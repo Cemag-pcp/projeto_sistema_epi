@@ -64,5 +64,28 @@ def pagina_inicial():
 
     return render_template('tables.html',tb_solicitacoes=tb_solicitacoes)
 
+@app.route('/receber-assinatura', methods=['POST'])
+def receber_assinatura():
+    try:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Obtém os dados do JSON enviado no corpo da solicitação
+        data = request.get_json()
+
+        # Obtém o dataURL da assinatura
+        id_solicitacao = data.get('id_solicitacao')
+        dataURL = data.get('dataURL')
+
+        cur.execute("INSERT INTO sistema_epi.tb_assinatura (id_solicitacao, assinatura) VALUES (%s, %s)", (id_solicitacao, dataURL))
+        conn.commit()
+
+        # Exemplo de resposta de volta para o cliente
+        return jsonify({'status': 'success', 'message': 'Assinatura recebida com sucesso!'})
+
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
+
 if __name__ == '__main__':
     app.run(debug=True)

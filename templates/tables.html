@@ -3,6 +3,7 @@
 {% block links %}
     <!-- css datatable -->
     <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/assinatura.css">
 {% endblock %}
 
 {% block container %}
@@ -28,6 +29,7 @@
                             <th>Solicitante</th>
                             <th>Quantidade</th>
                             <th>Equipamento</th>
+                            <th>Assinatura</th>
                             <th>Status</th>
                             <th>Motivo</th>
                             <th>Setor</th>
@@ -41,6 +43,7 @@
                             <th>Solicitante</th>
                             <th>Quantidade</th>
                             <th>Equipamento</th>
+                            <th>Assinatura</th>
                             <th>Status</th>
                             <th>Motivo</th>
                             <th>Setor</th>
@@ -55,6 +58,7 @@
                             <td>{{row[2]}}</td>
                             <td>{{row[4]}}</td>
                             <td>{{row[3]}}</td>
+                            <td><button onclick="modalEditar('{{ row[7] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                             <td>{{row[9]}}</td>
                             <td>{{row[5]}}</td>
                             <td>{{row[6]}}</td>
@@ -69,9 +73,9 @@
                                         <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[1] }}')"> 
                                             <i class="fas fa-wrench"></i> Execução
                                         </a>
-                                        <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalEditar('{{ row[1] }}')"> 
+                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalEditar('{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
-                                        </a>
+                                        </a> -->
                                         <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[1] }}')"> 
                                             <i class="fas fa-clock"></i> Histórico 
                                         </a>
@@ -88,7 +92,6 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- Modal edição de execução -->
@@ -102,22 +105,24 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="overflow-y: auto; height: 500px;">
+            <div class="modal-body" style="overflow-y: auto; height: 700px;">
                 <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
                 <hr>
                 <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <label>Data Abertura:</label>
-                        <input id="dataAbertura_edicao" type="text" name="dataAbertura" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-4 mb-2">
-                        <label>N° execução:</label>
+                    <div class="col-sm-6 mb-2">
+                        <label>N° da solicitação:</label>
                         <input type="text" id="n_ordem_edicao" name="n_ordem" value="" class="form-control" disabled>
                     </div>
-                    <div class="col-sm-4">
+                    <div class="col-sm-6 mb-2">
+                        <label>Data da solicitação:</label>
+                        <input type="datetime-local" name="dataAbertura" value="" class="form-control" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
                         <label>Motivo:</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;'>
-                            <option value="" selected disabled hidden></option>
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' disabled>
+                            <option value="Entrega" selected disabled></option>
                             <option>Entrega</option>
                             <option>Substituição</option>
                             <option>Perda</option>
@@ -126,27 +131,51 @@
                             <option>Furto</option>
                           </select>
                     </div>
-                </div>
-                <hr>
-                <h6 class="m-0 font-weight-bold text-primary">Máquina</h6>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-6 mb-2">
-                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
-                            <label>Máquina ou local</label>
-                            <input type="text" class="dropdown-input form-control" name="maquina_edicao" id="maquina_edicao" autocomplete="off" placeholder=" "> 
-                            <ul class="dropdown-list" id="listMaquinaLocalEdicao">
-                            </ul>
-                        </div>
-                    </div>
                     <div class="col-sm-6">
-                        <label for="statusLista">Status</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;'>
+                        <label>Status</label>
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' disabled>
                             <option value="" selected disabled hidden></option>
                             <option>Aprovado</option>
                             <option>Rejeitado</option>
                             <option>Em andamento</option>
                         </select>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <label>Solicitante</label>
+                        <input type="text" class="form-control" disabled>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <label>Setor</label>
+                        <input type="text" class="form-control" disabled>
+                    </div>
+                </div>
+                <hr>
+                <h6 class="m-0 font-weight-bold text-primary">Equipamento</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-6 mb-2">
+                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
+                            <label>Equipamento</label>
+                            <input type="text" class="dropdown-input form-control" autocomplete="off" placeholder=" "> 
+                        </div>
+                    </div>
+                    <div class="col-sm-6 mb-2">
+                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
+                            <label>Data de Entrega</label>
+                            <input type="date" class="dropdown-input form-control" autocomplete="off" placeholder=" "> 
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <label>Vida Útil (dias)</label>
+                        <input type="number" class="form-control" autocomplete="off" placeholder=" "> 
+                    </div>
+                    <div class="col-sm-6">
+                        <label>Previsão de troca</label>
+                        <input type="date" class="form-control" autocomplete="off" placeholder=" "> 
                     </div>
                 </div>
             </div> 
@@ -160,7 +189,7 @@
 
 <!-- Modal edição de execução -->
 <div class="modal fade" data-backdrop="static" id="modalEditar" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
@@ -170,51 +199,21 @@
                 </button>
             </div>
             <div class="modal-body">
-                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Assinatura</h6>
                 <hr>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <label>Data Abertura:</label>
-                        <input id="dataAbertura_edicao" type="text" name="dataAbertura" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-4 mb-2">
-                        <label>Quantidade</label>
-                        <input type="text" id="n_ordem_edicao" name="n_ordem" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-4">
-                        <label>Motivo:</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' name="risco">
-                            <option value="" selected disabled hidden></option>
-                            <option>Entrega</option>
-                            <option>Substituição</option>
-                            <option>Perda</option>
-                            <option>Dano</option>
-                            <option>Vencimento</option>
-                            <option>Furto</option>
-                          </select>
-                    </div>
+                <div class="wrapper">
+                    <img class="imagem-responsiva" width=300 height=200/>
+                    <canvas id="signature-pad" class="signature-pad" width=300 height=200></canvas>
                 </div>
-                <hr>
-                <h6 class="m-0 font-weight-bold text-primary">Máquina</h6>
-                <hr>
                 <div class="row">
-                    <div class="col-sm-6 mb-2">
-                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
-                            <label>Máquina ou local</label>
-                            <input type="text" class="dropdown-input form-control" name="maquina_edicao" id="maquina_edicao" autocomplete="off" placeholder=" " required disabled> 
-                            <ul class="dropdown-list" id="listMaquinaLocalEdicao">
-                            </ul>
-                        </div>
+                    <div class="col-sm-6 mt-4">
+                        <button class="btn btn-secondary btn-block" id="clear">Clear</button>
                     </div>
-                    <div class="col-sm-6">
-                        <label for="tombamento">Tombamento</label>
-                        <input id="inputTombamento_edicao" type="text" name="inputTombamento_edicao" class="form-control" disabled>
+                    <div class="col-sm-6 mt-4">
+                        <button class="btn btn-primary btn-block"  id="save">Save</button>
                     </div>
                 </div>
             </div> 
-            <div class="modal-footer">
-                <button id="salvarEdicao" type="submit" class="btn btn-primary btn-block">Salvar</button>
-            </div>
         </div>
     </div>
 </div>
@@ -264,6 +263,8 @@
     </div>
 </div>
 
+<div id="mensagem"></div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -271,9 +272,12 @@
 <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
 
 <!-- script com a construção das tabelas -->
 <script src="static/js/demo/datatables-demo.js"></script>
+
+<script src="/static/js/mensagem.js"></script>
 
 <script>
 
@@ -285,12 +289,57 @@
     
     }
 
-    function modalEditar(id_solicitante) {
+    function modalEditar(nome_funcionario,id_solicitacao) {
 
 
-        $('#modalEditar .modal-title').text('Editar solicitação ' + id_solicitante );
+        $('#modalEditar .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
 
         $('#modalEditar').modal('show');
+
+        console.log(id_solicitacao)
+        
+        var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+
+
+        var saveButton = document.getElementById('save');
+        var cancelButton = document.getElementById('clear');
+
+        
+        saveButton.addEventListener("click", function(event) {
+            if (signaturePad.isEmpty()) {
+                alert("Faça sua assinatura.");
+            } else {
+                // Obter a data de hoje
+                var dataURL = signaturePad.toDataURL();
+
+                // Enviar o dataURL e a data para a rota /receber-assinatura usando a API Fetch
+                fetch('/receber-assinatura', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id_solicitacao: id_solicitacao,
+                        dataURL: dataURL
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Lidar com a resposta do servidor, se necessário
+                    exibirMensagem('sucesso', 'Salvo.')
+                    $('#modalEditar').modal('hide');
+                    console.log(data);
+                    signaturePad.clear();
+                });
+            }
+        });
+
+        cancelButton.addEventListener('click', function(event) {
+            signaturePad.clear();
+        });
 
     }
 
@@ -309,4 +358,41 @@
     }
 </script>
     
+<script>
+    function download(dataURL, filename) {
+        if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
+            window.open(dataURL);
+        } else {
+            var blob = dataURLToBlob(dataURL);
+            var url = window.URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.style = "display: none";
+            a.href = url;
+            a.download = filename;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        }
+    }
+
+    function dataURLToBlob(dataURL) {
+        // Code taken from https://github.com/ebidel/filer.js
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+</script>
+
 {% endblock %}

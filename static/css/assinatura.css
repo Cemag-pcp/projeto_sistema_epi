@@ -1,0 +1,47 @@
+.wrapper {
+    position: relative;
+    margin: auto;
+    width: 309px;
+    height: 204px;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+img {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.signature-pad {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width:300px;
+    height:200px;
+}
+
+#mensagem {
+    position: fixed;
+    top: -50px; /* Define a posição inicial acima do viewport */
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px;
+    border-radius: 5px;
+    width: 200px; /* Ajuste conforme necessário */
+    text-align: center;
+    transition: top 0.5s ease-in-out; /* Adiciona uma transição suave */
+    z-index: 10000;
+}
+  
+#mensagem.sucesso {
+    background-color: #4CAF50;
+    color: white;
+}
+
+#mensagem.aviso {
+    background-color: #ff9800;
+    color: white;
+} 
+
