@@ -58,7 +58,11 @@
                             <td>{{row[2]}}</td>
                             <td>{{row[4]}}</td>
                             <td>{{row[3]}}</td>
-                            <td><button onclick="modalEditar('{{ row[7] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                            {% if row[10] == None %}
+                            <td><button onclick="modalEditar('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                            {% else %}
+                            <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
+                            {% endif %}
                             <td>{{row[9]}}</td>
                             <td>{{row[5]}}</td>
                             <td>{{row[6]}}</td>
@@ -70,16 +74,16 @@
                                     </a>
                                     <!-- </button> -->
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[1] }}')"> 
+                                        <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[10] }}','{{ row[1] }}')"> 
                                             <i class="fas fa-wrench"></i> Execução
                                         </a>
                                         <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalEditar('{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
                                         </a> -->
-                                        <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[1] }}')"> 
+                                        <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}')"> 
                                             <i class="fas fa-clock"></i> Histórico 
                                         </a>
-                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[1] }}')"> 
+                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[0] }}')"> 
                                             <i class="fas fa-trash"></i> Excluir 
                                         </a>
                                     </div>
@@ -105,23 +109,23 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body" style="overflow-y: auto; height: 700px;">
+            <div class="modal-body" style="overflow-y: auto; height: 550px;">
                 <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
                 <hr>
                 <div class="row">
                     <div class="col-sm-6 mb-2">
-                        <label>N° da solicitação:</label>
-                        <input type="text" id="n_ordem_edicao" name="n_ordem" value="" class="form-control" disabled>
+                        <label>Identificador da solicitação:</label>
+                        <input type="text" id="n_solicitacao_edicao" name="n_ordem" value="" class="form-control" disabled>
                     </div>
                     <div class="col-sm-6 mb-2">
                         <label>Data da solicitação:</label>
-                        <input type="datetime-local" name="dataAbertura" value="" class="form-control" disabled>
+                        <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-6">
                         <label>Motivo:</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' disabled>
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivo_execucao" disabled>
                             <option value="Entrega" selected disabled></option>
                             <option>Entrega</option>
                             <option>Substituição</option>
@@ -133,7 +137,7 @@
                     </div>
                     <div class="col-sm-6">
                         <label>Status</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' disabled>
+                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="status_execucao" disabled>
                             <option value="" selected disabled hidden></option>
                             <option>Aprovado</option>
                             <option>Rejeitado</option>
@@ -143,44 +147,38 @@
                 </div>
                 <div class="row">
                     <div class="col-sm-6 mb-2">
-                        <label>Solicitante</label>
-                        <input type="text" class="form-control" disabled>
+                        <label>Funcionário</label>
+                        <input type="text" class="form-control" id="funcionario_execucao" disabled>
                     </div>
                     <div class="col-sm-6 mb-2">
                         <label>Setor</label>
-                        <input type="text" class="form-control" disabled>
+                        <input type="text" class="form-control" id="setor_execucao" disabled>
                     </div>
                 </div>
                 <hr>
                 <h6 class="m-0 font-weight-bold text-primary">Equipamento</h6>
                 <hr>
                 <div class="row">
-                    <div class="col-sm-6 mb-2">
+                    <div class="col-sm-4 mb-2">
                         <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
                             <label>Equipamento</label>
-                            <input type="text" class="dropdown-input form-control" autocomplete="off" placeholder=" "> 
+                            <input type="text" class="dropdown-input form-control" id="equipamento_execucao" autocomplete="off" placeholder=" "> 
                         </div>
                     </div>
-                    <div class="col-sm-6 mb-2">
+                    <div class="col-sm-4 mb-2">
                         <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
                             <label>Data de Entrega</label>
-                            <input type="date" class="dropdown-input form-control" autocomplete="off" placeholder=" "> 
+                            <input type="date" class="dropdown-input form-control" id="data_entrega_execucao" autocomplete="off" placeholder=" "> 
                         </div>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6">
-                        <label>Vida Útil (dias)</label>
-                        <input type="number" class="form-control" autocomplete="off" placeholder=" "> 
-                    </div>
-                    <div class="col-sm-6">
+                    <div class="col-sm-4 mb-2">
                         <label>Previsão de troca</label>
-                        <input type="date" class="form-control" autocomplete="off" placeholder=" "> 
+                        <input type="date" class="form-control" id="previsao_entrega_execucao" autocomplete="off" placeholder=" "> 
                     </div>
                 </div>
             </div> 
             <div class="modal-footer">
-                <button id="salvarEdicao" type="submit" class="btn btn-primary btn-block">Salvar</button>
+                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Salvar</button>
             </div>
         </div>
     </div>
@@ -281,15 +279,55 @@
 
 <script>
 
-    function modalExecucao(id_solicitante) {
+    function modalExecucao(id_solicitante,assinatura,id) {
+
+        // DESABILITANDO O BOTÃO QUANDO JÁ TEM A ASSINATURA
+
+        $('#salvarExecucao').prop('disabled',false);   
+        $('#salvarExecucao').text('Salvar');     
 
         $('#modalExecutarSolicitacao .modal-title').text('Executar solicitação ' + id_solicitante );
 
-        $('#modalExecutarSolicitacao').modal('show');
-    
+        console.log(assinatura)
+
+        if(assinatura === 'None'){
+            $('#salvarExecucao').prop('disabled',true);   
+            $('#salvarExecucao').text('Aguardando assinatura');   
+        }
+
+        // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
+
+        $.ajax({
+            url:'/dados-execucao',
+            type:'POST',
+            dataType:'json',
+            contentType:'application/json',
+            data: JSON.stringify({ 'id': id }),  // Enviando um objeto JSON
+            success: function(response) {
+
+                $('#modalExecutarSolicitacao').modal('show');
+
+                $('#n_solicitacao_edicao').val(response.id);
+                $('#dataSolicitacao').val(formatarDataBr(response.data));
+                $('#motivo_execucao').val(response.motivo);
+                $('#status_execucao').val(response.status);
+                $('#funcionario_execucao').val(response.funcionario);
+                $('#setor_execucao').val(response.setor);
+                $('#equipamento_execucao').val(response.codigo);
+                $('#data_entrega_execucao').val(response.id);
+                $('#previsao_entrega_execucao').val(response.id);
+                
+            },
+            error: function(error) {
+                // hideLoading();
+                alert('Erro ao abir o modal de execução, solicite assistência');
+                console.log(error);
+            }
+        })
+
     }
 
-    function modalEditar(nome_funcionario,id_solicitacao) {
+    function modalEditar(nome_funcionario,id_solicitacao,id) {
 
 
         $('#modalEditar .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
@@ -297,21 +335,38 @@
         $('#modalEditar').modal('show');
 
         console.log(id_solicitacao)
-        
+
+        // TRATAMENTO PARA NÃO ENVIAR MAIS DE UMA REQUISIÇÃO
+        if (!signaturePad.calledOnce) {
+            signaturePad(id_solicitacao,id);
+
+            // Definir a variável de controle para indicar que a função foi chamada
+            signaturePad.calledOnce = true;
+        }
+
+    }
+
+
+    // CAMPO DE ENVIO DA ASSINATURA
+
+    function signaturePad(id_solicitacao,id) {
+
         var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
                 backgroundColor: 'rgba(255, 255, 255, 0)',
                 penColor: 'rgb(0, 0, 0)'
-            });
-
+        });
 
         var saveButton = document.getElementById('save');
         var cancelButton = document.getElementById('clear');
 
-        
+            
         saveButton.addEventListener("click", function(event) {
             if (signaturePad.isEmpty()) {
                 alert("Faça sua assinatura.");
             } else {
+                // Desabilitar o botão para evitar múltiplos cliques
+                saveButton.disabled = true;
+
                 // Obter a data de hoje
                 var dataURL = signaturePad.toDataURL();
 
@@ -323,7 +378,8 @@
                     },
                     body: JSON.stringify({
                         id_solicitacao: id_solicitacao,
-                        dataURL: dataURL
+                        dataURL: dataURL,
+                        id: id
                     }),
                 })
                 .then(response => response.json())
@@ -332,7 +388,7 @@
                     exibirMensagem('sucesso', 'Salvo.')
                     $('#modalEditar').modal('hide');
                     console.log(data);
-                    signaturePad.clear();
+                    window.location.reload();
                 });
             }
         });
@@ -341,8 +397,13 @@
             signaturePad.clear();
         });
 
+        $('#modalEditar').on('hidden.bs.modal', function () {
+            // Limpar o SignaturePad quando o modal é fechado
+            signaturePad.clear();
+        });
     }
 
+    
     function modalTimeline(id_solicitante) {
 
         $('#modalTimeline').modal('show');
@@ -355,6 +416,26 @@
 
         $('#modalExcluirSolicitacao').modal('show');
 
+    }
+
+    function formatarDataBr(dataString) {
+        // Cria um objeto Date a partir da string
+        var data = new Date(dataString);
+        
+        // Obtém os componentes da data
+        var dia = data.getDate();
+        var mes = data.getMonth() + 1; // Adiciona 1 porque os meses são indexados a partir de 0
+        var ano = data.getFullYear(); // Obtém os últimos dois dígitos do ano
+        var hora = data.getHours();
+        var minuto = data.getMinutes();
+        var segundo = data.getSeconds();
+
+        // Formata a string com zero à esquerda para garantir dois dígitos para o dia, mês, hora, minuto e segundo
+        var formatoDesejado = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano.toString()} ${hora.toString().padStart(2, '0')}:${minuto.toString().padStart(2, '0')}:${segundo.toString().padStart(2, '0')}`;
+
+        console.log(formatoDesejado);
+
+        return formatoDesejado;
     }
 </script>
     
@@ -379,7 +460,6 @@
     }
 
     function dataURLToBlob(dataURL) {
-        // Code taken from https://github.com/ebidel/filer.js
         var parts = dataURL.split(';base64,');
         var contentType = parts[0].split(":")[1];
         var raw = window.atob(parts[1]);
