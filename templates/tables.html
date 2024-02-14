@@ -75,14 +75,14 @@
                                     <!-- </button> -->
                                     <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
                                         <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[10] }}','{{ row[1] }}')"> 
-                                            <i class="fas fa-wrench"></i> Execução
+                                            <i class="fa-solid fa-pencil"></i> Editar
                                         </a>
                                         <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalEditar('{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
                                         </a> -->
-                                        <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}')"> 
+                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
                                             <i class="fas fa-clock"></i> Histórico 
-                                        </a>
+                                        </a> -->
                                         <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[0] }}')"> 
                                             <i class="fas fa-trash"></i> Excluir 
                                         </a>
@@ -104,7 +104,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao"></h5>
+                <h5 class="modal-title" id="numeroOrdem_edicao">Edição</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -114,35 +114,20 @@
                 <hr>
                 <div class="row">
                     <div class="col-sm-6 mb-2">
-                        <label>Identificador da solicitação:</label>
-                        <input type="text" id="n_solicitacao_edicao" name="n_ordem" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-6 mb-2">
                         <label>Data da solicitação:</label>
                         <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
                     </div>
-                </div>
-                <div class="row">
                     <div class="col-sm-6">
                         <label>Motivo:</label>
                         <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivo_execucao" disabled>
-                            <option value="Entrega" selected disabled></option>
-                            <option>Entrega</option>
-                            <option>Substituição</option>
-                            <option>Perda</option>
-                            <option>Dano</option>
-                            <option>Vencimento</option>
-                            <option>Furto</option>
-                          </select>
-                    </div>
-                    <div class="col-sm-6">
-                        <label>Status</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="status_execucao" disabled>
                             <option value="" selected disabled hidden></option>
-                            <option>Aprovado</option>
-                            <option>Rejeitado</option>
-                            <option>Em andamento</option>
-                        </select>
+                            <option value="Entrega">Entrega</option>
+                            <option value="Substituição">Substituição</option>
+                            <option value="Perda">Perda</option>
+                            <option value="Dano">Dano</option>
+                            <option value="Vencimento">Vencimento</option>
+                            <option value="Furto">Furto</option>
+                          </select>
                     </div>
                 </div>
                 <div class="row">
@@ -159,26 +144,32 @@
                 <h6 class="m-0 font-weight-bold text-primary">Equipamento</h6>
                 <hr>
                 <div class="row">
+                    <div class="col-sm-12 mb-2">
+                        <label>Equipamento</label>
+                        <input type="text" class="form-control" id="equipamento_execucao" autocomplete="off"> 
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-sm-4 mb-2">
-                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
-                            <label>Equipamento</label>
-                            <input type="text" class="dropdown-input form-control" id="equipamento_execucao" autocomplete="off" placeholder=" "> 
-                        </div>
+                        <label>Quantidade</label>
+                        <input type="number" class="form-control" id="quantidade_execucao" autocomplete="off"> 
                     </div>
                     <div class="col-sm-4 mb-2">
-                        <div class="dropdown" id="dropdown-MaquinaLocal" style="width: 100%;">
+                        <div class="info_data">
                             <label>Data de Entrega</label>
-                            <input type="date" class="dropdown-input form-control" id="data_entrega_execucao" autocomplete="off" placeholder=" "> 
                         </div>
+                        <input type="date" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
                     </div>
                     <div class="col-sm-4 mb-2">
-                        <label>Previsão de troca</label>
-                        <input type="date" class="form-control" id="previsao_entrega_execucao" autocomplete="off" placeholder=" "> 
+                        <div class="info_previsao">
+                            <label>Previsão de troca</label>
+                        </div>
+                        <input type="date" class="form-control" id="previsao_entrega_execucao" autocomplete="off" disabled> 
                     </div>
                 </div>
             </div> 
             <div class="modal-footer">
-                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Salvar</button>
+                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
             </div>
         </div>
     </div>
@@ -281,39 +272,44 @@
 
     function modalExecucao(id_solicitante,assinatura,id) {
 
-        // DESABILITANDO O BOTÃO QUANDO JÁ TEM A ASSINATURA
-
-        $('#salvarExecucao').prop('disabled',false);   
-        $('#salvarExecucao').text('Salvar');     
-
-        $('#modalExecutarSolicitacao .modal-title').text('Executar solicitação ' + id_solicitante );
-
-        console.log(assinatura)
-
-        if(assinatura === 'None'){
-            $('#salvarExecucao').prop('disabled',true);   
-            $('#salvarExecucao').text('Aguardando assinatura');   
-        }
-
         // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
-
+        
         $.ajax({
             url:'/dados-execucao',
             type:'POST',
             dataType:'json',
             contentType:'application/json',
-            data: JSON.stringify({ 'id': id }),  // Enviando um objeto JSON
+            data: JSON.stringify({ 'id_solicitante': id_solicitante }),  // Enviando um objeto JSON
             success: function(response) {
 
+                $('.info_data button').empty()
+
+                $('.info_previsao button').empty()
+
                 $('#modalExecutarSolicitacao').modal('show');
+
+                console.log(response.status === 'Aguardando Assinatura')
+
+                if(response.status === 'Aguardando Assinatura'){
+                    $('.info_data').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Data de entrega só exibirá após a assinatura">
+                                                <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
+                                            </button>`)
+                    $('.info_previsao').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Previsão de troca só exibirá após a assinatura">
+                                                    <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
+                                                </button>`)
+                }
+
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
 
                 $('#n_solicitacao_edicao').val(response.id);
                 $('#dataSolicitacao').val(formatarDataBr(response.data));
                 $('#motivo_execucao').val(response.motivo);
-                $('#status_execucao').val(response.status);
                 $('#funcionario_execucao').val(response.funcionario);
                 $('#setor_execucao').val(response.setor);
                 $('#equipamento_execucao').val(response.codigo);
+                $('#quantidade_execucao').val(response.quantidade);
                 $('#data_entrega_execucao').val(response.id);
                 $('#previsao_entrega_execucao').val(response.id);
                 
@@ -378,8 +374,7 @@
                     },
                     body: JSON.stringify({
                         id_solicitacao: id_solicitacao,
-                        dataURL: dataURL,
-                        id: id
+                        dataURL: dataURL
                     }),
                 })
                 .then(response => response.json())
@@ -404,10 +399,85 @@
     }
 
     
-    function modalTimeline(id_solicitante) {
+    
+    function modalTimeline(id_solicitacao,codigo_item,funcionario) {
+        
+        $.ajax({
+            url: '/timeline',
+            type: 'POST',  // Alterado para POST
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),  // Enviando um objeto JSON
+            success: function(response) {
+                // Limpar conteúdo atual da lista
+                $('#listaHistorico').empty();
 
-        $('#modalTimeline').modal('show');
+                $('#modalTimeline').modal('show');
 
+                // Seus dados fornecidos
+                var dados = response[1]; // Certifique-se de ajustar conforme a estrutura real da resposta
+                console.log(dados);
+                console.log(response);
+                
+                // Loop pelos dados e gerar elementos da lista
+                for (var i = 0; i < dados.length; i++) {
+                    var item = dados[i];
+                    var listItem = document.createElement('a');
+                    listItem.className = 'list-group-item list-group-item-action';
+                    // listItem.href = '#';
+                    listItem.setAttribute('aria-current', 'true');
+
+                    if (item[0] === 0) {
+                        var content = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${item[3]}</h5>
+                            <div class="d-flex flex-column align-items-end">
+                                <small>Matrícula do funcionário: ${funcionario}</small>
+                                <small>Exec.: ${i}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                            </div> 
+                        </div>    
+                    `;
+                    } else {
+                        var content = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${item[3]}</h5>
+                            <div class="d-flex flex-column align-items-end">
+                                <small>Matrícula do funcionário: ${funcionario}</small>
+                                <small>Exec.: ${i}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                            </div> 
+                        </div>                       
+                    `;
+                    }
+
+                    listItem.innerHTML = content;
+    
+                    // Use addEventListener para lidar com o clique
+                    (function(itemValue) {
+                        $(listItem).on('click', function() {
+                            // Chamar a função apenas uma vez
+                            itensParaEditar(id_ordem, itemValue);
+                        });
+                    })(item[0]);
+                    
+                    document.getElementById('listaHistorico').appendChild(listItem);
+                }
+            
+            },
+            error: function(error) {
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
     }
 
     function modalExcluirSolicitacao(id_solicitante) {

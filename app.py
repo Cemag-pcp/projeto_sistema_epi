@@ -52,10 +52,19 @@ def pagina_inicial():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    s = """SELECT s.*, hs.status, a.assinatura
-            FROM sistema_epi.tb_solicitacoes AS s
-            LEFT JOIN sistema_epi.tb_historico_solicitacoes AS hs ON s.id_solicitacao = hs.id_solicitacao
-            LEFT JOIN sistema_epi.tb_assinatura AS a ON s.id = a.id;  -- Adicionei este LEFT JOIN
+    s = """SELECT
+            solic.*,
+            hist.status,
+            ass.assinatura,ass.data_assinatura
+            FROM sistema_epi.tb_solicitacoes AS solic
+            LEFT JOIN (
+            SELECT
+                id_solicitacao,
+                status,
+                ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
+            FROM sistema_epi.tb_historico_solicitacoes
+            ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
+            LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao;
         """
     
     tb_solicitacoes = pd.read_sql_query(s, conn)
@@ -63,9 +72,6 @@ def pagina_inicial():
     print(tb_solicitacoes)
 
     tb_solicitacoes = tb_solicitacoes.sort_values(by=['id','id_solicitacao'])
-
-    # Agrupar novamente e concatenar os valores da coluna codigo_item
-    tb_solicitacoes['codigo_item'] = tb_solicitacoes.groupby('id_solicitacao')['codigo_item'].transform(lambda x: ', '.join(x))
 
     # Agrupar pelo id_solicitacao e manter apenas a primeira linha de cada grupo
     tb_solicitacoes = tb_solicitacoes.groupby('id_solicitacao').first().reset_index()
@@ -89,9 +95,11 @@ def receber_assinatura():
         # Obtém o dataURL da assinatura
         id_solicitacao = data.get('id_solicitacao')
         dataURL = data.get('dataURL')
-        id = data.get('id')
 
-        cur.execute("INSERT INTO sistema_epi.tb_assinatura (id_solicitacao, assinatura,id) VALUES (%s, %s,%s)", (id_solicitacao, dataURL,id))
+        cur.execute("INSERT INTO sistema_epi.tb_assinatura (id_solicitacao, assinatura) VALUES (%s, %s)", (id_solicitacao, dataURL))
+
+        cur.execute("INSERT INTO sistema_epi.tb_historico_solicitacoes (id_solicitacao, status) VALUES (%s, %s)", (id_solicitacao, 'Assinado'))
+
         conn.commit()
 
         # Exemplo de resposta de volta para o cliente
@@ -110,12 +118,13 @@ def dados_execucao():
 
     data = request.get_json()
 
-    id = data.get('id')
+    id_solicitante = data.get('id_solicitante')
 
-    query = f"""SELECT s.*, hs.status
-            FROM sistema_epi.tb_solicitacoes AS s
-            LEFT JOIN sistema_epi.tb_historico_solicitacoes AS hs ON s.id_solicitacao = hs.id_solicitacao
-            WHERE s.id = {id};"""
+    query = f"""SELECT DISTINCT tb_solicitacoes.*,tb_historico_solicitacoes.status
+            FROM sistema_epi.tb_solicitacoes
+            INNER JOIN sistema_epi.tb_historico_solicitacoes
+            ON tb_solicitacoes.id_solicitacao = tb_historico_solicitacoes.id_solicitacao
+            WHERE tb_solicitacoes.id_solicitacao = '{id_solicitante}';"""
 
     cur.execute(query)
     execucao = cur.fetchall()
@@ -134,10 +143,34 @@ def dados_execucao():
         'data':execucao[0][8],
         'status':execucao[0][9]
     }
-    print(execucao[0][0])
 
     # Exemplo de resposta de volta para o cliente
     return jsonify(dados)
+
+@app.route('/timeline', methods=['POST'])
+def timeline_os():
+
+    dados = request.get_json()
+
+    id_solicitacao = dados['id_solicitacao']
+    
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = f"""SELECT * 
+            FROM sistema_epi.tb_historico_solicitacoes
+            WHERE id_solicitacao = '{id_solicitacao}'"""
+    
+    df_timeline = pd.read_sql_query(query, conn)
+
+    print(df_timeline)
+
+    df_timeline = df_timeline.sort_values(by='id', ascending=True)
+
+    df_timeline = df_timeline.values.tolist()
+
+    return jsonify (id_solicitacao,df_timeline)
 
 if __name__ == '__main__':
     app.run(debug=True)
