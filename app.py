@@ -157,13 +157,14 @@ def setor_operador(operador):
     return jsonify(setor[0])
 
 # Formulário de solicitação
-@app.route('/solicitacao-material', methods=['GET'])
+@app.route('/solicitacao-material', methods=['GET','POST'])
 def rota_solicitacao_material():
 
     """
     Rota para de solicitação de material
     """
 
+    # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('solicitacao-material.html')
 
 @app.route('/solicitacao', methods=['POST'])

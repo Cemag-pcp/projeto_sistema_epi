@@ -10,6 +10,7 @@
 {% block container %}
 
 <div class="row justify-content-center">
+    
     <div class="col-sm-6">
         <div class="card o-hidden border-0 shadow-sm my-5">
             <div class="card-header">
@@ -23,25 +24,25 @@
                     <div class="col-md-12">
                         <div class="p-5">
                             <!-- solicitante e setor -->
-                            <h6 class="m-0 font-weight-bold text-primary mb-4">Solicitante</h6>
+                            <!-- <h6 class="m-0 font-weight-bold text-primary">Solicitante</h6> -->
                             <div class="row form-group">
                                 <div class="col-sm-12">
                                     <label for="inputSolicitante">Solicitante:</label>
                                     <input type="text" class="form-control" id="inputSolicitante" name="nameSolicitante" autocomplete="off" required>
                                 </div>
                             </div>
-                            <h6 class="m-0 font-weight-bold text-primary mb-4">Solicitação</h6>
+                            <hr>
                             <div id="camposSolicitacao">
-                                <div class="row justify-content-end">
-                                    <a class="btn btn-danger btn-circle" onclick="excluirClone(this)">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
                                 <!-- codigo,quantidade,operador -->
                                 <div class="row form-group">
-                                    <div class="col-sm-4">
+                                    <div class="col-sm-10">
                                         <label for="inputCodigo">Código do item:</label>
-                                        <input type="text" class="form-control" id="inputCodigo" name="nameCodigo" autocomplete="off" onclick="getId_itens(this)" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="inputCodigo" name="nameCodigo" aria-describedby="basic-addon2" autocomplete="off" onclick="getId_itens(this)" required>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="apagarConteudo(this)">x</button>
+                                            </div>
+                                        </div>
                                         <ul class="dropdown-list" id="listCodigo">
                                         </ul>
                                     </div>
@@ -49,9 +50,16 @@
                                         <label for="inputQuantidade">Quantidade:</label>
                                         <input type="number" class="form-control" id="inputQuantidade" name="nameQuantidade" autocomplete="off" required>
                                     </div>
+                                </div>
+                                <div class="row form-group">
                                     <div class="col-sm-6">
                                         <label for="inputOperador">Operador <small>(Para quem?):</small></label>
-                                        <input type="text" class="form-control" id="inputOperador" name="nameOperador" autocomplete="off" onclick="getId_operadores(this)" required>
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="inputOperador" name="nameOperador" autocomplete="off" aria-describedby="basic-addon2" onclick="getId_operadores(this)" required>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" onclick="apagarConteudo(this)">x</button>
+                                            </div>
+                                        </div>
                                         <ul class="dropdown-list" id="listOperador">
                                         </ul>
                                     </div>
@@ -59,8 +67,8 @@
                                 <!-- Radio -->
                                 <fieldset>
                                     <label>Motivo:</label>
-                                    <div class="row form-group ">
-                                        <div class="col-sm-3 col">
+                                    <div class="row form-group">
+                                        <div class="col-sm-3 d-flex">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radioSolicitacao"
                                                     id="radioPerda" value="Perda">
@@ -69,7 +77,7 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-sm-3 col">
+                                        <div class="col-sm-3 d-flex">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radioSolicitacao"
                                                     id="radioDano" value="Dano">
@@ -81,7 +89,7 @@
                                     </div>
                                     <!-- Radio -->
                                     <div class="row form-group mb-5">
-                                        <div class="col-sm-3 col">
+                                        <div class="col-sm-3 d-flex">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radioSolicitacao"
                                                     id="radioSubstituicao" value="Substituição">
@@ -90,7 +98,7 @@
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-sm-3 col">
+                                        <div class="col-sm-3 d-flex">
                                             <div class="form-check">
                                                 <input class="form-check-input" type="radio" name="radioSolicitacao"
                                                     id="radioOutro" value="Admissão">
@@ -98,6 +106,12 @@
                                                     Admissão
                                                 </label>
                                             </div>
+                                        </div>
+                                        <div class="col-sm-6 d-flex align-items-center justify-content-end">
+                                            <!-- <a class="btn btn-danger btn-circle" onclick="excluirClone(this)">
+                                                <i class="fas fa-trash"></i>
+                                            </a> -->
+                                            <button class="btn btn-outline-secondary" type="button" onclick="excluirClone(this)"><i class="fas fa-trash"></i></button>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -125,415 +139,10 @@
 
 {% block scripts %}
 
-<!-- Script para inputlist -->    
-<script>
-    
-    function configurarDropdown(inputId, listId) {
-        var inputDropdown = document.getElementById(inputId);
-        var listaDropdown = document.getElementById(listId);
-        var itens = listaDropdown.getElementsByTagName('li');
-        var valorAnterior = "";
-
-        inputDropdown.addEventListener('focus', function () {
-            if (inputDropdown.readOnly) {
-                listaDropdown.style.display = 'none';
-            } else {
-                listaDropdown.style.display = 'block';
-                listaDropdown.innerHTML = '';
-            }
-        });
-
-        inputDropdown.addEventListener('blur', function () {
-            // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
-            setTimeout(function () {
-                if (!correspondeAItem()) {
-                    // Se o valor não corresponder a um item na lista, redefina para o valor anterior
-                    inputDropdown.value = valorAnterior;
-                }
-                listaDropdown.style.display = 'none';
-            }, 200);
-        });
-
-        listaDropdown.addEventListener('click', function (event) {
-            if (event.target.tagName === 'LI') {
-                valorAnterior = event.target.textContent;
-                inputDropdown.value = valorAnterior;
-
-                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
-                setTimeout(function () {
-                    listaDropdown.style.display = 'none';
-                }, 100);
-            }
-        });
-
-        inputDropdown.addEventListener('input', function () {
-            var input = this.value.trim().toLowerCase();
-            var itens = listaDropdown.getElementsByTagName('li');
-
-            for (var i = 0; i < itens.length; i++) {
-                var textoItem = itens[i].textContent.toLowerCase();
-                var itemVisivel = textoItem.indexOf(input) > -1;
-                itens[i].style.display = itemVisivel ? 'block' : 'none';
-            }
-
-            // Exiba a lista apenas se houver correspondência com os itens
-            var correspondenciaItens = Array.from(itens).some(function (item) {
-                var textoItem = item.textContent.toLowerCase();
-                var itemVisivel = textoItem.includes(input);
-                item.style.display = itemVisivel ? 'block' : 'none';
-                return itemVisivel;
-            });
-
-            listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
-        });
-
-        function correspondeAItem() {
-            var input = inputDropdown.value.trim().toLowerCase();
-            return Array.from(itens).some(function (item) {
-                return item.textContent.toLowerCase() === input;
-            });
-        }
-    }
-
-    configurarDropdown('inputOperador', 'listOperador');
-    configurarDropdown('inputCodigo', 'listCodigo');
-
-</script>
-
-<!-- Populando lista de operadores -->
-<script>
-
-    var inputOperador = document.getElementById('inputOperador');
-    var listOperador = document.getElementById('listOperador');
-
-    function carregarOperadores() {
-        $.ajax({
-            url: '/operadores',
-            type: 'GET',
-            success: function(data) {
-                // Atualiza o menu de máquinas com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os itens à lista
-
-                listOperador.innerHTML = '';
-
-                data.forEach(function(item) {
-                    var li = document.createElement('li');
-                    li.textContent = item;
-                    listOperador.appendChild(li);
-                });
-            }
-        });
-    }
-
-    // Adiciona eventos tanto para o clique quanto para o foco
-    inputOperador.addEventListener('click', carregarOperadores);
-    inputOperador.addEventListener('focus', carregarOperadores);
-
-    // listOperador.addEventListener('click', function(event) {
-    //     if (event.target.tagName === 'LI') {
-    //         inputOperador.value = event.target.textContent;
-                            
-    //         $.ajax({
-    //             url: '/setor-operador/' + event.target.textContent,
-    //             type: 'GET',
-    //             success: function(data) {
-    //                 console.log(data);
-    //                 document.getElementById('inputSetorOperador').value = data;
-
-    //             }
-    //         });
-
-    //         // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
-    //         setTimeout(function() {
-    //             listOperador.style.display = 'none';
-    //         }, 100);
-    //     }
-    // });
-
-</script>
-
-<!-- Populando lista de itens -->
-<script>
-
-    var inputCodigo = document.getElementById('inputCodigo');
-    var listCodigo = document.getElementById('listCodigo');
-
-    function carregarItens() {
-        $.ajax({
-            url: '/itens',
-            type: 'GET',
-            success: function(data) {
-                // Atualiza o menu de máquinas com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os itens à lista
-
-                listCodigo.innerHTML = '';
-
-                data.forEach(function(item) {
-                    var li = document.createElement('li');
-                    li.textContent = item;
-                    listCodigo.appendChild(li);
-                });
-            }
-        });
-    }
-
-    // Adiciona eventos tanto para o clique quanto para o foco
-    inputCodigo.addEventListener('click', carregarItens);
-    inputCodigo.addEventListener('focus', carregarItens);
-
-</script>
-
-<script>
-
-    function carregarItens2(inputId, listId) {
-        var inputCodigo = document.getElementById(inputId);
-        var listCodigo = document.getElementById(listId);
-
-        $.ajax({
-            url: '/itens',
-            type: 'GET',
-            success: function(data) {
-                // Atualiza o menu de itens com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os itens à lista
-
-                listCodigo.innerHTML = '';
-
-                data.forEach(function(item) {
-                    var li = document.createElement('li');
-                    li.textContent = item;
-                    listCodigo.appendChild(li);
-                });
-            }
-        });
-    }
-
-    // function clonarCampos() {
-    //     // Selecione a última div com a classe 'camposSolicitacao'
-    //     var camposOriginais = document.querySelectorAll('[id^="camposSolicitacao"]');
-
-    //     // Verifique se há pelo menos uma div original
-    //     if (camposOriginais.length > 0) {
-    //         var ultimoCamposSolicitacao = camposOriginais[camposOriginais.length - 1];
-    //         var novoCamposSolicitacao = ultimoCamposSolicitacao.cloneNode(true);
-    //         id_unico = new Date().getTime();
-
-    //         // Altere o ID da div clonada
-    //         novoCamposSolicitacao.id += '-clone_' + id_unico;
-
-    //         // Crie IDs únicos para os elementos clonados
-    //         novoCamposSolicitacao.querySelectorAll('[id]').forEach(function(elemento) {
-    //             elemento.id += '-clone_' + id_unico;
-    //         });
-
-    //         // Limpe os valores dos campos clonados
-    //         novoCamposSolicitacao.querySelectorAll('input[type="text"], input[type="number"], select').forEach(function(elemento) {
-    //             elemento.value = '';
-    //         });
-
-    //         // Desmarque os radio buttons clonados e altere o nome e o valor
-    //         novoCamposSolicitacao.querySelectorAll('input[type="radio"]').forEach(function(elemento) {
-    //             elemento.checked = false;
-    //             elemento.name = elemento.name.replace(/-clone_\d+$/, ''); // Remova o sufixo numérico
-    //             elemento.name += '-clone_' + id_unico; // Adicione o novo sufixo único
-
-    //             // Encontre a label associada ao botão de rádio
-    //             var labelFor = novoCamposSolicitacao.querySelector('label[for="' + elemento.id.replace('-clone_' + id_unico, '') + '"]');
-    //             if (labelFor) {
-    //                 labelFor.setAttribute('for', elemento.id);
-    //             }
-    //         });
-
-    //         // Adicione o novo conjunto de campos após o último conjunto clonado
-    //         ultimoCamposSolicitacao.parentNode.appendChild(novoCamposSolicitacao);
-
-    //         // Chame a função de configuração do dropdown após a inserção no DOM
-    //         configurarDropdown('inputCodigo-clone_' + id_unico, 'listCodigo-clone_' + id_unico);
-    //         configurarDropdown('inputOperador-clone_' + id_unico, 'listOperador-clone_' + id_unico);
-
-    //     } else {
-    //         console.error('Não há divs originais para clonar.');
-    //     }
-    // }
-
-    function clonarCampos() {
-        // Selecione a última div com a classe 'camposSolicitacao'
-        var camposOriginais = document.querySelectorAll('[id^="camposSolicitacao"]');
-
-        // Verifique se há pelo menos uma div original
-        if (camposOriginais.length > 0) {
-            var ultimoCamposSolicitacao = camposOriginais[camposOriginais.length - 1];
-            var novoCamposSolicitacao = ultimoCamposSolicitacao.cloneNode(true);
-            var timestamp = new Date().getTime();
-
-            // Altere o ID da div clonada
-            novoCamposSolicitacao.id = 'camposSolicitacao-clone_' + timestamp;
-
-            // Crie IDs únicos para os elementos clonados
-            novoCamposSolicitacao.querySelectorAll('[id]').forEach(function(elemento) {
-                // Remova o sufixo numérico do ID original e adicione o novo timestamp
-                elemento.id = elemento.id.replace(/-clone_\d+$/, '') + '-clone_' + timestamp;
-            });
-
-            // Limpe os valores dos campos clonados
-            novoCamposSolicitacao.querySelectorAll('input[type="text"], input[type="number"], select').forEach(function(elemento) {
-                elemento.value = '';
-            });
-
-            // Desmarque os radio buttons clonados e altere o nome e o valor
-            novoCamposSolicitacao.querySelectorAll('input[type="radio"]').forEach(function(elemento) {
-                elemento.checked = false;
-                elemento.name = elemento.name.replace(/-clone_\d+$/, '') + '-clone_' + timestamp;
-
-                // Encontre a label associada ao botão de rádio
-                var labelFor = novoCamposSolicitacao.querySelector('label[for="' + elemento.id.replace('-clone_' + timestamp, '') + '"]');
-                if (labelFor) {
-                    labelFor.setAttribute('for', elemento.id);
-                }
-            });
-
-            // Adicione o novo conjunto de campos após o último conjunto clonado
-            ultimoCamposSolicitacao.parentNode.appendChild(novoCamposSolicitacao);
-
-            // Chame a função de configuração do dropdown após a inserção no DOM
-            configurarDropdown('inputCodigo-clone_' + timestamp, 'listCodigo-clone_' + timestamp);
-            configurarDropdown('inputOperador-clone_' + timestamp, 'listOperador-clone_' + timestamp);
-
-        } else {
-            console.error('Não há divs originais para clonar.');
-        }
-    }
-
-    function carregarOperadores2(inputId, listId) {
-        
-        var inputOperador = document.getElementById(inputId);
-        var listOperador = document.getElementById(listId);
-
-        $.ajax({
-            url: '/operadores',
-            type: 'GET',
-            success: function(data) {
-                // Atualiza o menu de máquinas com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os itens à lista
-
-                listOperador.innerHTML = '';
-
-                data.forEach(function(item) {
-                    var li = document.createElement('li');
-                    li.textContent = item;
-                    listOperador.appendChild(li);
-                });
-            }
-        });
-    }
-
-    function getId_itens(element) {
-        var id = element.id;
-        var listId = id.replace('inputCodigo-clone_','listCodigo-clone_')
-
-        carregarItens2(id, listId);
-    }
-
-    function getId_operadores(element) {
-        var id = element.id;
-        var listId = id.replace('inputOperador-clone_','listOperador-clone_')
-
-        carregarOperadores2(id, listId);
-    }
-    
-</script>
-
-<script>
-    function enviarSolicitacao() {
-        document.getElementById('btnEnviarSolicitacao').disabled = true;
-
-        // Selecione todos os camposSolicitacao e seus clones
-        var campoSolicitante = document.getElementById('inputSolicitante').value;
-        var camposSolicitacao = document.querySelectorAll('[id^="camposSolicitacao"]');
-
-        // Crie um array para armazenar os dados
-        var dados = [];
-
-        // Flag para verificar se algum campo está em branco
-        var campoEmBrancoEncontrado = false;
-
-        // Flag para verificar se pelo menos um botão de rádio foi marcado
-        var radioMarcado = false;
-
-        camposSolicitacao.forEach(function(campos) {
-            // Selecione todos os radios dentro do camposSolicitacao atual
-            var radios = campos.querySelectorAll('input[id^="input"], input[type="radio"]:checked');
-
-            // Crie um objeto para armazenar os dados do camposSolicitacao atual
-            var dadosCampos = {'solicitante': campoSolicitante};
-
-            // Itere sobre os radios e armazene seus valores no objeto de dados do camposSolicitacao atual
-            radios.forEach(function(radio) {
-                console.log(radio.value);
-                // Verifique se o valor não está vazio antes de adicionar ao objeto
-                if (radio.value.trim() !== '') {
-                    dadosCampos[radio.id] = radio.value;
-                    radioMarcado = true;
-                } else {
-                    // Se encontrar um campo em branco, ajuste a flag
-                    campoEmBrancoEncontrado = true;
-                }
-            });
-
-            // Adicione o objeto de dados do camposSolicitacao atual ao array de dados
-            dados.push(dadosCampos);
-        });
-
-        // Verifique se pelo menos um botão de rádio foi marcado
-        if (!radioMarcado) {
-            alert("Selecione uma opção de rádio");
-            document.getElementById('btnEnviarSolicitacao').disabled = false;
-            return;
-        }
-
-        // Se algum campo estiver em branco, pare o loop
-        if (campoEmBrancoEncontrado) {
-            alert("Preencha todos os campos");
-            document.getElementById('btnEnviarSolicitacao').disabled = false;
-            return;
-        }
-
-        // Se algum campo estiver em branco, não prossiga com a chamada AJAX
-        if (campoEmBrancoEncontrado) {
-            return;
-        }
-
-        $.ajax({
-            url:'/solicitacao',
-            type: 'POST',
-            data: JSON.stringify(dados),
-            contentType: 'application/json',
-            success: function(data) {
-                // console.log(data)
-            },
-            error: function(error){
-                console.error('Erro na requisição AJAX:', error);
-            }
-        });
-    }
-</script>
-
-<script>
-    // Função para excluir o clone pelo botão clicado
-    function excluirClone(botao) {
-    // Obtém o elemento pai mais próximo com ID que contenha "camposSolicitacao"
-    var divPai = botao.closest('[id^="camposSolicitacao"]');
-
-    // Verifica se o div pai existe antes de removê-lo
-    if (divPai) {
-        // Remove o div pai do DOM
-        divPai.remove();
-    }
-}
-</script>
-
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/populando-listas.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/clonando-populando.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
 
 {% endblock %}
