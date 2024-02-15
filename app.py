@@ -3,6 +3,7 @@ import datetime
 import pandas as pd
 import psycopg2  # pip install psycopg2
 import psycopg2.extras 
+from functools import wraps
 from psycopg2.extras import execute_values
 from datetime import datetime
 import cachetools
@@ -15,6 +16,13 @@ DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
 
+def login_required(func): # Lógica do parâmetro de login_required, onde escolhe quais páginas onde apenas o usuário logado pode acessar
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if 'loggedin' not in session:
+            return redirect(url_for('login'))
+        return func(*args, **kwargs)
+    return wrapper
 
 @app.route('/login', methods=['POST','GET'])
 def login(): # Lógica de login
@@ -30,8 +38,13 @@ def login(): # Lógica de login
         cur.execute("""SELECT * FROM sistema_epi.tb_usuario WHERE username = %s AND password = %s""", (username, password))
         user = cur.fetchone()
 
+        print(user)
+        print(user is not None)
+
         if user is not None:
+            session['loggedin'] = True
             session['user_id'] = user['username']
+            print(user['username'])
             return redirect(url_for('pagina_inicial'))
         else:
             flash('Usuário ou Senha inválida', category='error')
@@ -46,6 +59,7 @@ def logout(): # Botão de logout
 	return redirect(url_for('login'))
 
 @app.route('/', methods=['GET'])
+@login_required
 def pagina_inicial():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -83,6 +97,7 @@ def pagina_inicial():
     return render_template('tables.html',tb_solicitacoes=tb_solicitacoes)
 
 @app.route('/receber-assinatura', methods=['POST'])
+@login_required
 def receber_assinatura():
     try:
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -109,6 +124,7 @@ def receber_assinatura():
         return jsonify({'status': 'error', 'message': str(e)})
 
 @app.route('/dados-execucao', methods=['POST'])
+@login_required
 def dados_execucao():
     
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -125,29 +141,46 @@ def dados_execucao():
             INNER JOIN sistema_epi.tb_historico_solicitacoes
             ON tb_solicitacoes.id_solicitacao = tb_historico_solicitacoes.id_solicitacao
             WHERE tb_solicitacoes.id_solicitacao = '{id_solicitante}';"""
+    
+    query_solicitacoes = f"""SELECT id,codigo_item,quantidade,motivo  
+                         FROM sistema_epi.tb_solicitacoes
+                         WHERE id_solicitacao = '{id_solicitante}';"""
 
     cur.execute(query)
-    execucao = cur.fetchall()
+    info_gerais = cur.fetchall()
 
-    print(execucao)
+    cur.execute(query_solicitacoes)
+    equipamento = cur.fetchall()
 
     dados = {
-        'id':execucao[0][0],
-        'id_solicitacao':execucao[0][1],
-        'matricula':execucao[0][2],
-        'codigo':execucao[0][3],
-        'quantidade':execucao[0][4],
-        'motivo':execucao[0][5],
-        'setor':execucao[0][6],
-        'funcionario':execucao[0][7],
-        'data':execucao[0][8],
-        'status':execucao[0][9]
+        'id_solicitacao': info_gerais[-1][1],
+        'matricula': info_gerais[-1][2],
+        'setor': info_gerais[-1][6],
+        'funcionario': info_gerais[-1][7],
+        'data_solicitacao': info_gerais[0][8],
+        'data': info_gerais[-1][8],
+        'status': info_gerais[-1][9]
     }
+
+    equipamentos = []
+    
+    for row in equipamento:
+        equipamentos.append({
+            'id': row[0],
+            'codigo': row[1],
+            'quantidade': row[2],
+            'motivo': row[3]
+        })
+
+    dados['equipamentos'] = equipamentos
+
+    print(dados)
 
     # Exemplo de resposta de volta para o cliente
     return jsonify(dados)
 
 @app.route('/timeline', methods=['POST'])
+@login_required
 def timeline_os():
 
     dados = request.get_json()

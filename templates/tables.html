@@ -59,7 +59,7 @@
                             <td>{{row[4]}}</td>
                             <td>{{row[3]}}</td>
                             {% if row[10] == None %}
-                            <td><button onclick="modalEditar('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                            <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                             {% else %}
                             <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
                             {% endif %}
@@ -77,7 +77,7 @@
                                         <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[10] }}','{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
                                         </a>
-                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalEditar('{{ row[1] }}')"> 
+                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
                                         </a> -->
                                         <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
@@ -113,21 +113,21 @@
                 <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
                 <hr>
                 <div class="row">
-                    <div class="col-sm-6 mb-2">
+                    <div class="col-sm-4 mb-2">
                         <label>Data da solicitação:</label>
                         <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
                     </div>
-                    <div class="col-sm-6">
-                        <label>Motivo:</label>
-                        <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivo_execucao" disabled>
-                            <option value="" selected disabled hidden></option>
-                            <option value="Entrega">Entrega</option>
-                            <option value="Substituição">Substituição</option>
-                            <option value="Perda">Perda</option>
-                            <option value="Dano">Dano</option>
-                            <option value="Vencimento">Vencimento</option>
-                            <option value="Furto">Furto</option>
-                          </select>
+                    <div class="col-sm-4 mb-2">
+                        <div class="info_data">
+                            <label>Data de Entrega</label>
+                        </div>
+                        <input type="datetime" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
+                    </div>
+                    <div class="col-sm-4 mb-2">
+                        <div class="info_previsao">
+                            <label>Previsão de troca</label>
+                        </div>
+                        <input type="datetime" class="form-control" id="previsao_entrega_execucao" autocomplete="off" disabled> 
                     </div>
                 </div>
                 <div class="row">
@@ -140,32 +140,8 @@
                         <input type="text" class="form-control" id="setor_execucao" disabled>
                     </div>
                 </div>
-                <hr>
-                <h6 class="m-0 font-weight-bold text-primary">Equipamento</h6>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-12 mb-2">
-                        <label>Equipamento</label>
-                        <input type="text" class="form-control" id="equipamento_execucao" autocomplete="off"> 
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <label>Quantidade</label>
-                        <input type="number" class="form-control" id="quantidade_execucao" autocomplete="off"> 
-                    </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="info_data">
-                            <label>Data de Entrega</label>
-                        </div>
-                        <input type="date" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
-                    </div>
-                    <div class="col-sm-4 mb-2">
-                        <div class="info_previsao">
-                            <label>Previsão de troca</label>
-                        </div>
-                        <input type="date" class="form-control" id="previsao_entrega_execucao" autocomplete="off" disabled> 
-                    </div>
+                <div id="containerEquipamentos">
+                    
                 </div>
             </div> 
             <div class="modal-footer">
@@ -177,7 +153,7 @@
 
 
 <!-- Modal edição de execução -->
-<div class="modal fade" data-backdrop="static" id="modalEditar" tabindex="-1" role="dialog" aria-labelledby="modalEditarLabel" aria-hidden="true">
+<div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog" aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -262,6 +238,7 @@
 <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dias-uteis/dist/dias-uteis.min.js"></script>
 
 <!-- script com a construção das tabelas -->
 <script src="static/js/demo/datatables-demo.js"></script>
@@ -269,6 +246,54 @@
 <script src="/static/js/mensagem.js"></script>
 
 <script>
+
+    $('#modalExecutarSolicitacao').on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    // Remove a classe ao fechar o modal
+    $('#modalExecutarSolicitacao').on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    $('#modalAssinatura').on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    // Remove a classe ao fechar o modal
+    $('#modalAssinatura').on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    function calcularPrevisaoEntrega(dataEntrega) {
+        // Converte a data de entrega para um objeto Date
+        var dataEntregaObj = new Date(dataEntrega);
+
+        // Adiciona 365 dias úteis à data de entrega
+        var previsaoEntregaObj = adicionarDiasUteis(dataEntregaObj, 365);
+
+        // Formata a data de previsão de entrega
+        var previsaoEntregaFormatada = formatarDataBr(previsaoEntregaObj);
+
+        return previsaoEntregaFormatada;
+    }
+
+    // Função para adicionar dias úteis a uma data
+    function adicionarDiasUteis(data, dias) {
+        var dataTemp = new Date(data);
+        var diasAdicionados = 0;
+
+        while (diasAdicionados < dias) {
+            dataTemp.setDate(dataTemp.getDate() + 1);
+
+            // Verifica se o dia adicionado não é um sábado (6) ou domingo (0)
+            if (dataTemp.getDay() !== 0 && dataTemp.getDay() !== 6) {
+                diasAdicionados++;
+            }
+        }
+
+        return dataTemp;
+    }
 
     function modalExecucao(id_solicitante,assinatura,id) {
 
@@ -283,35 +308,77 @@
             success: function(response) {
 
                 $('.info_data button').empty()
-
                 $('.info_previsao button').empty()
 
                 $('#modalExecutarSolicitacao').modal('show');
 
-                console.log(response.status === 'Aguardando Assinatura')
-
-                if(response.status === 'Aguardando Assinatura'){
+                if (response.status === 'Aguardando Assinatura') {
                     $('.info_data').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Data de entrega só exibirá após a assinatura">
                                                 <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
                                             </button>`)
                     $('.info_previsao').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Previsão de troca só exibirá após a assinatura">
                                                     <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
                                                 </button>`)
+                    $('#data_entrega_execucao').val('');
+                    $('#previsao_entrega_execucao').val('');
+                } else {
+                    $('#data_entrega_execucao').val(formatarDataBr(response.data));
+                    var previsaoEntrega = calcularPrevisaoEntrega(response.data);
+
+                    // Atribui o valor calculado ao campo #previsao_entrega_execucao
+                    $('#previsao_entrega_execucao').val(previsaoEntrega);
                 }
 
                 $(function () {
                     $('[data-toggle="tooltip"]').tooltip()
                 })
 
-                $('#n_solicitacao_edicao').val(response.id);
-                $('#dataSolicitacao').val(formatarDataBr(response.data));
-                $('#motivo_execucao').val(response.motivo);
+                // Preencher os campos do formulário com as informações gerais
+                $('#dataSolicitacao').val(formatarDataBr(response.data_solicitacao));
                 $('#funcionario_execucao').val(response.funcionario);
                 $('#setor_execucao').val(response.setor);
-                $('#equipamento_execucao').val(response.codigo);
-                $('#quantidade_execucao').val(response.quantidade);
-                $('#data_entrega_execucao').val(response.id);
-                $('#previsao_entrega_execucao').val(response.id);
+
+                // Adicionar campos de entrada para cada equipamento
+                var containerEquipamentos = $('#containerEquipamentos');
+                containerEquipamentos.empty();
+                let equip_num = '';
+                response.equipamentos.forEach(function(equipamento, index) {
+                    var novoInput = `
+                    <hr>
+                    <h6 class="m-0 font-weight-bold text-primary">Equipamento `+ equip_num +`</h6>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <label>Id</label>
+                            <input type="text" class="form-control" id="id_execucao`+ index +`" value="` + equipamento.id + `" autocomplete="off" disabled> 
+                        </div>
+                        <div class="col-sm-6 mb-2">
+                            <label>Equipamento</label>
+                            <input type="text" class="form-control" id="motivo_execucao`+ index +`" value="` + equipamento.codigo + `" autocomplete="off"> 
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6 mb-2">
+                            <label>Quantidade</label>
+                            <input type="number" class="form-control" id="quantidade_execucao`+ index +`" value="` + equipamento.quantidade + `" autocomplete="off"> 
+                        </div>
+                        <div class="col-sm-6">
+                            <label>Motivo:</label>
+                            <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivo_execucao`+ index +`">
+                            <option value="` + equipamento.motivo + `" selected disabled hidden>` + equipamento.motivo + `</option>
+                            <option value="Entrega">Entrega</option>
+                            <option value="Substituição">Substituição</option>
+                            <option value="Perda">Perda</option>
+                            <option value="Dano">Dano</option>
+                            <option value="Vencimento">Vencimento</option>
+                            <option value="Furto">Furto</option>
+                          </select>
+                        </div>
+                    </div>`;
+                    containerEquipamentos.append(novoInput);
+                    equip_num = 1
+                    equip_num++
+                });
                 
             },
             error: function(error) {
@@ -323,12 +390,12 @@
 
     }
 
-    function modalEditar(nome_funcionario,id_solicitacao,id) {
+    function modalAssinatura(nome_funcionario,id_solicitacao,id) {
 
 
-        $('#modalEditar .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
+        $('#modalAssinatura .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
 
-        $('#modalEditar').modal('show');
+        $('#modalAssinatura').modal('show');
 
         console.log(id_solicitacao)
 
@@ -381,7 +448,7 @@
                 .then(data => {
                     // Lidar com a resposta do servidor, se necessário
                     exibirMensagem('sucesso', 'Salvo.')
-                    $('#modalEditar').modal('hide');
+                    $('#modalAssinatura').modal('hide');
                     console.log(data);
                     window.location.reload();
                 });
@@ -392,7 +459,7 @@
             signaturePad.clear();
         });
 
-        $('#modalEditar').on('hidden.bs.modal', function () {
+        $('#modalAssinatura').on('hidden.bs.modal', function () {
             // Limpar o SignaturePad quando o modal é fechado
             signaturePad.clear();
         });
