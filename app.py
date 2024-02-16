@@ -95,7 +95,7 @@ def pagina_inicial():
 
     print(tb_solicitacoes)
 
-    return render_template('tables.html',tb_solicitacoes=tb_solicitacoes)
+    return render_template('home.html',tb_solicitacoes=tb_solicitacoes)
 
 @app.route('/receber-assinatura', methods=['POST'])
 @login_required
@@ -131,17 +131,28 @@ def dados_execucao():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
     
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur = conn.cursor()
 
     data = request.get_json()
 
     id_solicitante = data.get('id_solicitante')
 
-    query = f"""SELECT DISTINCT tb_solicitacoes.*,tb_historico_solicitacoes.status
-            FROM sistema_epi.tb_solicitacoes
-            INNER JOIN sistema_epi.tb_historico_solicitacoes
-            ON tb_solicitacoes.id_solicitacao = tb_historico_solicitacoes.id_solicitacao
-            WHERE tb_solicitacoes.id_solicitacao = '{id_solicitante}';"""
+    query = f"""
+                SELECT
+                    solic.*,
+                    hist.status,
+                    ass.assinatura,ass.data_assinatura
+                FROM sistema_epi.tb_solicitacoes AS solic
+                    LEFT JOIN (
+                    SELECT
+                        id_solicitacao,
+                        status,
+                        ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
+                    FROM sistema_epi.tb_historico_solicitacoes
+                    ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
+                    LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
+                    WHERE solic.id_solicitacao = '{id_solicitante}';
+            """
     
     query_solicitacoes = f"""SELECT id,codigo_item,quantidade,motivo  
                          FROM sistema_epi.tb_solicitacoes
@@ -156,10 +167,9 @@ def dados_execucao():
     dados = {
         'id_solicitacao': info_gerais[-1][1],
         'matricula': info_gerais[-1][2],
-        'setor': info_gerais[-1][6],
         'funcionario': info_gerais[-1][7],
         'data_solicitacao': info_gerais[0][8],
-        'data': info_gerais[-1][8],
+        'data_assinado': info_gerais[-1][11],
         'status': info_gerais[-1][9]
     }
 
@@ -394,6 +404,23 @@ def criar_solicitacao():
         input_tb_historico(id)
     
     return redirect(url_for('rota_solicitacao_material'))
+
+@app.route('/vida-util', methods=['POST'])
+def buscar_vida_util():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+    print(dados)
+    cur.execute('select vida_util from sistema_epi.tb_itens')
+    vida_util = cur.fetchone()
+
+    print(vida_util)
+
+    return jsonify(vida_util)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
