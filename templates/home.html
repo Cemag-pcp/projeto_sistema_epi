@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block links %}
-    <!-- css datatable -->
+    <!-- CSS datatable -->
     <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
     
     <!-- CSS do campo de assinatura -->
@@ -16,15 +16,54 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Tables</h1>
-    <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
-        For more information about DataTables, please visit the <a target="_blank"
-            href="https://datatables.net">official DataTables documentation</a>.</p>
+    <h1 class="h3 mb-2 text-gray-800">Tabela de Solicitações</h1>
+    <p class="mb-4">Tabela principal para visualizar as solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+            <hr>
+            <div class="row">
+                <div class="col-sm-2 mb-2">
+                    <label for="funcionario-filter">Funcionário</label>
+                    <input class="form-control" id="funcionario-filter" name="funcionario-filter">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="solicitante-filter">Solicitante</label>
+                    <input id="solicitante-filter" class="form-control">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="equipamento-filter">Equipamento</label>
+                    <input id="equipamento-filter" class="form-control">
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="assinatura-filter">Assinatura</label>
+                    <select class="form-control form-control" id="assinatura-filter" style='padding: .375rem .25rem;' name="natureza-filter">
+                        <option value="">Todos</option>
+                        <option>Solicitação Assinada</option>
+                        <option>Assinatura Pendente</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="status-filter">Status</label>
+                    <select class="form-control form-control" id="status-filter" style='padding: .375rem .25rem;' name="status-filter">
+                        <option value="">Todos</option>
+                        <option>Aguardando Assinatura</option>
+                        <option>Assinado</option>
+                    </select>
+                </div>
+                <div class="col-sm-2 mb-2">
+                    <label for="motivo-filter">Motivo</label>
+                    <select class="form-control form-control" id="motivo-filter" style='padding: .375rem .25rem;' name="risco-filter">
+                        <option value="">Todos</option>
+                        <option>Perda</option>
+                        <option>Dano</option>
+                        <option>Admissão</option>
+                        <option>Substituição</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <div class="card-body">
             <div class="table-responsive">
@@ -38,7 +77,6 @@
                             <th>Assinatura</th>
                             <th>Status</th>
                             <th>Motivo</th>
-                            <th>Setor</th>
                             <th>Data</th>
                             <th>Opções</th>
                         </tr>
@@ -52,7 +90,6 @@
                             <th>Assinatura</th>
                             <th>Status</th>
                             <th>Motivo</th>
-                            <th>Setor</th>
                             <th>Data</th>
                             <th>Opções</th>
                         </tr>
@@ -60,10 +97,10 @@
                     <tbody>
                         {% for row in tb_solicitacoes %}
                         <tr>
-                            <td>{{row[7]}}</td>
-                            <td>{{row[2]}}</td>
+                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[7]}}" style="max-width: 150px; cursor: default;">{{row[7]}}</td>
+                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}" style="max-width: 150px; cursor: default;">{{row[2]}}</td>
                             <td>{{row[4]}}</td>
-                            <td>{{row[3]}}</td>
+                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}" style="max-width: 200px; cursor: default;">{{row[3]}}</td>
                             {% if row[10] == None %}
                             <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                             {% else %}
@@ -71,7 +108,6 @@
                             {% endif %}
                             <td>{{row[9]}}</td>
                             <td>{{row[5]}}</td>
-                            <td>{{row[6]}}</td>
                             <td>{{row[8]}}</td>
                             <td style="align-items: center;">
                                 <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
@@ -153,7 +189,7 @@
     </div>
 </div>
 
-<!-- Modal assinatura -->
+<!-- Modal Assinatura -->
 <div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog" aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
     <div class="modal-dialog modal-md" role="document">
         <div class="modal-content">
@@ -251,6 +287,10 @@
 <script src="/static/js/mensagem.js"></script>
 
 <script>
+
+    $(function () {
+            $('[data-toggle="tooltip"]').tooltip()
+    })
 
     $('#modalExecutarSolicitacao').on('show.bs.modal', function () {
         $('body').addClass('modal-open');
@@ -479,169 +519,168 @@
 
     function signaturePad(id_solicitacao,id) {
 
-        var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
-                backgroundColor: 'rgba(255, 255, 255, 0)',
-                penColor: 'rgb(0, 0, 0)'
-        });
+var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+        backgroundColor: 'rgba(255, 255, 255, 0)',
+        penColor: 'rgb(0, 0, 0)'
+});
 
-        var saveButton = document.getElementById('save');
-        var cancelButton = document.getElementById('clear');
+var saveButton = document.getElementById('save');
+var cancelButton = document.getElementById('clear');
 
-            
-        saveButton.addEventListener("click", function(event) {
-            if (signaturePad.isEmpty()) {
-                alert("Faça sua assinatura.");
-            } else {
-                // Desabilitar o botão para evitar múltiplos cliques
-                saveButton.disabled = true;
+    
+saveButton.addEventListener("click", function(event) {
+    if (signaturePad.isEmpty()) {
+        alert("Faça sua assinatura.");
+    } else {
+        // Desabilitar o botão para evitar múltiplos cliques
+        saveButton.disabled = true;
 
-                // Obter a data de hoje
-                var dataURL = signaturePad.toDataURL();
+        // Obter a data de hoje
+        var dataURL = signaturePad.toDataURL();
 
-                // Enviar o dataURL e a data para a rota /receber-assinatura usando a API Fetch
-                fetch('/receber-assinatura', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        id_solicitacao: id_solicitacao,
-                        dataURL: dataURL
-                    }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Lidar com a resposta do servidor, se necessário
-                    exibirMensagem('sucesso', 'Salvo.')
-                    $('#modalAssinatura').modal('hide');
-                    console.log(data);
-                    window.location.reload();
-                });
-            }
-        });
-
-        cancelButton.addEventListener('click', function(event) {
-            signaturePad.clear();
-        });
-
-        $('#modalAssinatura').on('hidden.bs.modal', function () {
-            // Limpar o SignaturePad quando o modal é fechado
-            signaturePad.clear();
+        // Enviar o dataURL e a data para a rota /receber-assinatura usando a API Fetch
+        fetch('/receber-assinatura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                id_solicitacao: id_solicitacao,
+                dataURL: dataURL
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Lidar com a resposta do servidor, se necessário
+            exibirMensagem('sucesso', 'Salvo.')
+            $('#modalAssinatura').modal('hide');
+            console.log(data);
+            window.location.reload();
         });
     }
-    
+});
+
+cancelButton.addEventListener('click', function(event) {
+    signaturePad.clear();
+});
+
+$('#modalAssinatura').on('hidden.bs.modal', function () {
+    // Limpar o SignaturePad quando o modal é fechado
+    signaturePad.clear();
+});
+}
+
     function modalTimeline(id_solicitacao,codigo_item,funcionario) {
-        
-        $.ajax({
-            url: '/timeline',
-            type: 'POST',  // Alterado para POST
-            dataType: 'json',
-            contentType: 'application/json',
-            data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),  // Enviando um objeto JSON
-            success: function(response) {
-                // Limpar conteúdo atual da lista
-                $('#listaHistorico').empty();
 
-                $('#modalTimeline').modal('show');
+    $.ajax({
+        url: '/timeline',
+        type: 'POST',  // Alterado para POST
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),  // Enviando um objeto JSON
+        success: function(response) {
+            // Limpar conteúdo atual da lista
+            $('#listaHistorico').empty();
 
-                // Seus dados fornecidos
-                var dados = response[1]; // Certifique-se de ajustar conforme a estrutura real da resposta
-                console.log(dados);
-                console.log(response);
-                
-                // Loop pelos dados e gerar elementos da lista
-                for (var i = 0; i < dados.length; i++) {
-                    var item = dados[i];
-                    var listItem = document.createElement('a');
-                    listItem.className = 'list-group-item list-group-item-action';
-                    // listItem.href = '#';
-                    listItem.setAttribute('aria-current', 'true');
+            $('#modalTimeline').modal('show');
 
-                    if (item[0] === 0) {
-                        var content = `
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">${item[3]}</h5>
-                            <div class="d-flex flex-column align-items-end">
-                                <small>Matrícula do funcionário: ${funcionario}</small>
-                                <small>Exec.: ${i}</small>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
-                            </div> 
-                        </div>    
-                    `;
-                    } else {
-                        var content = `
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">${item[3]}</h5>
-                            <div class="d-flex flex-column align-items-end">
-                                <small>Matrícula do funcionário: ${funcionario}</small>
-                                <small>Exec.: ${i}</small>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
-                            </div> 
-                        </div>                       
-                    `;
-                    }
-
-                    listItem.innerHTML = content;
-    
-                    // Use addEventListener para lidar com o clique
-                    (function(itemValue) {
-                        $(listItem).on('click', function() {
-                            // Chamar a função apenas uma vez
-                            itensParaEditar(id_ordem, itemValue);
-                        });
-                    })(item[0]);
-                    
-                    document.getElementById('listaHistorico').appendChild(listItem);
-                }
+            // Seus dados fornecidos
+            var dados = response[1]; // Certifique-se de ajustar conforme a estrutura real da resposta
+            console.log(dados);
+            console.log(response);
             
-            },
-            error: function(error) {
-                alert('Ocorreu um erro ao buscar os vídeos');
-                console.log(error);
+            // Loop pelos dados e gerar elementos da lista
+            for (var i = 0; i < dados.length; i++) {
+                var item = dados[i];
+                var listItem = document.createElement('a');
+                listItem.className = 'list-group-item list-group-item-action';
+                // listItem.href = '#';
+                listItem.setAttribute('aria-current', 'true');
+
+                if (item[0] === 0) {
+                    var content = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">${item[3]}</h5>
+                        <div class="d-flex flex-column align-items-end">
+                            <small>Matrícula do funcionário: ${funcionario}</small>
+                            <small>Exec.: ${i}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                        </div> 
+                    </div>    
+                `;
+                } else {
+                    var content = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">${item[3]}</h5>
+                        <div class="d-flex flex-column align-items-end">
+                            <small>Matrícula do funcionário: ${funcionario}</small>
+                            <small>Exec.: ${i}</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                        </div> 
+                    </div>                       
+                `;
+                }
+
+                listItem.innerHTML = content;
+
+                // Use addEventListener para lidar com o clique
+                (function(itemValue) {
+                    $(listItem).on('click', function() {
+                        // Chamar a função apenas uma vez
+                        itensParaEditar(id_ordem, itemValue);
+                    });
+                })(item[0]);
+                
+                document.getElementById('listaHistorico').appendChild(listItem);
             }
-        });
+        
+        },
+        error: function(error) {
+            alert('Ocorreu um erro ao buscar os vídeos');
+            console.log(error);
+        }
+    });
     }
 
     function modalExcluirSolicitacao(id_solicitante) {
 
-        $('#modalExcluirSolicitacao .modal-body').text('Tem certeza que quer remover essa solicitação de EPI '  + id_solicitante + ' ? ');
+    $('#modalExcluirSolicitacao .modal-body').text('Tem certeza que quer remover essa solicitação de EPI '  + id_solicitante + ' ? ');
 
-        $('#modalExcluirSolicitacao').modal('show');
+    $('#modalExcluirSolicitacao').modal('show');
 
     }
 
     function formatarDataBr(dataString) {
-        // Cria um objeto Date a partir da string
-        var data = new Date(dataString);
-        
-        // Obtém os componentes da data
-        var dia = data.getDate();
-        var mes = data.getMonth() + 1; // Adiciona 1 porque os meses são indexados a partir de 0
-        var ano = data.getFullYear(); // Obtém os últimos dois dígitos do ano
-        // var hora = data.getHours();
-        // var minuto = data.getMinutes();
-        // var segundo = data.getSeconds();
+    // Cria um objeto Date a partir da string
+    var data = new Date(dataString);
 
-        // Formata a string com zero à esquerda para garantir dois dígitos para o dia, mês, hora, minuto e segundo
-        var formatoDesejado = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano.toString()}`;
+    // Obtém os componentes da data
+    var dia = data.getDate();
+    var mes = data.getMonth() + 1; // Adiciona 1 porque os meses são indexados a partir de 0
+    var ano = data.getFullYear(); // Obtém os últimos dois dígitos do ano
+    // var hora = data.getHours();
+    // var minuto = data.getMinutes();
+    // var segundo = data.getSeconds();
 
-        console.log(formatoDesejado);
+    // Formata a string com zero à esquerda para garantir dois dígitos para o dia, mês, hora, minuto e segundo
+    var formatoDesejado = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano.toString()}`;
 
-        return formatoDesejado;
+    console.log(formatoDesejado);
+
+    return formatoDesejado;
     }
 
 </script>
     
 <script>
-
     function download(dataURL, filename) {
         if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
             window.open(dataURL);
@@ -674,6 +713,78 @@
 
         return new Blob([uInt8Array], { type: contentType });
     }
+
+</script>
+
+<!-- FILTROS -->
+<script>
+
+    var funcionarioFilter = document.getElementById('funcionario-filter');
+    var solicitanteFilter = document.getElementById('solicitante-filter');
+    var equipamentoFilter = document.getElementById('equipamento-filter');
+    var assinaturaFilter = document.getElementById('assinatura-filter');
+    var statusFilter = document.getElementById('status-filter');
+    var motivoFilter = document.getElementById('motivo-filter');
+
+    function applyFilters() {
+
+        $('#dataTable').DataTable().destroy();
+
+        // Obtém os valores dos filtros
+        let funcionarioFilterValue = funcionarioFilter.value.toLowerCase();
+        let solicitanteFilterValue = solicitanteFilter.value.toLowerCase();
+        let equipamentoFilterValue = equipamentoFilter.value.toLowerCase();
+        let assinaturaFilterValue = assinaturaFilter.value.toLowerCase();
+        let statusFilterValue = statusFilter.value.toLowerCase();
+        let motivoFilterValue = motivoFilter.value.toLowerCase();
+        // let maquinaParadaFilterValue = maquinaParadaFilter.value.toLowerCase();
+
+        // Obtém a tabela
+        var table = $('#dataTable').DataTable({
+            responsive: true,
+            columnDefs: [
+                // { responsivePriority: 10001, targets: 10 },
+                { responsivePriority: 1, targets: 6 },
+            ]
+        });
+
+        // Aplica a filtragem para cada coluna
+        table.columns(0).search(funcionarioFilterValue).draw();
+        table.columns(1).search(solicitanteFilterValue).draw();
+        table.columns(3).search(equipamentoFilterValue).draw();
+        table.columns(5).search(statusFilterValue).draw();
+        table.columns(4).search(assinaturaFilterValue).draw();
+        table.columns(6).search(motivoFilterValue).draw();
+        // table.columns(8).search(maquinaParadaFilterValue).draw();
+
+        // Atualiza a exibição da linha conforme necessário
+        table.rows().every(function () {
+            let shouldDisplay =
+                this.data()[0].toLowerCase().includes(funcionarioFilterValue) &&
+                this.data()[1].toLowerCase().includes(solicitanteFilterValue) &&
+                this.data()[3].toLowerCase().includes(equipamentoFilterValue) &&
+                this.data()[5].toLowerCase().includes(statusFilterValue) &&
+                this.data()[4].toLowerCase().includes(assinaturaFilterValue) &&
+                this.data()[6].toLowerCase().includes(motivoFilterValue)
+                // this.data()[8].toLowerCase().includes(maquinaParadaFilterValue);
+
+            this.node().style.display = shouldDisplay ? '' : 'none';
+        });
+
+        let visibleRows = table.rows({ search: 'applied' }).data().toArray();
+
+        // Retorna os dados filtrados
+        return visibleRows;
+    }
+
+    funcionarioFilter.addEventListener('input', applyFilters);
+    solicitanteFilter.addEventListener('input', applyFilters);
+    equipamentoFilter.addEventListener('input', applyFilters);
+    statusFilter.addEventListener('change', applyFilters);
+    assinaturaFilter.addEventListener('change', applyFilters);
+    motivoFilter.addEventListener('change', applyFilters);
+
+    applyFilters();
 
 </script>
 
