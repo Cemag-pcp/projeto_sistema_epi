@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block links %}
+
+    <!-- Dropdown input list -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+    <link rel="stylesheet" href="/static/css/assinatura.css">
+{% endblock %}
+
+{% block container %}
+    <div id="wrapper">
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                <div class="container-fluid">
+                    <div class="text-center">
+                        <div class="error mx-auto" id="dashboard"  data-text="Dashboard">Dashboard</div>
+                        <p class="lead text-gray-800 mx-auto">Dashboard ainda não está disponível para visualização...</p>
+                        <p class="text-gray-500 mx-auto" style="font-size: 150px;"><i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i></p>
+                        <a href="/">&larr; Voltar para página inicial</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+{% endblock %}
