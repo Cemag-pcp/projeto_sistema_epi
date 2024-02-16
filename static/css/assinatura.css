@@ -45,3 +45,13 @@
     color: white;
 } 
 
+#dashboard{
+    width: 550px;
+}
+
+@media (max-width: 650px){
+    #dashboard{
+        font-size: 70px;
+        width: unset;
+    }
+}

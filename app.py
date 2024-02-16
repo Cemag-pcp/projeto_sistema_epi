@@ -46,7 +46,7 @@ def login(): # Lógica de login
             session['loggedin'] = True
             session['user_id'] = user['username']
             print(user['username'])
-            return redirect(url_for('pagina_inicial'))
+            return redirect(url_for('rota_solicitacao_material',username=username))
         else:
             flash('Usuário ou Senha inválida', category='error')
 
@@ -81,10 +81,21 @@ def pagina_inicial():
             ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
             LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao;
         """
-    
+
     tb_solicitacoes = pd.read_sql_query(s, conn)
 
-    print(tb_solicitacoes)
+    sql = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios"
+    
+    tb_sql = pd.read_sql_query(sql, conn)
+
+    mapeamento = dict(zip(tb_sql['concat'].str.extract('(\d+)', expand=False), tb_sql['concat']))
+
+    # Substituir na coluna matricula_solicitante
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].astype(str)
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].replace(mapeamento)
+
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].astype(str)
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].replace(mapeamento)
 
     tb_solicitacoes = tb_solicitacoes.sort_values(by=['id','id_solicitacao'])
 
@@ -352,12 +363,38 @@ def setor_operador(operador):
 @app.route('/solicitacao-material', methods=['GET','POST'])
 def rota_solicitacao_material():
 
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    usuario = session.get('user_id')
+
+    sql = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios where matricula = '{usuario}'"
+    cur.execute(sql)
+
+    data = cur.fetchall()
+
+    solicitante = data[0][0]
+
+    nome = solicitante.split(' - ')[1]
+
     """
     Rota para de solicitação de material
     """
 
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
-    return render_template('solicitacao-material.html')
+    return render_template('solicitacao-material.html', solicitante=solicitante,nome=nome)
+
+# Dashboard
+@app.route('/dashboard', methods=['GET','POST'])
+def dashboard():
+
+    """
+    Rota para de solicitação de material
+    """
+
+    # Renderize o template e passe o parâmetro de sucesso, se aplicável
+    return render_template('dashboard.html')
 
 @app.route('/solicitacao', methods=['POST'])
 def criar_solicitacao():

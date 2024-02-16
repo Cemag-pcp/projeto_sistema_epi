@@ -27,8 +27,8 @@
                             <!-- <h6 class="m-0 font-weight-bold text-primary">Solicitante</h6> -->
                             <div class="row form-group">
                                 <div class="col-sm-12">
-                                    <label for="inputSolicitante">Solicitante:</label>
-                                    <input type="text" class="form-control" id="inputSolicitante" name="nameSolicitante" autocomplete="off" required>
+                                    <label>Solicitante:</label>
+                                    <input type="text" class="form-control" id="inputSolicitante" name="nameSolicitante" value="{{solicitante}}" autocomplete="off" disabled>
                                 </div>
                             </div>
                             <hr>
@@ -135,6 +135,8 @@
     </div>
 </div>
 
+<input type="text" id="pegando_nome" value="{{nome}}" style="display: none;">
+
 {% endblock %}
 
 {% block scripts %}
@@ -144,5 +146,21 @@
 <script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
+
+<script>
+    $(document).ready(function() {
+        nome_solicitante = $('#pegando_nome').val()
+
+        $('#nome_logado').text(nome_solicitante)
+        // Verifica se o valor é '4345 - JOSE EDENILSON DE CASTRO'
+        if ($('#inputSolicitante').val() !== '4345 - JOSE EDENILSON DE CASTRO') {
+            // Oculta o elemento com ID 'accordionSidebar'
+            $('#accordionSidebar').hide();
+        } else {
+            // Caso contrário, mostra o elemento
+            $('#accordionSidebar').show();
+        }
+    });
+</script>
 
 {% endblock %}
