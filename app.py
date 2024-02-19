@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify,redirect, url_for,flash,session
 import datetime
+import warnings
 import pandas as pd
 import psycopg2  # pip install psycopg2
 import psycopg2.extras 
@@ -16,6 +17,8 @@ DB_HOST = "database-2.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
+
+warnings.filterwarnings("ignore")
 
 def login_required(func): # Lógica do parâmetro de login_required, onde escolhe quais páginas onde apenas o usuário logado pode acessar
     @wraps(func)
@@ -103,8 +106,6 @@ def pagina_inicial():
     tb_solicitacoes = tb_solicitacoes.groupby('id_solicitacao').first().reset_index()
 
     tb_solicitacoes = tb_solicitacoes.values.tolist()
-
-    print(tb_solicitacoes)
 
     return render_template('home.html',tb_solicitacoes=tb_solicitacoes)
 
@@ -450,14 +451,83 @@ def buscar_vida_util():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     dados = request.get_json()
-    print(dados)
     cur.execute('select vida_util from sistema_epi.tb_itens')
     vida_util = cur.fetchone()
 
-    print(vida_util)
-
     return jsonify(vida_util)
 
+@app.route('/alterar-dados', methods=['POST'])
+def alterar_dados():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    try:
+        # Recebe os dados do corpo da solicitação como JSON
+        dados = request.get_json()
+
+        # Acesse os dados específicos, por exemplo, os equipamentos
+        equipamentos = dados.get('equipamentos', [])
+        
+
+        # Faça algo com os dados, como salvá-los no banco de dados
+        for equipamento in equipamentos:
+            idExecucao = equipamento.get('idExecucao')
+            equipamento_nome = equipamento.get('equipamento')
+            quantidade = equipamento.get('quantidade')
+            motivo = equipamento.get('motivo')
+
+            cur.execute(""" UPDATE sistema_epi.tb_solicitacoes
+                    SET codigo_item=%s, quantidade=%s, motivo=%s
+                    WHERE id = %s
+                    """, (equipamento_nome, quantidade, motivo, idExecucao))
+            
+            print(idExecucao,equipamento_nome,quantidade,motivo)
+
+            conn.commit()
+            
+        conn.close()
+
+            # Responda ao cliente
+        return jsonify({'mensagem': 'Dados recebidos com sucesso!'})
+
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@app.route('/excluir-solicitacao', methods=['POST'])
+@login_required
+def excluir_solicitacao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    id_solicitacao = data['id_solicitacao']
+
+    query_solicitacao = f"""DELETE FROM sistema_epi.tb_solicitacoes
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_solicitacao)
+
+    query_historico = f"""DELETE FROM sistema_epi.tb_historico_solicitacoes
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_historico)
+
+    query_assinatura = f"""DELETE FROM sistema_epi.tb_assinatura
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_assinatura)
+
+    conn.commit()
+    conn.close()
+
+    return 'Dados recebidos com sucesso!'
 
 if __name__ == '__main__':
     app.run(debug=True)
