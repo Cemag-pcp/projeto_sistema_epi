@@ -469,7 +469,20 @@ def alterar_dados():
 
         # Acesse os dados específicos, por exemplo, os equipamentos
         equipamentos = dados.get('equipamentos', [])
+        id_solicitacao = equipamentos[0]['id_solicitacao']
+        print(id_solicitacao)
+
+        query = f"""DELETE
+                FROM sistema_epi.tb_historico_solicitacoes
+                WHERE id_solicitacao = '{id_solicitacao}' AND status = 'Assinado' """
         
+        cur.execute(query)
+
+        query_assinatura = f"""DELETE
+                FROM sistema_epi.tb_assinatura
+                WHERE id_solicitacao = '{id_solicitacao}'"""
+        
+        cur.execute(query_assinatura)
 
         # Faça algo com os dados, como salvá-los no banco de dados
         for equipamento in equipamentos:

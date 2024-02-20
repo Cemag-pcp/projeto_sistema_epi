@@ -27,15 +27,15 @@
             <div class="row">
                 <div class="col-sm-2 mb-2">
                     <label for="funcionario-filter">Funcionário</label>
-                    <input class="form-control" id="funcionario-filter" name="funcionario-filter">
+                    <input class="form-control" id="funcionario-filter" name="funcionario-filter" autocomplete="off">
                 </div>
                 <div class="col-sm-2 mb-2">
                     <label for="solicitante-filter">Solicitante</label>
-                    <input id="solicitante-filter" class="form-control">
+                    <input id="solicitante-filter" class="form-control" autocomplete="off">
                 </div>
                 <div class="col-sm-2 mb-2">
                     <label for="equipamento-filter">Equipamento</label>
-                    <input id="equipamento-filter" class="form-control">
+                    <input id="equipamento-filter" class="form-control" autocomplete="off">
                 </div>
                 <div class="col-sm-2 mb-2">
                     <label for="assinatura-filter">Assinatura</label>
@@ -181,7 +181,7 @@
                 </div>
             </div> 
             <div class="modal-footer">
-                <button id="salvarExecucao" onclick="alterarDados()" type="submit" class="btn btn-primary btn-block">Alterar</button>
+                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
             </div>
         </div>
     </div>
@@ -365,6 +365,11 @@
     function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
         // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
+        $('#salvarExecucao').prop('disabled',true)
+
+        $('#salvarExecucao').one('click',function(){
+            alterarDados(id_solicitante)
+        })
         
         $.ajax({
             url:'/dados-execucao',
@@ -464,6 +469,9 @@
                         configurarDropdown('equipamentoSolicitado_'+index, 'listCodigo'+index)
 
                         var inputCodigo = document.getElementById('equipamentoSolicitado_' + index);
+                        var inputQuantidade = document.getElementById('quantidadeExecucao_' + index);
+                        var selectMotivo = document.getElementById('motivoExecucao_' + index);
+                
                         var listCodigo = document.getElementById('listCodigo'+index);
 
                         inputCodigo.addEventListener('click', function() {
@@ -473,11 +481,22 @@
                         inputCodigo.addEventListener('focus', function() {
                             carregarItens(listCodigo);
                         });
+                        var list = [listCodigo,inputQuantidade,selectMotivo]
+
+                        for(var i = 0; i < list.length;i++){
+                            list[i].addEventListener('click', function() {
+                                if(inputCodigo.value == equipamento.codigo && inputQuantidade.value == equipamento.quantidade && selectMotivo.value == equipamento.motivo || inputQuantidade.value < 1){
+                                    $('#salvarExecucao').prop('disabled',true)
+                                } else {
+                                    $('#salvarExecucao').prop('disabled',false);
+                                }
+                            });
+                        }
 
                     });
-                    
 
                 });
+
                 
             },
             error: function(error) {
@@ -489,7 +508,7 @@
 
     }
 
-    function alterarDados() {
+    function alterarDados(id_solicitacao) {
         // Obtém todos os elementos que correspondem aos seletores desejados
         const elementos = document.querySelectorAll('[id^="equipamentoSolicitado_"]');
         console.log(elementos)
@@ -506,7 +525,7 @@
             const motivo = document.getElementById(`motivoExecucao_${id}`).value;
 
             // Adiciona os dados ao array
-            dados.push({ idExecucao, equipamento, quantidade, motivo });
+            dados.push({id_solicitacao,idExecucao, equipamento, quantidade, motivo });
         });
 
         if (dados.some(obj => Object.values(obj).some(value => !value.trim()))) {
@@ -527,6 +546,7 @@
             console.log('Resposta do servidor:', data);
             exibirMensagem('sucesso', 'Salvo.')
             $('#modalExecutarSolicitacao').modal('hide');
+            location.reload()
         })
         .catch(error => {
             console.error('Erro ao fazer a requisição:', error);
