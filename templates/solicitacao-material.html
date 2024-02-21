@@ -5,13 +5,15 @@
     <!-- Dropdown input list -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 
+    <link rel="stylesheet" href="/static/css/assinatura.css">
+
 {% endblock %}
 
 {% block container %}
 
 <div class="row justify-content-center">
     
-    <div class="col-sm-6">
+    <div class="col-md-12 col-lm-12 col-lg-12 col-xl-6">
         <div class="card o-hidden border-0 shadow-sm my-5">
             <div class="card-header">
                 <div class="text-center">
@@ -83,6 +85,15 @@
                                                     id="radioDano" value="Dano">
                                                 <label class="form-check-label" for="radioDano" id="labelRadioDano">
                                                     Dano
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3 d-flex">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
+                                                    id="radioEntrega" value="Primeira Entrega">
+                                                <label class="form-check-label" for="radioEntrega" id="labelRadioEntrega">
+                                                    Primeira Entrega
                                                 </label>
                                             </div>
                                         </div>

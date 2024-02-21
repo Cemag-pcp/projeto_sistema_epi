@@ -82,6 +82,9 @@
 
 // Enviar solicitação para o backend
 function enviarSolicitacao() {
+
+    $("#loading-overlay").show();
+    
     document.getElementById('btnEnviarSolicitacao').disabled = true;
 
     // Selecione todos os camposSolicitacao e seus clones
@@ -112,12 +115,15 @@ function enviarSolicitacao() {
             console.log(input.value);
             // Verifique se o valor não está vazio antes de adicionar ao objeto
             if (input.value.trim() !== '') {
-                dadosCampos[input.id] = input.value;
-            } else if (input.type === 'radio') {
-                // Verifique se o radio está marcado e adicione ao objeto
-                if (input.checked) {
-                    dadosCampos[input.id] = true;
-                    radioGrupoMarcado = true;
+                if (input.type === 'radio') {
+                    // Verifique se o radio está marcado e adicione ao objeto apenas se for true
+                    if (input.checked) {
+                        dadosCampos[input.id] = input.value;
+                        radioGrupoMarcado = true;
+                    }
+                } else {
+                    // Adicione outros tipos de input ao objeto
+                    dadosCampos[input.id] = input.value;
                 }
             } else {
                 // Se encontrar um campo em branco, ajuste a flag
@@ -134,7 +140,7 @@ function enviarSolicitacao() {
         }
     });
 
-    console.log(dados);
+    console.log(JSON.stringify(dados));
 
     // Verifique se pelo menos um botão de rádio foi marcado em algum grupo
     if (!radioMarcado) {
@@ -150,20 +156,22 @@ function enviarSolicitacao() {
         return;
     }
 
-    // // Se nenhum problema for encontrado, prossiga com a chamada AJAX
-    // $.ajax({
-    //     url: '/solicitacao',
-    //     type: 'POST',
-    //     data: JSON.stringify(dados),
-    //     contentType: 'application/json',
-    //     success: function () {
-    //         // Adicione o parâmetro de sucesso à URL ao recarregar a página
-    //         window.location.reload();
-    //     },
-    //     error: function (error) {
-    //         console.error('Erro na requisição AJAX:', error);
-    //     }
-    // });
+    // Se nenhum problema for encontrado, prossiga com a chamada AJAX
+    $.ajax({
+        url: '/solicitacao',
+        type: 'POST',
+        data: JSON.stringify(dados),
+        contentType: 'application/json',
+        success: function () {
+            // Adicione o parâmetro de sucesso à URL ao recarregar a página
+            $("#loading-overlay").hide();
+            window.location.reload();
+        },
+        error: function (error) {
+            console.error('Erro na requisição AJAX:', error);
+            $("#loading-overlay").hide();
+        }
+    });
 }
 // Fim Enviar solicitação para o backend
 
