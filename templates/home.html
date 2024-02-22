@@ -26,6 +26,10 @@
             <hr>
             <div class="row">
                 <div class="col-sm-2 mb-2">
+                    <label for="data-filter">Data</label>
+                    <input class="form-control" id="data-filter" name="data-filter" autocomplete="off">
+                </div>
+                <div class="col-sm-2 mb-2">
                     <label for="funcionario-filter">Funcionário</label>
                     <input class="form-control" id="funcionario-filter" name="funcionario-filter" autocomplete="off">
                 </div>
@@ -33,7 +37,7 @@
                     <label for="solicitante-filter">Solicitante</label>
                     <input id="solicitante-filter" class="form-control" autocomplete="off">
                 </div>
-                <div class="col-sm-4 mb-2">
+                <div class="col-sm-2 mb-2">
                     <label for="equipamento-filter">Equipamento</label>
                     <input id="equipamento-filter" class="form-control" autocomplete="off">
                 </div>
@@ -354,6 +358,8 @@
 
     function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
+        $("#loading-overlay").show();
+
         // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
         $('#salvarExecucao').prop('disabled',true)
 
@@ -456,8 +462,11 @@
                     
 
                         containerEquipamentos.append(novoInput);
-                        equip_num = 1
-                        equip_num++
+                        if(equip_num === ''){
+                            equip_num = 2
+                        } else{
+                            equip_num++
+                        }
                         
                         configurarDropdown('equipamentoSolicitado_'+index, 'listCodigo'+index)
 
@@ -487,14 +496,15 @@
                         }
 
                     });
-
+                    
                 });
 
-                
+                $("#loading-overlay").hide();
             },
             error: function(error) {
                 // hideLoading();
-                alert('Erro ao abir o modal de execução, solicite assistência');
+                alert('Erro ao abrir o modal de edição, solicite assistência');
+                $("#loading-overlay").hide();
                 console.log(error);
             }
         })
@@ -801,7 +811,7 @@
 
 <!-- FILTROS -->
 <script>
-
+    var dataFilter = document.getElementById('data-filter');
     var funcionarioFilter = document.getElementById('funcionario-filter');
     var solicitanteFilter = document.getElementById('solicitante-filter');
     var equipamentoFilter = document.getElementById('equipamento-filter');
@@ -813,6 +823,7 @@
         $('#dataTable').DataTable().destroy();
 
         // Obtém os valores dos filtros
+        let dataFilterValue = dataFilter.value.toLowerCase();
         let funcionarioFilterValue = funcionarioFilter.value.toLowerCase();
         let solicitanteFilterValue = solicitanteFilter.value.toLowerCase();
         let equipamentoFilterValue = equipamentoFilter.value.toLowerCase();
@@ -831,6 +842,7 @@
         });
 
         // Aplica a filtragem para cada coluna
+        table.columns(0).search(dataFilterValue).draw();
         table.columns(1).search(funcionarioFilterValue).draw();
         table.columns(2).search(solicitanteFilterValue).draw();
         table.columns(4).search(equipamentoFilterValue).draw();
@@ -841,6 +853,7 @@
         // Atualiza a exibição da linha conforme necessário
         table.rows().every(function () {
             let shouldDisplay =
+                this.data()[0].toLowerCase().includes(dataFilterValue) &&
                 this.data()[1].toLowerCase().includes(funcionarioFilterValue) &&
                 this.data()[2].toLowerCase().includes(solicitanteFilterValue) &&
                 this.data()[4].toLowerCase().includes(equipamentoFilterValue) &&
@@ -857,6 +870,7 @@
         return visibleRows;
     }
 
+    dataFilter.addEventListener('input', applyFilters);
     funcionarioFilter.addEventListener('input', applyFilters);
     solicitanteFilter.addEventListener('input', applyFilters);
     equipamentoFilter.addEventListener('input', applyFilters);

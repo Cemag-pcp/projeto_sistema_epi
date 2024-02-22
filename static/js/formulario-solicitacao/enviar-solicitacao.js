@@ -144,14 +144,18 @@ function enviarSolicitacao() {
 
     // Verifique se pelo menos um botão de rádio foi marcado em algum grupo
     if (!radioMarcado) {
-        alert("Selecione uma opção de rádio em cada grupo");
+        alert("Selecione uma opção de rádio em cada grupo")
+        // exibirMensagem("aviso","Selecione uma opção de rádio em cada grupo")
+        $("#loading-overlay").hide();
         document.getElementById('btnEnviarSolicitacao').disabled = false;
         return;
     }
 
     // Se algum campo estiver em branco, pare o loop
     if (campoEmBrancoEncontrado) {
-        alert("Preencha todos os campos");
+        alert("Preencha todos os campos")
+        // exibirMensagem("aviso","Preencha todos os campos")
+        $("#loading-overlay").hide();
         document.getElementById('btnEnviarSolicitacao').disabled = false;
         return;
     }
