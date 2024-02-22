@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify,redirect, url_for,flash,session
 import datetime
+import warnings
 import pandas as pd
 import psycopg2  # pip install psycopg2
 import psycopg2.extras 
@@ -16,6 +17,8 @@ DB_HOST = "database-2.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
+
+warnings.filterwarnings("ignore")
 
 def login_required(func): # Lógica do parâmetro de login_required, onde escolhe quais páginas onde apenas o usuário logado pode acessar
     @wraps(func)
@@ -84,6 +87,9 @@ def pagina_inicial():
 
     tb_solicitacoes = pd.read_sql_query(s, conn)
 
+    tb_solicitacoes['data_solicitada'] = pd.to_datetime(tb_solicitacoes['data_solicitada'])
+    tb_solicitacoes['data_solicitada'] = tb_solicitacoes['data_solicitada'].dt.strftime('%d/%m/%Y')
+
     sql = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios"
     
     tb_sql = pd.read_sql_query(sql, conn)
@@ -97,16 +103,14 @@ def pagina_inicial():
     tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].astype(str)
     tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].replace(mapeamento)
 
-    tb_solicitacoes = tb_solicitacoes.sort_values(by=['id','id_solicitacao'])
-
     # Agrupar pelo id_solicitacao e manter apenas a primeira linha de cada grupo
     tb_solicitacoes = tb_solicitacoes.groupby('id_solicitacao').first().reset_index()
 
-    tb_solicitacoes = tb_solicitacoes.values.tolist()
+    tb_solicitacoes = tb_solicitacoes.sort_values(by='id', ascending=False)
 
-    print(tb_solicitacoes)
+    tb_solicitacoes_list = tb_solicitacoes.values.tolist()
 
-    return render_template('home.html',tb_solicitacoes=tb_solicitacoes)
+    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list)
 
 @app.route('/receber-assinatura', methods=['POST'])
 @login_required
@@ -151,23 +155,17 @@ def dados_execucao():
     query = f"""
                 SELECT
                     solic.*,
-                    hist.status,
-                    ass.assinatura,ass.data_assinatura
+                    ass.data_assinatura
                 FROM sistema_epi.tb_solicitacoes AS solic
-                    LEFT JOIN (
-                    SELECT
-                        id_solicitacao,
-                        status,
-                        ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
-                    FROM sistema_epi.tb_historico_solicitacoes
-                    ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
-                    LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
-                    WHERE solic.id_solicitacao = '{id_solicitante}';
+                LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
+                WHERE solic.id_solicitacao = '{id_solicitante}'
+                ORDER BY id asc;
             """
     
     query_solicitacoes = f"""SELECT id,codigo_item,quantidade,motivo  
                          FROM sistema_epi.tb_solicitacoes
-                         WHERE id_solicitacao = '{id_solicitante}';"""
+                         WHERE id_solicitacao = '{id_solicitante}'
+                         ORDER BY id asc;"""
 
     cur.execute(query)
     info_gerais = cur.fetchall()
@@ -180,8 +178,7 @@ def dados_execucao():
         'matricula': info_gerais[-1][2],
         'funcionario': info_gerais[-1][7],
         'data_solicitacao': info_gerais[0][8],
-        'data_assinado': info_gerais[-1][11],
-        'status': info_gerais[-1][9]
+        'data_assinado': info_gerais[-1][9],
     }
 
     equipamentos = []
@@ -247,6 +244,8 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
     for item in campos_solicitacao:
         # Adicionar as novas chaves e valores
         item.update(novos_campos)
+    
+    print(campos_solicitacao)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                     password=DB_PASS, host=DB_HOST)
@@ -260,6 +259,8 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
         quantidade = list(item.values())[2]
         motivo = list(item.values())[4]
         matricula_recebedor = list(item.values())[3].split()[0]
+
+        print(id_solicitacao, matricula_solicitante, codigo, quantidade, motivo,matricula_recebedor)
 
         sql = """INSERT INTO sistema_epi.tb_solicitacoes 
             (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe)
@@ -293,6 +294,8 @@ def input_tb_historico(id_solicitacao):
     # Iterar sobre os dados e inserir no banco de dados
     # for item in campos_solicitacao:
     status = 'Aguardando Assinatura'
+
+    print(id_solicitacao, status)
 
     sql = """INSERT INTO sistema_epi.tb_historico_solicitacoes 
         (id_solicitacao, status)
@@ -450,14 +453,92 @@ def buscar_vida_util():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
     dados = request.get_json()
-    print(dados)
     cur.execute('select vida_util from sistema_epi.tb_itens')
     vida_util = cur.fetchone()
 
-    print(vida_util)
-
     return jsonify(vida_util)
 
+@app.route('/alterar-dados', methods=['POST'])
+def alterar_dados():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    try:
+        # Recebe os dados do corpo da solicitação como JSON
+        dados = request.get_json()
+
+        # Acesse os dados específicos, por exemplo, os equipamentos
+        equipamentos = dados.get('equipamentos', [])
+        id_solicitacao = equipamentos[0]['id_solicitacao']
+        print(id_solicitacao)
+
+        query_assinatura = f"""DELETE
+                FROM sistema_epi.tb_assinatura
+                WHERE id_solicitacao = '{id_solicitacao}'"""
+        
+        cur.execute(query_assinatura)
+
+        input_tb_historico(id_solicitacao)
+
+        # Faça algo com os dados, como salvá-los no banco de dados
+        for equipamento in equipamentos:
+            idExecucao = equipamento.get('idExecucao')
+            equipamento_nome = equipamento.get('equipamento')
+            quantidade = equipamento.get('quantidade')
+            motivo = equipamento.get('motivo')
+
+            cur.execute(""" UPDATE sistema_epi.tb_solicitacoes
+                    SET codigo_item=%s, quantidade=%s, motivo=%s
+                    WHERE id = %s
+                    """, (equipamento_nome, quantidade, motivo, idExecucao))
+            
+            print(idExecucao,equipamento_nome,quantidade,motivo)
+
+            conn.commit()
+            
+        conn.close()
+
+            # Responda ao cliente
+        return jsonify({'mensagem': 'Dados recebidos com sucesso!'})
+
+    except Exception as e:
+        return jsonify({'erro': str(e)}), 500
+
+@app.route('/excluir-solicitacao', methods=['POST'])
+@login_required
+def excluir_solicitacao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    id_solicitacao = data['id_solicitacao']
+
+    query_solicitacao = f"""DELETE FROM sistema_epi.tb_solicitacoes
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_solicitacao)
+
+    query_historico = f"""DELETE FROM sistema_epi.tb_historico_solicitacoes
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_historico)
+
+    query_assinatura = f"""DELETE FROM sistema_epi.tb_assinatura
+            WHERE id_solicitacao = '{id_solicitacao}';
+            """
+    
+    cur.execute(query_assinatura)
+
+    conn.commit()
+    conn.close()
+
+    return 'Dados recebidos com sucesso!'
 
 if __name__ == '__main__':
     app.run(debug=True)
