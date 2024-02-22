@@ -540,5 +540,11 @@ def excluir_solicitacao():
 
     return 'Dados recebidos com sucesso!'
 
+@app.route('/historico', methods=['GET'])
+@login_required
+def historico():
+
+    return render_template('historico.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
