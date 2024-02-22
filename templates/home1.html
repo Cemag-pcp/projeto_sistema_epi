@@ -1,0 +1,795 @@
+{% extends 'base.html' %}
+
+{% block links %}
+    <!-- css datatable -->
+    <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+    
+    <!-- CSS do campo de assinatura -->
+    <link rel="stylesheet" href="/static/css/assinatura.css">
+
+    <!-- CSS dropdown inputs -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+
+{% endblock %}
+
+{% block container %}
+<div class="container-fluid">
+
+    <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Tables</h1>
+    <p class="mb-4">DataTables is a third party plugin that is used to generate the demo table below.
+        For more information about DataTables, please visit the <a target="_blank"
+            href="https://datatables.net">official DataTables documentation</a>.</p>
+
+    <!-- DataTales Example -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Solicitante</th>
+                            <th>Quantidade</th>
+                            <th>Equipamento</th>
+                            <th>Assinatura</th>
+                            <th>Status</th>
+                            <th>Motivo</th>
+                            <th>Setor</th>
+                            <th>Data</th>
+                            <th>Opções</th>
+                        </tr>
+                    </thead>
+                    <tfoot>
+                        <tr>
+                            <th>Funcionário</th>
+                            <th>Solicitante</th>
+                            <th>Quantidade</th>
+                            <th>Equipamento</th>
+                            <th>Assinatura</th>
+                            <th>Status</th>
+                            <th>Motivo</th>
+                            <th>Setor</th>
+                            <th>Data</th>
+                            <th>Opções</th>
+                        </tr>
+                    </tfoot>
+                    <tbody>
+                        {% for row in tb_solicitacoes %}
+                        <tr>
+                            <td>{{row[7]}}</td>
+                            <td>{{row[2]}}</td>
+                            <td>{{row[4]}}</td>
+                            <td>{{row[3]}}</td>
+                            {% if row[10] == None %}
+                            <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                            {% else %}
+                            <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
+                            {% endif %}
+                            <td>{{row[9]}}</td>
+                            <td>{{row[5]}}</td>
+                            <td>{{row[6]}}</td>
+                            <td>{{row[8]}}</td>
+                            <td style="align-items: center;">
+                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
+                                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
+                                        <i class="fa-solid fa-angle-down"></i>
+                                    </a>
+                                    <!-- </button> -->
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                        <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[10] }}','{{ row[1] }}')"> 
+                                            <i class="fa-solid fa-pencil"></i> Editar
+                                        </a>
+                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
+                                            <i class="fa-solid fa-pencil"></i> Editar
+                                        </a> -->
+                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
+                                            <i class="fas fa-clock"></i> Histórico 
+                                        </a> -->
+                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[0] }}')"> 
+                                            <i class="fas fa-trash"></i> Excluir 
+                                        </a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal edição de execução -->
+<div class="modal fade" data-backdrop="static" id="modalExecutarSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalExecutarSolicitacaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                <h5 class="modal-title" id="numeroOrdem_edicao">Edição</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="overflow-y: auto; height: 550px;">
+                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
+                <hr>
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label>Data da solicitação:</label>
+                        <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
+                    </div>
+                    <div class="col-sm-4 mb-2">
+                        <div class="info_data">
+                            <label>Data de Entrega</label>
+                        </div>
+                        <input type="datetime" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 mb-2">
+                        <label>Solicitante</label>
+                        <input type="text" class="form-control" id="solicitante_execucao" disabled>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 mb-2">
+                        <label>Funcionário</label>
+                        <input type="text" class="form-control" id="funcionario_execucao" disabled>
+                    </div>
+                </div>
+                <div id="containerEquipamentos">
+                    
+                </div>
+            </div> 
+            <div class="modal-footer">
+                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal assinatura -->
+<div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog" aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-md" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                <h5 class="modal-title" id="numeroOrdem_edicao">Editar</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h6 class="m-0 font-weight-bold text-primary">Assinatura</h6>
+                <hr>
+                <div class="wrapper">
+                    <img class="imagem-responsiva" width=300 height=200/>
+                    <canvas id="signature-pad" class="signature-pad" width=300 height=200></canvas>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mt-4">
+                        <button class="btn btn-secondary btn-block" id="clear">Clear</button>
+                    </div>
+                    <div class="col-sm-6 mt-4">
+                        <button class="btn btn-primary btn-block"  id="save">Save</button>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+</div>
+
+<!-- Modal timeline -->
+<div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 700px; overflow-y: auto;">
+                <div class="list-group" id="listaHistorico">
+                    
+                </div>
+            </div>
+            <div class="modal-footer">
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para excluir maquina -->
+<div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="TituloModalCentralizado">
+                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                    Atenção
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mensagem"></div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- script para datatable -->
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Plugin icons -->
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+<!-- Plugin assinatura -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
+
+<!-- script com a construção das tabelas -->
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script menssagem -->
+<script src="/static/js/mensagem.js"></script>
+
+<script>
+
+    $('#modalExecutarSolicitacao').on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    // Remove a classe ao fechar o modal
+    $('#modalExecutarSolicitacao').on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    $('#modalAssinatura').on('show.bs.modal', function () {
+        $('body').addClass('modal-open');
+    });
+
+    // Remove a classe ao fechar o modal
+    $('#modalAssinatura').on('hidden.bs.modal', function () {
+        $('body').removeClass('modal-open');
+    });
+
+    function calcularPrevisaoEntrega(item, dataEntrega, callback) {
+        var vidaUtil;
+
+        $.ajax({
+            url: '/vida-util',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'item': item }),
+            success: function (response) {
+                vidaUtil = response[0];
+
+                if (dataEntrega === null) {
+                    // Chama a função de retorno de chamada com uma string vazia
+                    callback('');
+                    return;
+                }
+
+                var dataEntregaObj = new Date(dataEntrega);
+
+                // Adiciona 365 dias úteis à data de entrega
+                var previsaoEntregaObj = adicionarDiasUteis(dataEntregaObj, vidaUtil);
+
+                // Formata a data de previsão de entrega
+                var previsaoEntregaFormatada = formatarDataBr(previsaoEntregaObj);
+
+                // Chama a função de retorno de chamada com a previsão de entrega
+                callback(previsaoEntregaFormatada);
+            },
+            error: function () {
+                console.log('Item não encontrado');
+                // Chama a função de retorno de chamada com um valor padrão ou indicador de erro
+                callback(null);
+            }
+        });
+    }
+
+    // Função para adicionar dias úteis a uma data
+    function adicionarDiasUteis(data, dias) {
+        var dataTemp = new Date(data);
+        var diasAdicionados = 0;
+
+        while (diasAdicionados < dias) {
+            dataTemp.setDate(dataTemp.getDate() + 1);
+
+            // Verifica se o dia adicionado não é um sábado (6) ou domingo (0)
+            if (dataTemp.getDay() !== 0 && dataTemp.getDay() !== 6) {
+                diasAdicionados++;
+            }
+        }
+
+        return dataTemp;
+    }
+
+    function modalExecucao(id_solicitante,assinatura,id) {
+
+        // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
+        
+        $.ajax({
+            url:'/dados-execucao',
+            type:'POST',
+            dataType:'json',
+            contentType:'application/json',
+            data: JSON.stringify({ 'id_solicitante': id_solicitante }),  // Enviando um objeto JSON
+            success: function(response) {
+                
+                console.log(response);
+
+                $('.info_data button').empty()
+                $('.info_previsao button').empty()
+
+                $('#modalExecutarSolicitacao').modal('show');
+                $('.info_data').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Data de entrega só exibirá após a assinatura">
+                                                <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
+                                            </button>`)
+
+                if (response.status === 'Aguardando Assinatura') {
+
+                    $('#data_entrega_execucao').val('');
+                    $('#previsao_entrega_execucao').val('');
+                } else {
+                    $('#data_entrega_execucao').val(formatarDataBr(response.data_assinado));
+
+                    // Atribui o valor calculado ao campo #previsao_entrega_execucao
+                    // $('#previsao_entrega_execucao').val(previsaoEntrega);
+                }
+
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
+
+                // Preencher os campos do formulário com as informações gerais
+                $('#dataSolicitacao').val(formatarDataBr(response.data_solicitacao));
+                $('#funcionario_execucao').val(response.funcionario);
+                $('#setor_execucao').val(response.setor);
+                $('#solicitante_execucao').val(response.matricula);
+                
+
+                // Adicionar campos de entrada para cada equipamento
+                var containerEquipamentos = $('#containerEquipamentos');
+                containerEquipamentos.empty();
+                let equip_num = '';
+                response.equipamentos.forEach(function(equipamento, index) {
+
+                    // var data_previsao;
+                    calcularPrevisaoEntrega(equipamento, response.data_assinado, function (previsao) {
+                        // data_previsao = previsao;
+                        var novoInput = `
+                        <hr>
+                        <h6 class="m-0 font-weight-bold text-primary">Equipamento `+ equip_num +`</h6>
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-2 mb-2">
+                                <label>Id</label>
+                                <input type="text" class="form-control" id="id_execucao`+ index +`" value="` + equipamento.id + `" autocomplete="off" disabled> 
+                            </div>
+                            <div class="col-sm-10 mb-2">
+                                <label>Equipamento</label>
+                                <input type="text" class="form-control" id="equipamentoSolicitado`+ index +`" value="` + equipamento.codigo + `" autocomplete="off"> 
+                                <ul class="dropdown-list" id="listCodigo` + index + `">
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4 mb-2">
+                                <label>Quantidade</label>
+                                <input type="number" class="form-control" id="quantidade_execucao`+ index +`" value="` + equipamento.quantidade + `" autocomplete="off"> 
+                            </div>
+                            <div class="col-sm-4">
+                                <label>Motivo:</label>
+                                <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivo_execucao`+ index +`">
+                                <option value="` + equipamento.motivo + `" selected disabled hidden>` + equipamento.motivo + `</option>
+                                <option value="Entrega">Entrega</option>
+                                <option value="Substituição">Substituição</option>
+                                <option value="Perda">Perda</option>
+                                <option value="Dano">Dano</option>
+                                <option value="Vencimento">Vencimento</option>
+                                <option value="Furto">Furto</option>
+                            </select>
+                            </div>
+                            
+                            <div class="col-sm-4 mb-2">
+                                <div class="info_previsao">
+                                    <label>Previsão de troca</label>
+                                </div>
+                                <input type="datetime" class="form-control" id="previsao_entrega_execucao`+index+`" value="`+previsao+`" autocomplete="off" disabled> 
+                            </div>
+                            
+                        </div>`;
+                    
+
+                        containerEquipamentos.append(novoInput);
+                        equip_num = 1
+                        equip_num++
+                        
+                        configurarDropdown('equipamentoSolicitado'+index, 'listCodigo'+index)
+
+                        var inputCodigo = document.getElementById('equipamentoSolicitado' + index);
+                        var listCodigo = document.getElementById('listCodigo'+index);
+
+                        inputCodigo.addEventListener('click', function() {
+                            carregarItens(listCodigo);
+                        });
+
+                        inputCodigo.addEventListener('focus', function() {
+                            carregarItens(listCodigo);
+                        });
+
+                    });
+                    
+
+                });
+                
+                $('.info_previsao').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Previsão de troca só exibirá após a assinatura">
+                                                    <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
+                                                </button>`)
+            },
+            error: function(error) {
+                // hideLoading();
+                alert('Erro ao abir o modal de execução, solicite assistência');
+                console.log(error);
+            }
+        })
+
+    }
+
+    function modalAssinatura(nome_funcionario,id_solicitacao,id) {
+
+
+        $('#modalAssinatura .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
+
+        $('#modalAssinatura').modal('show');
+
+        console.log(id_solicitacao)
+
+        // TRATAMENTO PARA NÃO ENVIAR MAIS DE UMA REQUISIÇÃO
+        if (!signaturePad.calledOnce) {
+            signaturePad(id_solicitacao,id);
+
+            // Definir a variável de controle para indicar que a função foi chamada
+            signaturePad.calledOnce = true;
+        }
+
+    }
+
+    // CAMPO DE ENVIO DA ASSINATURA
+
+    function signaturePad(id_solicitacao,id) {
+
+        var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'rgb(0, 0, 0)'
+        });
+
+        var saveButton = document.getElementById('save');
+        var cancelButton = document.getElementById('clear');
+
+            
+        saveButton.addEventListener("click", function(event) {
+            if (signaturePad.isEmpty()) {
+                alert("Faça sua assinatura.");
+            } else {
+                // Desabilitar o botão para evitar múltiplos cliques
+                saveButton.disabled = true;
+
+                // Obter a data de hoje
+                var dataURL = signaturePad.toDataURL();
+
+                // Enviar o dataURL e a data para a rota /receber-assinatura usando a API Fetch
+                fetch('/receber-assinatura', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id_solicitacao: id_solicitacao,
+                        dataURL: dataURL
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Lidar com a resposta do servidor, se necessário
+                    exibirMensagem('sucesso', 'Salvo.')
+                    $('#modalAssinatura').modal('hide');
+                    console.log(data);
+                    window.location.reload();
+                });
+            }
+        });
+
+        cancelButton.addEventListener('click', function(event) {
+            signaturePad.clear();
+        });
+
+        $('#modalAssinatura').on('hidden.bs.modal', function () {
+            // Limpar o SignaturePad quando o modal é fechado
+            signaturePad.clear();
+        });
+    }
+    
+    function modalTimeline(id_solicitacao,codigo_item,funcionario) {
+        
+        $.ajax({
+            url: '/timeline',
+            type: 'POST',  // Alterado para POST
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),  // Enviando um objeto JSON
+            success: function(response) {
+                // Limpar conteúdo atual da lista
+                $('#listaHistorico').empty();
+
+                $('#modalTimeline').modal('show');
+
+                // Seus dados fornecidos
+                var dados = response[1]; // Certifique-se de ajustar conforme a estrutura real da resposta
+                console.log(dados);
+                console.log(response);
+                
+                // Loop pelos dados e gerar elementos da lista
+                for (var i = 0; i < dados.length; i++) {
+                    var item = dados[i];
+                    var listItem = document.createElement('a');
+                    listItem.className = 'list-group-item list-group-item-action';
+                    // listItem.href = '#';
+                    listItem.setAttribute('aria-current', 'true');
+
+                    if (item[0] === 0) {
+                        var content = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${item[3]}</h5>
+                            <div class="d-flex flex-column align-items-end">
+                                <small>Matrícula do funcionário: ${funcionario}</small>
+                                <small>Exec.: ${i}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                            </div> 
+                        </div>    
+                    `;
+                    } else {
+                        var content = `
+                        <div class="d-flex w-100 justify-content-between">
+                            <h5 class="mb-1">${item[3]}</h5>
+                            <div class="d-flex flex-column align-items-end">
+                                <small>Matrícula do funcionário: ${funcionario}</small>
+                                <small>Exec.: ${i}</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1" style="font-size: small;"><strong>Data: </strong>${formatarDataBr(item[2])}</p>
+                            </div> 
+                        </div>                       
+                    `;
+                    }
+
+                    listItem.innerHTML = content;
+    
+                    // Use addEventListener para lidar com o clique
+                    (function(itemValue) {
+                        $(listItem).on('click', function() {
+                            // Chamar a função apenas uma vez
+                            itensParaEditar(id_ordem, itemValue);
+                        });
+                    })(item[0]);
+                    
+                    document.getElementById('listaHistorico').appendChild(listItem);
+                }
+            
+            },
+            error: function(error) {
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
+    }
+
+    function modalExcluirSolicitacao(id_solicitante) {
+
+        $('#modalExcluirSolicitacao .modal-body').text('Tem certeza que quer remover essa solicitação de EPI '  + id_solicitante + ' ? ');
+
+        $('#modalExcluirSolicitacao').modal('show');
+
+    }
+
+    function formatarDataBr(dataString) {
+        // Cria um objeto Date a partir da string
+        var data = new Date(dataString);
+        
+        // Obtém os componentes da data
+        var dia = data.getDate();
+        var mes = data.getMonth() + 1; // Adiciona 1 porque os meses são indexados a partir de 0
+        var ano = data.getFullYear(); // Obtém os últimos dois dígitos do ano
+        // var hora = data.getHours();
+        // var minuto = data.getMinutes();
+        // var segundo = data.getSeconds();
+
+        // Formata a string com zero à esquerda para garantir dois dígitos para o dia, mês, hora, minuto e segundo
+        var formatoDesejado = `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}/${ano.toString()}`;
+
+        console.log(formatoDesejado);
+
+        return formatoDesejado;
+    }
+
+</script>
+    
+<script>
+
+    function download(dataURL, filename) {
+        if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
+            window.open(dataURL);
+        } else {
+            var blob = dataURLToBlob(dataURL);
+            var url = window.URL.createObjectURL(blob);
+
+            var a = document.createElement("a");
+            a.style = "display: none";
+            a.href = url;
+            a.download = filename;
+
+            document.body.appendChild(a);
+            a.click();
+
+            window.URL.revokeObjectURL(url);
+        }
+    }
+
+    function dataURLToBlob(dataURL) {
+        var parts = dataURL.split(';base64,');
+        var contentType = parts[0].split(":")[1];
+        var raw = window.atob(parts[1]);
+        var rawLength = raw.length;
+        var uInt8Array = new Uint8Array(rawLength);
+
+        for (var i = 0; i < rawLength; ++i) {
+            uInt8Array[i] = raw.charCodeAt(i);
+        }
+
+        return new Blob([uInt8Array], { type: contentType });
+    }
+
+</script>
+
+<!-- Carrega dados de itens dentro do input -->
+<script>
+
+    function carregarItens(listCodigo) {
+        
+        // Verifica se os itens estão em cache
+        var itensCache = localStorage.getItem('itensCache');
+
+        if (itensCache) {
+            // Se estiver em cache, utiliza os dados do cache
+            atualizarLista(JSON.parse(itensCache),listCodigo);
+        } else {
+            // Caso contrário, faz a solicitação AJAX
+            $.ajax({
+                url: '/itens',
+                type: 'GET',
+                success: function (data) {
+                    // Atualiza o menu de máquinas com as opções retornadas do servidor
+                    console.log(data);
+                    // Adiciona os itens à lista
+
+                    // Atualiza o cache com os novos dados
+                    localStorage.setItem('itensCache', JSON.stringify(data));
+
+                    atualizarLista(data);
+                }
+            });
+        }
+    }
+
+    function atualizarLista(itens,listCodigo) {
+        listCodigo.innerHTML = '';
+
+        itens.forEach(function (item) {
+            var li = document.createElement('li');
+            li.textContent = item;
+            listCodigo.appendChild(li);
+        });
+    }
+
+</script>
+
+<!-- Criar listas dentro do input -->
+<script>
+    // Cria listas dentro do input
+    function configurarDropdown(inputId, listId) {
+        var inputDropdown = document.getElementById(inputId);
+        var listaDropdown = document.getElementById(listId);
+        var itens = listaDropdown.getElementsByTagName('li');
+        var valorAnterior = "";
+
+        inputDropdown.addEventListener('focus', function () {
+            if (inputDropdown.readOnly) {
+                listaDropdown.style.display = 'none';
+            } else {
+                listaDropdown.style.display = 'block';
+                listaDropdown.innerHTML = '';
+            }
+        });
+
+        inputDropdown.addEventListener('blur', function () {
+            // Aguarde um curto período antes de ocultar a lista para permitir que o clique no item seja processado
+            setTimeout(function () {
+                if (!correspondeAItem()) {
+                    // Se o valor não corresponder a um item na lista, redefina para o valor anterior
+                    inputDropdown.value = valorAnterior;
+                }
+                listaDropdown.style.display = 'none';
+            }, 200);
+        });
+
+        listaDropdown.addEventListener('click', function (event) {
+            if (event.target.tagName === 'LI') {
+                valorAnterior = event.target.textContent;
+                inputDropdown.value = valorAnterior;
+
+                // Oculte a lista após um pequeno atraso para garantir que o valor do input seja atualizado antes
+                setTimeout(function () {
+                    listaDropdown.style.display = 'none';
+                }, 100);
+            }
+        });
+
+        inputDropdown.addEventListener('input', function () {
+            var input = this.value.trim().toLowerCase();
+            var itens = listaDropdown.getElementsByTagName('li');
+
+            for (var i = 0; i < itens.length; i++) {
+                var textoItem = itens[i].textContent.toLowerCase();
+                var itemVisivel = textoItem.indexOf(input) > -1;
+                itens[i].style.display = itemVisivel ? 'block' : 'none';
+            }
+
+            // Exiba a lista apenas se houver correspondência com os itens
+            var correspondenciaItens = Array.from(itens).some(function (item) {
+                var textoItem = item.textContent.toLowerCase();
+                var itemVisivel = textoItem.includes(input);
+                item.style.display = itemVisivel ? 'block' : 'none';
+                return itemVisivel;
+            });
+
+            listaDropdown.style.display = correspondenciaItens ? 'block' : 'none';
+        });
+
+        function correspondeAItem() {
+            var input = inputDropdown.value.trim().toLowerCase();
+            return Array.from(itens).some(function (item) {
+                return item.textContent.toLowerCase() === input;
+            });
+        }
+    
+    }
+    // Fim criar lista dentro de input
+</script>
+
+{% endblock %}
