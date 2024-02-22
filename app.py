@@ -392,10 +392,7 @@ def rota_solicitacao_material():
 @app.route('/dashboard', methods=['GET','POST'])
 def dashboard():
 
-    """
-    Rota para de solicitação de material
-    """
-
+    
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('dashboard.html')
 
@@ -540,11 +537,78 @@ def excluir_solicitacao():
 
     return 'Dados recebidos com sucesso!'
 
-@app.route('/historico', methods=['GET'])
+@app.route('/historico', methods=['GET','POST'])
 @login_required
 def historico():
 
-    return render_template('historico.html')
+    if request.method == 'POST':
+
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        data = request.get_json()
+
+        matricula = data['matricula']
+
+        query_historico = f"SELECT * FROM sistema_epi.tb_solicitacoes WHERE funcionario_recebe = '{matricula}'"
+
+        cur.execute(query_historico)
+        
+        historicos = cur.fetchall()
+
+        return jsonify(historicos)
+
+    else:
+        conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # QUERY PARA EXIBIR APENAS OS FUNCIONARIOS QUE ESTÃO NO tb_solicitacoes
+
+        query_funcionarios = """SELECT DISTINCT funcionario_completo
+                                    FROM (
+                                        SELECT CONCAT(s.funcionario_recebe, ' - ', f.nome) AS funcionario_completo, s.*
+                                        FROM sistema_epi.tb_solicitacoes s
+                                        JOIN requisicao.funcionarios f ON s.funcionario_recebe = f.matricula
+                                    ) AS subconsulta
+                              """
+        
+        cur.execute(query_funcionarios)
+        
+        funcionarios = cur.fetchall()
+    
+    return render_template('historico.html',funcionarios=funcionarios)
+    
+@app.route('/pegar-assinatura', methods=['GET'])
+@login_required
+def pegar_assinatur():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    consulta = "SELECT id_solicitacao, assinatura, data_assinatura FROM sistema_epi.tb_assinatura"
+    cur.execute(consulta)
+    resultados = cur.fetchall()
+
+    # 2. Extrair os dados da consulta
+    dados_assinatura = []
+    for resultado in resultados:
+        id_solicitacao, assinatura_memoryview, data_assinatura = resultado
+        
+        # Converter memoryview para bytes e, em seguida, decodificar
+        assinatura_bytes = bytes(assinatura_memoryview)
+        assinatura_legivel = assinatura_bytes.decode('utf-8')  # ou outro método apropriado
+
+        # Adicione os dados a uma lista
+        dados_assinatura.append({
+            'id_solicitacao': id_solicitacao,
+            'assinatura': assinatura_legivel,
+            'data_assinatura': data_assinatura
+        })
+
+    return 'sucess'
 
 if __name__ == '__main__':
     app.run(debug=True)

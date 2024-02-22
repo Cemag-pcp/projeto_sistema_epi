@@ -14,10 +14,33 @@
 
 {% block container %}
 <div class="container-fluid">
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+          <h6 class="m-0 font-weight-bold text-primary">Pesquisar</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+              <div class="col-md-6 mb-4">
+                <label for="data_filtro">Funcionário:</label>
+                <select class="form-control" id="funcionario-historico">
+                    <option value="" selected hidden disabled></option>
+                    {% for funcionario in funcionarios %}
+                    <option value="{{funcionario[0]}}">{{funcionario[0]}}</option>
+                    {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6 mb-4">
+                <label for="data_filtro">Data:</label>
+                <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
+              </div>
+            </div>
+            <button type="submit" id="filtrar_historico" class="btn btn-primary">Filtrar</button>
+        </div>
+      </div>
 
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Tabela de Solicitações</h1>
-    <p class="mb-4">Tabela principal para visualizar as solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
+    <h1 class="h3 mb-2 text-gray-800">Histórico de Solicitações</h1>
+    <p class="mb-4">Tabela para visualizar o histórico de solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
@@ -53,168 +76,18 @@
                         </tr>
                     </tfoot>
                     <tbody>
-                        {% for row in tb_solicitacoes_list %}
                         <tr>
-                            <td style="max-width: 100px;">{{row[8]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[7]}}" style="max-width: 150px; cursor: default;">{{row[7]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}" style="max-width: 150px; cursor: default;">{{row[2]}}</td>
-                            <td>{{row[4]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}" style="max-width: 200px; cursor: default;">{{row[3]}}</td>
-                            {% if row[10] == None %}
-                            <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
-                            {% else %}
-                            <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
-                            {% endif %}
-                            <td>{{row[5]}}</td>
-                            <td style="align-items: center;">
-                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
-                                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
-                                        <i class="fa-solid fa-angle-down"></i>
-                                    </a>
-                                    <!-- </button> -->
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[7] }}','{{ row[2] }}')"> 
-                                            <i class="fa-solid fa-pencil"></i> Editar
-                                        </a>
-                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
-                                            <i class="fa-solid fa-pencil"></i> Editar
-                                        </a> -->
-                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
-                                            <i class="fas fa-clock"></i> Histórico 
-                                        </a> -->
-                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[7] }}','{{ row[0] }}')"> 
-                                            <i class="fas fa-trash"></i> Excluir 
-                                        </a>
-                                    </div>
-                                </div>
-                            </td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         </tr>
-                        {% endfor %}
                     </tbody>
                 </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal edição de execução -->
-<div class="modal fade" data-backdrop="static" id="modalExecutarSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalExecutarSolicitacaoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao">Edição</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="overflow-y: auto; height: 550px;">
-                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <label>Data da solicitação:</label>
-                        <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-8 mb-2">
-                        <label>Solicitante</label>
-                        <input type="text" class="form-control" id="solicitante_execucao" disabled>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <div class="info_data">
-                            <label>Data de Entrega</label>
-                        </div>
-                        <input type="datetime" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
-                    </div>
-                    <div class="col-sm-8 mb-2">
-                        <label>Funcionário</label>
-                        <input type="text" class="form-control" id="funcionario_execucao" disabled>
-                    </div>
-                </div>
-                <div id="containerEquipamentos">
-                    
-                </div>
-            </div> 
-            <div class="modal-footer">
-                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Assinatura -->
-<div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog" aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao">Editar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <h6 class="m-0 font-weight-bold text-primary">Assinatura</h6>
-                <hr>
-                <div class="wrapper">
-                    <img class="imagem-responsiva" width=300 height=200/>
-                    <canvas id="signature-pad" class="signature-pad" width=300 height=200></canvas>
-                </div>
-                <div class="row">
-                    <div class="col-sm-6 mt-4">
-                        <button class="btn btn-secondary btn-block" id="clear">Clear</button>
-                    </div>
-                    <div class="col-sm-6 mt-4">
-                        <button class="btn btn-primary btn-block"  id="save">Save</button>
-                    </div>
-                </div>
-            </div> 
-        </div>
-    </div>
-</div>
-
-<!-- Modal timeline -->
-<div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="height: 700px; overflow-y: auto;">
-                <div class="list-group" id="listaHistorico">
-                    
-                </div>
-            </div>
-            <div class="modal-footer">
-                
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal para excluir maquina -->
-<div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="TituloModalCentralizado">
-                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
-                    Atenção
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
             </div>
         </div>
     </div>
@@ -240,5 +113,101 @@
 
 <!-- Script menssagem -->
 <script src="/static/js/mensagem.js"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<script>
+
+    function historicoFuncionario(funcionario) {
+
+        funcionario = funcionario.split(" - ");
+
+        matricula = funcionario[0]
+
+        $.ajax({
+            url: '/historico',
+            type: 'POST',
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'matricula': matricula }),
+            success: function (response) {
+                console.log(response)
+            },
+            error: function () {
+                console.log('Item não encontrado');
+                // Chama a função de retorno de chamada com um valor padrão ou indicador de erro
+            }
+        });
+    }
+
+    $('#filtrar_historico').one('click',function(){
+        funcionario = $('#funcionario-historico').val()
+        historicoFuncionario(funcionario)
+    })
+
+</script>
+
+<script>
+
+    $(function () {
+      const dataAtual = new Date();
+      const opcoesFormatacao = { day: 'numeric', month: '2-digit', year: 'numeric' };
+      const dataFormatada = dataAtual.toLocaleDateString('pt-BR', opcoesFormatacao);
+
+      var dataInicial = dataFormatada.split(" - ")[0];
+      var dataFinal = dataFormatada.split(" - ")[1];
+
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        autoUpdateInput: false,
+        startDate: moment(dataInicial, 'DD/MM/YYYY'),
+        endDate: moment(dataFinal, 'DD/MM/YYYY'),
+        locale: {
+          format: 'DD/MM/YYYY',
+          cancelLabel: 'Clear'
+        }
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+      });
+
+      $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+
+        if (endDate.isBefore(startDate)) {
+          alert("A data final não pode ser menor que a data inicial");
+          picker.setEndDate(startDate);
+        }
+      });
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // Obter o elemento de input
+      var inputElement = document.getElementById("inputDate1");
+
+      // Verificar se há um valor salvo no armazenamento local
+      var savedValue = localStorage.getItem("inputDate1");
+
+      // Se houver um valor salvo, definir o valor do input
+      if (savedValue !== null) {
+        inputElement.value = savedValue;
+      }
+
+      // Adicionar um ouvinte de evento para salvar o valor quando o usuário digitar
+      inputElement.addEventListener("input", function () {
+        // Salvar o valor no armazenamento local
+        localStorage.setItem("inputDate1", inputElement.value);
+      });
+    });
+  </script>
 
 {% endblock %}
