@@ -6,7 +6,7 @@ import psycopg2  # pip install psycopg2
 import psycopg2.extras 
 from functools import wraps
 from psycopg2.extras import execute_values
-from datetime import datetime
+from datetime import datetime,timedelta
 import cachetools
 import uuid
 
@@ -231,6 +231,7 @@ def gerar_id_solicitacao():
     """
 
     return str(uuid.uuid1())
+
 
 def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
     """
@@ -537,6 +538,42 @@ def excluir_solicitacao():
 
     return 'Dados recebidos com sucesso!'
 
+
+def condicao_historico(matricula, data_solicit,solicitante_historico):
+
+    consulta_padrao = """
+                    SELECT 
+                        f_solicitante.nome as nome_solicitante,
+                        s.codigo_item,
+                        s.quantidade,
+                        s.motivo,
+                        f.nome as nome_funcionario_recebe,
+                        s.data_solicitada
+                    FROM 
+                        sistema_epi.tb_solicitacoes s
+                    JOIN 
+                        requisicao.funcionarios f_solicitante ON s.matricula_solicitante = f_solicitante.matricula
+                    JOIN 
+                        requisicao.funcionarios f ON s.funcionario_recebe = f.matricula
+                    WHERE 1=1"""
+    
+    if matricula:
+        consulta_padrao += f" AND s.funcionario_recebe = '{matricula}'"
+    if data_solicit:
+        mes_inicial, mes_final = data_solicit.split(' - ')
+        mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
+        mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date() + timedelta(days=1)
+
+        mes_inicial_formatado = mes_inicial.strftime('%Y-%m-%d')
+        mes_final_formatado = mes_final.strftime('%Y-%m-%d')
+        consulta_padrao += f" AND s.data_solicitada >= '{mes_inicial_formatado}' AND s.data_solicitada <= '{mes_final_formatado}'"
+    if solicitante_historico:
+        consulta_padrao += f" AND s.matricula_solicitante = '{solicitante_historico}'"
+
+    consulta_padrao += ' ORDER BY s.id desc;'
+
+    return consulta_padrao
+
 @app.route('/historico', methods=['GET','POST'])
 @login_required
 def historico():
@@ -551,13 +588,30 @@ def historico():
 
         matricula = data['matricula']
 
-        query_historico = f"SELECT * FROM sistema_epi.tb_solicitacoes WHERE funcionario_recebe = '{matricula}'"
+        data_solicit = data['data']
 
+        solicitante_historico = data['solicitante_historico']
+
+        query_historico = condicao_historico(matricula,data_solicit,solicitante_historico)
+        
         cur.execute(query_historico)
         
         historicos = cur.fetchall()
 
-        return jsonify(historicos)
+        # Transformar a lista de listas em uma lista de dicionários
+        historicos_dicts = []
+        for historico in historicos:
+            historico_dict = {
+                'Solicitante': historico[0],
+                'Equipamento': historico[1],
+                'Quantidade': historico[2],
+                'Motivo': historico[3],
+                'Funcionario': historico[4],
+                'DataSolicitada': historico[5].strftime('%d/%m/%Y')  # Convertendo para uma string de data formatada
+            }
+            historicos_dicts.append(historico_dict)
+
+        return jsonify(historicos_dicts)
 
     else:
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -574,12 +628,33 @@ def historico():
                                     ) AS subconsulta
                               """
         
+        query_solicitante = """SELECT DISTINCT solicitante_completo
+                                    FROM (
+                                        SELECT CONCAT(s.matricula_solicitante, ' - ', f.nome) AS solicitante_completo, s.*
+                                        FROM sistema_epi.tb_solicitacoes s
+                                        JOIN requisicao.funcionarios f ON s.matricula_solicitante = f.matricula
+                                    ) AS subconsulta
+                              """
+        
         cur.execute(query_funcionarios)
         
         funcionarios = cur.fetchall()
+
+        cur.execute(query_solicitante)
+        
+        solicitantes = cur.fetchall()
     
-    return render_template('historico.html',funcionarios=funcionarios)
+    return render_template('historico.html',funcionarios=funcionarios,solicitantes=solicitantes)
     
+@app.route('/ficha', methods=['GET'])
+@login_required
+def ficha():
+
+    """Coleta de Informações necessária para a ficha de documentação"""
+
+    return render_template('ficha.html')
+
+# AINDA NÃO UTLIZADA, POREM VAI AJUDAR NA DOCUMENTAÇÃO
 @app.route('/pegar-assinatura', methods=['GET'])
 @login_required
 def pegar_assinatur():

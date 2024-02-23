@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block links %}
+
+    <!-- Dropdown input list -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+
+    <link rel="stylesheet" href="/static/css/assinatura.css">
+
+{% endblock %}
+
+{% block container %}
+
+<div class="row justify-content-center">
+    
+    <div class="col-md-12 col-lm-12 col-lg-12 col-xl-6">
+        <div class="card o-hidden border-0 shadow-sm my-5">
+            <div class="card-header">
+                <div class="text-center">
+                    <h1 class="h4 text-gray-900 mb-2 mt-2">Ficha de EPI</h1>
+                </div>
+            </div>
+            <div class="card-body" style="height:575px; overflow-y: auto;">
+                <!-- Nested Row within Card Body -->
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="p-5">
+                            <label for="inputQuantidade">Solicitante</label>
+                            <input type="text" class="form-control" id="inputQuantidade" name="nameQuantidade" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-footer">
+                <div class="row justify-content-between">
+                    <div class="col-6">
+                    </div>
+                    <div class="col-6">
+                        <button id="btnEnviarSolicitacao" type="submit" class="form-control btn btn-success">Emitir ficha</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="text" id="pegando_nome" value="{{nome}}" style="display: none;">
+
+{% endblock %}
+
+{% block scripts %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/populando-listas.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/clonando-populando.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
+
+{% endblock %}

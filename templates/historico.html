@@ -16,22 +16,31 @@
 <div class="container-fluid">
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-          <h6 class="m-0 font-weight-bold text-primary">Pesquisar</h6>
+          <h6 class="m-0 font-weight-bold text-primary">Filtros do Histórico</h6>
         </div>
         <div class="card-body">
             <div class="row">
-              <div class="col-md-6 mb-4">
-                <label for="data_filtro">Funcionário:</label>
+              <div class="col-md-4 mb-4">
+                <label for="data_filtro">Data:</label>
+                <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
+              </div>
+              <div class="col-md-4 mb-4">
+                <label for="funcionario-historico">Funcionário:</label>
                 <select class="form-control" id="funcionario-historico">
-                    <option value="" selected hidden disabled></option>
+                    <option value="" selected></option>
                     {% for funcionario in funcionarios %}
                     <option value="{{funcionario[0]}}">{{funcionario[0]}}</option>
                     {% endfor %}
                 </select>
               </div>
-              <div class="col-md-6 mb-4">
-                <label for="data_filtro">Data:</label>
-                <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
+              <div class="col-md-4 mb-4">
+                <label for="solicitante_historico">Solicitante:</label>
+                <select class="form-control" id="solicitante_historico">
+                    <option value="" selected></option>
+                    {% for solicitante in solicitantes %}
+                    <option value="{{solicitante[0]}}">{{solicitante[0]}}</option>
+                    {% endfor %}
+                </select>
               </div>
             </div>
             <button type="submit" id="filtrar_historico" class="btn btn-primary">Filtrar</button>
@@ -45,12 +54,11 @@
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
-            <hr>
+            <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="overflow-y: auto;max-height: 500px;">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="tableHistorico" width="100%" cellspacing="0">
                     <thead>
                         <tr>
                             <th>Data</th>
@@ -58,9 +66,7 @@
                             <th>Solicitante</th>
                             <th>Quantidade</th>
                             <th>Equipamento</th>
-                            <th>Assinatura</th>
                             <th>Motivo</th>
-                            <th>Opções</th>
                         </tr>
                     </thead>
                     <tfoot>
@@ -70,15 +76,11 @@
                             <th>Solicitante</th>
                             <th>Quantidade</th>
                             <th>Equipamento</th>
-                            <th>Assinatura</th>
                             <th>Motivo</th>
-                            <th>Opções</th>
                         </tr>
                     </tfoot>
                     <tbody>
                         <tr>
-                            <td></td>
-                            <td></td>
                             <td></td>
                             <td></td>
                             <td></td>
@@ -105,9 +107,6 @@
 <!-- Plugin icons -->
 <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 
-<!-- Plugin assinatura -->
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
-
 <!-- script com a construção das tabelas -->
 <script src="static/js/demo/datatables-demo.js"></script>
 
@@ -120,32 +119,84 @@
 
 <script>
 
-    function historicoFuncionario(funcionario) {
+      function criarLinha(row) {
+          return `
+          <tr>
+            <td style="max-width: 70px;">${row.DataSolicitada}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.Funcionario}" style="max-width: 70px; cursor: default;">${row.Funcionario}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.Solicitante}" style="max-width: 70px; cursor: default;">${row.Solicitante}</td>
+            <td>${row.Quantidade}</td>
+            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="${row.Equipamento}" style="max-width: 100px; cursor: default;">${row.Equipamento}</td>
+            <td>${row.Motivo}</td>
+          </tr>`;
+      }
 
-        funcionario = funcionario.split(" - ");
+      function atualizarTabela(historicos) {
+          // Limpar o conteúdo atual da tabela
+          $('#tableHistorico tbody').empty();
 
-        matricula = funcionario[0]
+          // Preencher a tabela com os dados do response
+          for (var i = 0; i < historicos.length; i++) {
+            var row = historicos[i];
+            var newRow = criarLinha(row);
+            $('#tableHistorico tbody').append(newRow);
+          }
+      }
 
-        $.ajax({
+      function historicoFuncionario(funcionario,data,solicitante_historico) {
+          $("#loading-overlay").show();
+          
+          if (funcionario !== null) {
+            funcionario = funcionario.split(" - ");
+            matricula = funcionario[0];
+            console.log(matricula)
+          } else {
+            matricula = ''
+          } 
+
+          console.log(solicitante_historico)
+
+          if (solicitante_historico !== null){
+            solicitante = solicitante_historico.split(" - ");
+            matricula_solicitante= solicitante[0];
+            
+          } else {
+            matricula_solicitante = ''
+          }
+          
+          
+          $.ajax({
             url: '/historico',
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',
-            data: JSON.stringify({ 'matricula': matricula }),
+            data: JSON.stringify({ 'matricula': matricula , 'data': data, 'solicitante_historico':matricula_solicitante}),
             success: function (response) {
-                console.log(response)
+                console.log('Response:', response);
+                atualizarTabela(response);
+                $(function () {
+                    $('[data-toggle="tooltip"]').tooltip()
+                })
+                $("#loading-overlay").hide();
             },
             error: function () {
-                console.log('Item não encontrado');
-                // Chama a função de retorno de chamada com um valor padrão ou indicador de erro
+              console.log('Item não encontrado');
+              $("#loading-overlay").hide();
+              // Tratar o erro de forma adequada (exibir mensagem para o usuário)
             }
-        });
-    }
+          });
+      }
 
-    $('#filtrar_historico').one('click',function(){
-        funcionario = $('#funcionario-historico').val()
-        historicoFuncionario(funcionario)
-    })
+      $('#inputDate1').on('focus',function(){
+        $('#inputDate1').val('')
+      })
+
+      $('#filtrar_historico').on('click', function () {
+          funcionario = $('#funcionario-historico').val();
+          data = $('#inputDate1').val();
+          solicitante_historico = $('#solicitante_historico').val();
+          historicoFuncionario(funcionario,data,solicitante_historico);
+      });
 
 </script>
 
