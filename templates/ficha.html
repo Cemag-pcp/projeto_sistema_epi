@@ -17,16 +17,30 @@
         <div class="card o-hidden border-0 shadow-sm my-5">
             <div class="card-header">
                 <div class="text-center">
-                    <h1 class="h4 text-gray-900 mb-2 mt-2">Ficha de EPI</h1>
+                    <h1 class="h4 text-gray-900 mb-2 mt-2">Ficha de EPI
+                        <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Selecione os filtros para o Relatório de Ficha de EPI dos Trabalhadores">
+                            <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: gray;"></i>
+                        </button>  
+                    </h1>
                 </div>
             </div>
-            <div class="card-body" style="height:575px; overflow-y: auto;">
-                <!-- Nested Row within Card Body -->
+            <div class="card-body" style="height:300px; overflow-y: auto;">
                 <div class="row">
-                    <div class="col-md-12">
-                        <div class="p-5">
-                            <label for="inputQuantidade">Solicitante</label>
-                            <input type="text" class="form-control" id="inputQuantidade" name="nameQuantidade" autocomplete="off">
+                    <div class="col-md-6">
+                        <div class="p-3">
+                            <label for="data_filtro">Operador:</label>
+                            <select class="form-control" id="operadorFicha" name="operadorFicha" ">
+                                <option value="" selected></option>
+                                {% for funcionario in funcionarios %}
+                                <option value="{{funcionario[0]}}">{{funcionario[0]}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="p-3">
+                            <label for="data_filtro">Data:</label>
+                            <input type="text" class="form-control" id="dateFicha" name="datetimes" autocomplete="off">
                         </div>
                     </div>
                 </div>
@@ -36,7 +50,7 @@
                     <div class="col-6">
                     </div>
                     <div class="col-6">
-                        <button id="btnEnviarSolicitacao" type="submit" class="form-control btn btn-success">Emitir ficha</button>
+                        <button id="btnEnviarSolicitacao" onclick="emitirFicha()" class="form-control btn btn-success">Emitir ficha</button>
                     </div>
                 </div>
             </div>
@@ -44,16 +58,97 @@
     </div>
 </div>
 
-<input type="text" id="pegando_nome" value="{{nome}}" style="display: none;">
-
 {% endblock %}
 
 {% block scripts %}
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/populando-listas.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/clonando-populando.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
+<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<!-- Plugin icons -->
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+<!-- script com a construção das tabelas -->
+<script src="static/js/demo/datatables-demo.js"></script>
+
+<!-- Script menssagem -->
+<script src="/static/js/mensagem.js"></script>
+
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    })
+
+    $('#dateFicha').on('focus',function(){
+            $('#dateFicha').val('')
+    })
+
+    $(function () {
+      const dataAtual = new Date();
+      const opcoesFormatacao = { day: 'numeric', month: '2-digit', year: 'numeric' };
+      const dataFormatada = dataAtual.toLocaleDateString('pt-BR', opcoesFormatacao);
+
+      var dataInicial = dataFormatada.split(" - ")[0];
+      var dataFinal = dataFormatada.split(" - ")[1];
+
+      $('input[name="datetimes"]').daterangepicker({
+        timePicker: true,
+        timePicker24Hour: true,
+        autoUpdateInput: false,
+        startDate: moment(dataInicial, 'DD/MM/YYYY'),
+        endDate: moment(dataFinal, 'DD/MM/YYYY'),
+        locale: {
+          format: 'DD/MM/YYYY',
+          cancelLabel: 'Clear'
+        }
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        $(this).val(picker.startDate.format('DD/MM/YYYY') + ' - ' + picker.endDate.format('DD/MM/YYYY'));
+      });
+
+      $('input[name="datetimes"]').on('cancel.daterangepicker', function (ev, picker) {
+        $(this).val('');
+      });
+
+      $('input[name="datetimes"]').on('apply.daterangepicker', function (ev, picker) {
+        var startDate = picker.startDate;
+        var endDate = picker.endDate;
+
+        if (endDate.isBefore(startDate)) {
+          alert("A data final não pode ser menor que a data inicial");
+          picker.setEndDate(startDate);
+        }
+      });
+    });
+</script>
+
+<script>
+    function emitirFicha() {
+
+        let operadorFicha = $('#operadorFicha').val();
+        let dateFicha = $('#dateFicha').val();
+
+        $.ajax({
+            url: '/ficha',
+            type: 'POST',  // Alterado para POST
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({ 'operadorFicha': operadorFicha ,'dateFicha':dateFicha}),  // Enviando um objeto JSON
+            success: function(response) {
+                console.log(response)
+            },
+            error: function(error) {
+                alert('Ocorreu um erro ao buscar os vídeos');
+                console.log(error);
+            }
+        });
+
+    }
+</script>
 
 {% endblock %}

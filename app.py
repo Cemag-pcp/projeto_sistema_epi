@@ -1,14 +1,18 @@
+import base64
 from flask import Flask, render_template, request, jsonify,redirect, url_for,flash,session
 import datetime
 import warnings
 import pandas as pd
 import psycopg2  # pip install psycopg2
+from openpyxl import load_workbook
+from openpyxl.drawing.image import Image
 import psycopg2.extras 
 from functools import wraps
 from psycopg2.extras import execute_values
 from datetime import datetime,timedelta
 import cachetools
 import uuid
+import copy
 
 app = Flask(__name__)
 app.secret_key = "appEpi"
@@ -232,6 +236,39 @@ def gerar_id_solicitacao():
 
     return str(uuid.uuid1())
 
+
+def query_funcionario_solicitante():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+
+    query_funcionarios = """SELECT DISTINCT funcionario_completo
+                                    FROM (
+                                        SELECT CONCAT(s.funcionario_recebe, ' - ', f.nome) AS funcionario_completo, s.*
+                                        FROM sistema_epi.tb_solicitacoes s
+                                        JOIN requisicao.funcionarios f ON s.funcionario_recebe = f.matricula
+                                    ) AS subconsulta
+                              """
+    
+    query_solicitante = """SELECT DISTINCT solicitante_completo
+                                FROM (
+                                    SELECT CONCAT(s.matricula_solicitante, ' - ', f.nome) AS solicitante_completo, s.*
+                                    FROM sistema_epi.tb_solicitacoes s
+                                    JOIN requisicao.funcionarios f ON s.matricula_solicitante = f.matricula
+                                ) AS subconsulta
+                            """
+    
+    cur.execute(query_funcionarios)
+        
+    funcionarios = cur.fetchall()
+
+    cur.execute(query_solicitante)
+    
+    solicitantes = cur.fetchall()
+
+    return funcionarios, solicitantes
 
 def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
     """
@@ -614,45 +651,116 @@ def historico():
         return jsonify(historicos_dicts)
 
     else:
+        funcionarios, solicitantes = query_funcionario_solicitante()
+    
+    return render_template('historico.html',funcionarios=funcionarios,solicitantes=solicitantes)
+    
+@app.route('/ficha', methods=['GET','POST'])
+@login_required
+def ficha():
+
+    if request.method == 'POST':
+
         conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-        # QUERY PARA EXIBIR APENAS OS FUNCIONARIOS QUE ESTÃO NO tb_solicitacoes
+        data = request.get_json()
 
-        query_funcionarios = """SELECT DISTINCT funcionario_completo
-                                    FROM (
-                                        SELECT CONCAT(s.funcionario_recebe, ' - ', f.nome) AS funcionario_completo, s.*
-                                        FROM sistema_epi.tb_solicitacoes s
-                                        JOIN requisicao.funcionarios f ON s.funcionario_recebe = f.matricula
-                                    ) AS subconsulta
-                              """
-        
-        query_solicitante = """SELECT DISTINCT solicitante_completo
-                                    FROM (
-                                        SELECT CONCAT(s.matricula_solicitante, ' - ', f.nome) AS solicitante_completo, s.*
-                                        FROM sistema_epi.tb_solicitacoes s
-                                        JOIN requisicao.funcionarios f ON s.matricula_solicitante = f.matricula
-                                    ) AS subconsulta
-                              """
-        
-        cur.execute(query_funcionarios)
-        
-        funcionarios = cur.fetchall()
+        operadorFicha = data['operadorFicha']
 
-        cur.execute(query_solicitante)
+        matricula, operador = operadorFicha.split(' - ')
+
+        dateFicha = data['dateFicha']
+
+        print(dateFicha)
+
+        query = f"""
+                    SELECT 
+                        s.data_solicitada,
+                        s.quantidade,
+                        s.codigo_item,
+                        s.motivo,
+                        s.funcionario_recebe,
+                        a.assinatura
+                    FROM 
+                        sistema_epi.tb_solicitacoes s
+                    JOIN 
+                        sistema_epi.tb_assinatura a
+                    ON 
+                        s.id_solicitacao = a.id_solicitacao
+                    WHERE 1=1 AND s.funcionario_recebe = '{matricula}'
+                """
+
+        if dateFicha:
+            mes_inicial, mes_final = dateFicha.split(' - ')
+            mes_inicial = datetime.strptime(mes_inicial, '%d/%m/%Y').date()
+            mes_final = datetime.strptime(mes_final, '%d/%m/%Y').date() + timedelta(days=1)
+
+            mes_inicial_formatado = mes_inicial.strftime('%Y-%m-%d')
+            mes_final_formatado = mes_final.strftime('%Y-%m-%d')
+            query += f" AND s.data_solicitada >= '{mes_inicial_formatado}' AND s.data_solicitada <= '{mes_final_formatado}'"
+
+        cur.execute(query)
+        lista_solicitacoes = cur.fetchall()
+
+        num_solicitacoes = len(lista_solicitacoes)
+
+        print(num_solicitacoes)
+
+        for i in range(num_solicitacoes):
+            assinatura = lista_solicitacoes[i][5]
+            del(lista_solicitacoes[i][5])
+            assinatura_bytes = bytes(assinatura)
+            lista_solicitacoes[i].append(assinatura_bytes)
+
+        wb = load_workbook('FICHA DE EPI Atualizada 15.01.2024.xlsx')
+
+        ws = wb.active
+
+        if num_solicitacoes != 0:
+            num_solicitacoes = len(lista_solicitacoes)
+
+
+        # Aumentar a quantidade de Linhas
+        for i in range(num_solicitacoes):
+            # Define a linha de destino
+            linha_destino = 27 + i
+
+            # Copia o valor e o estilo da linha 27 para a linha de destino
+            for coluna in range(1, 8):  # A coluna 1 é a A, a coluna 2 é a B, etc.
+                ws.cell(row=linha_destino, column=coluna).font = copy.copy(ws.cell(row=27, column=coluna).font)
+                ws.cell(row=linha_destino, column=coluna).fill = copy.copy(ws.cell(row=27, column=coluna).fill)
+                ws.cell(row=linha_destino, column=coluna).border = copy.copy(ws.cell(row=27, column=coluna).border)
+                ws.cell(row=linha_destino, column=coluna).alignment = copy.copy(ws.cell(row=27, column=coluna).alignment)
+
+        # Inserir a tabela do SQL 
+        for i in range(num_solicitacoes):
+            # Define a linha de destino
+            linha_destino = 27 + i
+
+            # Insere os dados nas colunas
+            ws.cell(row=linha_destino, column=1).value = lista_solicitacoes[i][0]  # Data solicitada
+            ws.cell(row=linha_destino, column=2).value = lista_solicitacoes[i][1]  # Quantidade
+            ws.cell(row=linha_destino, column=3).value = lista_solicitacoes[i][2]  # Código do item
+            ws.cell(row=linha_destino, column=6).value = lista_solicitacoes[i][3]  # Motivo
+            assinatura = lista_solicitacoes[i][5]
+            ws.add_image('assinatura.png', 'G{}'.format(linha_destino))
+
+        ws['B4'] = operador
+        ws['B5'] = int(matricula.replace(',', ''))
+
+        wb.save('Nova_ficha.xlsx')
         
-        solicitantes = cur.fetchall()
+        wb.close()
+
+        return jsonify('OK')
     
-    return render_template('historico.html',funcionarios=funcionarios,solicitantes=solicitantes)
+    else:
+
+        funcionarios, solicitantes = query_funcionario_solicitante()
     
-@app.route('/ficha', methods=['GET'])
-@login_required
-def ficha():
-
-    """Coleta de Informações necessária para a ficha de documentação"""
-
-    return render_template('ficha.html')
+    return render_template('ficha.html',funcionarios=funcionarios)
 
 # AINDA NÃO UTLIZADA, POREM VAI AJUDAR NA DOCUMENTAÇÃO
 @app.route('/pegar-assinatura', methods=['GET'])
