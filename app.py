@@ -1,11 +1,14 @@
 import base64
-from flask import Flask, render_template, request, jsonify,redirect, url_for,flash,session
+from PIL import Image
+from io import BytesIO
+from pdfkit import from_file
+from flask import Flask, render_template, request, jsonify,redirect, send_file, url_for,flash,session
 import datetime
 import warnings
 import pandas as pd
 import psycopg2  # pip install psycopg2
 from openpyxl import load_workbook
-from openpyxl.drawing.image import Image
+from openpyxl.drawing.image import Image as imge
 import psycopg2.extras 
 from functools import wraps
 from psycopg2.extras import execute_values
@@ -13,6 +16,7 @@ from datetime import datetime,timedelta
 import cachetools
 import uuid
 import copy
+import os
 
 app = Flask(__name__)
 app.secret_key = "appEpi"
@@ -706,7 +710,8 @@ def ficha():
 
         num_solicitacoes = len(lista_solicitacoes)
 
-        print(num_solicitacoes)
+        if num_solicitacoes == 0:
+            return jsonify('Vazio')
 
         for i in range(num_solicitacoes):
             assinatura = lista_solicitacoes[i][5]
@@ -728,31 +733,59 @@ def ficha():
             linha_destino = 27 + i
 
             # Copia o valor e o estilo da linha 27 para a linha de destino
-            for coluna in range(1, 8):  # A coluna 1 é a A, a coluna 2 é a B, etc.
+            for coluna in range(1, 9):  # A coluna 1 é a A, a coluna 2 é a B, etc.
                 ws.cell(row=linha_destino, column=coluna).font = copy.copy(ws.cell(row=27, column=coluna).font)
                 ws.cell(row=linha_destino, column=coluna).fill = copy.copy(ws.cell(row=27, column=coluna).fill)
                 ws.cell(row=linha_destino, column=coluna).border = copy.copy(ws.cell(row=27, column=coluna).border)
                 ws.cell(row=linha_destino, column=coluna).alignment = copy.copy(ws.cell(row=27, column=coluna).alignment)
+                        # Access and copy the line height from row 27
+                line_height = ws.row_dimensions[27].height  # Access height from source row
+                ws.row_dimensions[linha_destino].height = line_height  # Set the same height for the target row
 
+        num_assinaturas = []
         # Inserir a tabela do SQL 
         for i in range(num_solicitacoes):
             # Define a linha de destino
+            num_assinaturas.append(i)
+            ws['B4'] = operador
+            ws['B5'] = int(matricula.replace(',', ''))
+
             linha_destino = 27 + i
 
-            # Insere os dados nas colunas
-            ws.cell(row=linha_destino, column=1).value = lista_solicitacoes[i][0]  # Data solicitada
+            data_formatada = lista_solicitacoes[i][0].strftime("%d/%m/%Y")
+            ws.cell(row=linha_destino, column=1).value = data_formatada
             ws.cell(row=linha_destino, column=2).value = lista_solicitacoes[i][1]  # Quantidade
             ws.cell(row=linha_destino, column=3).value = lista_solicitacoes[i][2]  # Código do item
             ws.cell(row=linha_destino, column=6).value = lista_solicitacoes[i][3]  # Motivo
-            assinatura = lista_solicitacoes[i][5]
-            ws.add_image('assinatura.png', 'G{}'.format(linha_destino))
+            # assinatura = lista_solicitacoes[i][5]
+            base64_string = lista_solicitacoes[i][5]
 
-        ws['B4'] = operador
-        ws['B5'] = int(matricula.replace(',', ''))
+            # Remove o prefixo 'data:image/png;base64,' para obter apenas a parte codificada em base64
+            image_data = base64_string.split(b';base64,')[1]
 
-        wb.save('Nova_ficha.xlsx')
+            # Decodifica a string base64
+            image_bytes = base64.b64decode(image_data)
+
+            # Cria um objeto BytesIO para criar uma imagem PIL a partir dos bytes
+            image_buffer = BytesIO(image_bytes)
+
+            # Abre a imagem PIL
+            image = Image.open(image_buffer)
+            
+            image.save(f"assinatura{i}.png")
+
+            img = imge(f"assinatura{i}.png")
+            img.height = 130
+            img.width = 150
+            ws.add_image(img, f'G{linha_destino}')
+
+            
+        wb.save(r'downloads/Nova_ficha.xlsx')
         
         wb.close()
+
+        for num in num_assinaturas:
+            os.remove(f"assinatura{num}.png")
 
         return jsonify('OK')
     
@@ -761,6 +794,14 @@ def ficha():
         funcionarios, solicitantes = query_funcionario_solicitante()
     
     return render_template('ficha.html',funcionarios=funcionarios)
+
+@app.route('/downloads/Nova_ficha.xlsx', methods=['GET'])
+def download_modelo_excel():
+    # Caminho para o arquivo modelo CSV
+    excel_filename = r'downloads/Nova_ficha.xlsx'
+
+    # Envie o arquivo para download
+    return send_file(excel_filename, as_attachment=True, mimetype='text/csv')
 
 # AINDA NÃO UTLIZADA, POREM VAI AJUDAR NA DOCUMENTAÇÃO
 @app.route('/pegar-assinatura', methods=['GET'])

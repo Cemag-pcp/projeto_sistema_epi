@@ -18,7 +18,7 @@
             <div class="card-header">
                 <div class="text-center">
                     <h1 class="h4 text-gray-900 mb-2 mt-2">Ficha de EPI
-                        <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Selecione os filtros para o Relatório de Ficha de EPI dos Trabalhadores">
+                        <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Selecione os filtros para o relatório de ficha de EPI dos trabalhadores">
                             <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: gray;"></i>
                         </button>  
                     </h1>
@@ -29,7 +29,7 @@
                     <div class="col-md-6">
                         <div class="p-3">
                             <label for="data_filtro">Operador:</label>
-                            <select class="form-control" id="operadorFicha" name="operadorFicha" ">
+                            <select class="form-control" id="operadorFicha" name="operadorFicha">
                                 <option value="" selected></option>
                                 {% for funcionario in funcionarios %}
                                 <option value="{{funcionario[0]}}">{{funcionario[0]}}</option>
@@ -39,7 +39,11 @@
                     </div>
                     <div class="col-md-6">
                         <div class="p-3">
-                            <label for="data_filtro">Data:</label>
+                            <label for="data_filtro">Data:
+                                <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Se a data estiver em branco, todas as solicitações serão exibidas na ficha">
+                                    <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: gray;"></i>
+                                </button>  
+                            </label>
                             <input type="text" class="form-control" id="dateFicha" name="datetimes" autocomplete="off">
                         </div>
                     </div>
@@ -49,7 +53,7 @@
                 <div class="row justify-content-between">
                     <div class="col-6">
                     </div>
-                    <div class="col-6">
+                    <div class="col-6" id="div_button">
                         <button id="btnEnviarSolicitacao" onclick="emitirFicha()" class="form-control btn btn-success">Emitir ficha</button>
                     </div>
                 </div>
@@ -77,6 +81,8 @@
 <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
 
 <script>
     $(function () {
@@ -128,9 +134,19 @@
 </script>
 
 <script>
+
     function emitirFicha() {
 
+        $("#loading-overlay").show();
+
         let operadorFicha = $('#operadorFicha').val();
+
+        if(operadorFicha === ''){
+            alert('Campo de Operador está vazio')
+            $("#loading-overlay").hide();
+            return
+        }
+
         let dateFicha = $('#dateFicha').val();
 
         $.ajax({
@@ -140,14 +156,21 @@
             contentType: 'application/json',
             data: JSON.stringify({ 'operadorFicha': operadorFicha ,'dateFicha':dateFicha}),  // Enviando um objeto JSON
             success: function(response) {
-                console.log(response)
+                // Baixando Arquivo Excel
+                if(response === 'Vazio'){
+                    alert('Nenhuma solicitação para essa data')
+                } else {
+                    saveAs('downloads/Nova_ficha.xlsx', 'Nova_ficha.xlsx');
+                }
+                
+                $("#loading-overlay").hide();
             },
             error: function(error) {
-                alert('Ocorreu um erro ao buscar os vídeos');
+                alert('Ocorreu para emitir o arquivo .xlsx');
                 console.log(error);
+                $("#loading-overlay").hide();
             }
         });
-
     }
 </script>
 
