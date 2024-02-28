@@ -137,7 +137,7 @@ def receber_assinatura():
 
         cur.execute("INSERT INTO sistema_epi.tb_assinatura (id_solicitacao, assinatura) VALUES (%s, %s)", (id_solicitacao, dataURL))
 
-        cur.execute("INSERT INTO sistema_epi.tb_historico_solicitacoes (id_solicitacao, status) VALUES (%s, %s)", (id_solicitacao, 'Assinado'))
+        cur.execute("INSERT INTO sistema_epi.tb_historico_solicitacoes (id_solicitacao, status, motivo) VALUES (%s, %s, %s)", (id_solicitacao, 'Assinado', 'Assinado'))
 
         conn.commit()
 
@@ -313,7 +313,7 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
 
     conn.commit()
 
-def input_tb_historico(id_solicitacao):
+def base_tb_historico(id_solicitacao,status_assinatura,motivo_assinatura):
     """
     Função para inputar dados na tabela de histórico do schema: sistema_epi
     A cada atualização será criado um registro
@@ -335,16 +335,17 @@ def input_tb_historico(id_solicitacao):
 
     # Iterar sobre os dados e inserir no banco de dados
     # for item in campos_solicitacao:
-    status = 'Aguardando Assinatura'
+    status = status_assinatura
+    motivo = motivo_assinatura
 
     print(id_solicitacao, status)
 
     sql = """INSERT INTO sistema_epi.tb_historico_solicitacoes 
-        (id_solicitacao, status)
+        (id_solicitacao, status,motivo)
     VALUES
-        (%s, %s);"""
+        (%s, %s,%s);"""
 
-    cur.execute(sql,(id_solicitacao,status))
+    cur.execute(sql,(id_solicitacao,status,motivo))
 
     conn.commit()
 
@@ -466,6 +467,8 @@ def criar_solicitacao():
 
     # Crie uma lista para cada valor único de inputOperador
     listas = {}
+    motivo = "Primeira Assinatura"
+    status = "Aguardando Assinatura"
 
     for input_operador, lista in dados_agrupados.items():
         listas[input_operador] = lista
@@ -480,7 +483,8 @@ def criar_solicitacao():
     
     for id in lista_id_solicitacao:
         print(id)
-        input_tb_historico(id)
+        base_tb_historico(id,status,motivo)
+        
     
     return redirect(url_for('rota_solicitacao_material'))
 
@@ -519,7 +523,10 @@ def alterar_dados():
         
         cur.execute(query_assinatura)
 
-        input_tb_historico(id_solicitacao)
+        motivo = "Editou o Item"
+        status = "Aguardando Assinatura"
+
+        base_tb_historico(id_solicitacao,status,motivo)
 
         # Faça algo com os dados, como salvá-los no banco de dados
         for equipamento in equipamentos:
@@ -575,6 +582,42 @@ def excluir_solicitacao():
     cur.execute(query_assinatura)
 
     conn.commit()
+    conn.close()
+
+    return 'Dados recebidos com sucesso!'
+
+@app.route('/excluir-equipamento', methods=['POST'])
+@login_required
+def excluir_equipamento():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    id = data['id']
+    id_solicitante = data['id_solicitante']
+    codigo = data['codigo']
+
+    query_assinatura = f"""DELETE FROM sistema_epi.tb_assinatura
+                        WHERE id_solicitacao = '{id_solicitante}'
+                        """
+    
+    cur.execute(query_assinatura)
+
+    query_solicitacao = f"""DELETE FROM sistema_epi.tb_solicitacoes WHERE id = {id}"""
+    print(query_solicitacao)
+
+    cur.execute(query_solicitacao)
+
+    motivo = "Excluiu Item - " + codigo
+    status = "Aguardando Assinatura"
+
+    conn.commit()
+    conn.close()
+
+    base_tb_historico(id_solicitante,status,motivo)
+
     conn.close()
 
     return 'Dados recebidos com sucesso!'

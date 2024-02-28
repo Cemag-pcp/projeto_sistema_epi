@@ -1,13 +1,13 @@
 function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
+    $('#salvarExecucao').data('id_solicitante', id_solicitante);
+
+    console.log(id_solicitante)
+
     $("#loading-overlay").show();
 
     // REQUISIÇÃO PARA PEGAR OS VALORES DO MODAL EXECUÇÃO
     $('#salvarExecucao').prop('disabled',true)
-
-    $('#salvarExecucao').one('click',function(){
-        alterarDadosExecucao(id_solicitante)
-    })
     
     $.ajax({
         url:'/dados-execucao',
@@ -55,8 +55,8 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
             var containerEquipamentos = $('#containerEquipamentos');
             containerEquipamentos.empty();
             let equip_num = '';
+            console.log(response)
             response.equipamentos.forEach(function(equipamento, index) {
-
                 // var data_previsao;
                 calcularPrevisaoEntrega(equipamento, response.data_assinado, function (previsao) {
                     // data_previsao = previsao;
@@ -120,9 +120,14 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                     var selectMotivo = document.getElementById('motivoExecucao_' + index);
                     var excluirEquip = document.getElementById('excluirEquip_' + index);
 
-                    excluirEquip.addEventListener('click', function() {
-                        modalExcluirEquipamento(funcionario_nome,equipamento.codigo,equipamento.id)
-                    });
+                    if (response.equipamentos.length > 1) {
+                        excluirEquip.addEventListener('click', function() {
+                            modalExcluirEquipamento(funcionario_nome,equipamento.codigo,equipamento.id,id_solicitante)
+                        });
+                    } else {
+                        excluirEquip.style.display = 'none';
+                        excluirEquip.disabled = true;
+                    }
             
                     var listCodigo = document.getElementById('listCodigo'+index);
 
@@ -160,6 +165,12 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
     })
 
 }
+
+$('#salvarExecucao').one('click',function(){
+    var id_solicitante = $(this).data('id_solicitante');
+
+    alterarDadosExecucao(id_solicitante)
+})
 
 function modalAssinatura(nome_funcionario,id_solicitacao,id,data) {
 
@@ -260,79 +271,100 @@ function modalTimeline(id_solicitacao,codigo_item,funcionario) {
 }
 
 function modalExcluirSolicitacao(funcionario, id_solicitacao) {
+
+    $('#btnExcluir').data('id_solicitacao', id_solicitacao);
+
     $('#modalExcluirSolicitacao .modal-body').text('Tem certeza que quer remover essa solicitação de EPI do(a) ' + funcionario + ' ? ');
 
     $('#modalExcluirSolicitacao').modal('show');
 
-
-    $('#btnExcluir').click(function () {
-
-        $("#loading-overlay").show();
-        
-        $('#btnExcluir').prop('disabled', true);
-        // Realizar a requisição AJAX para o backend
-        $.ajax({
-            type: 'POST',
-            url: '/excluir-solicitacao',
-            contentType: 'application/json',
-            data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),
-            success: function (response) {
-                console.log(response);
-                $('#modalExcluirSolicitacao').modal('hide');
-                exibirMensagem('sucesso', 'Excluido com Sucesso');
-                $("#loading-overlay").hide();
-                location.reload();
-            },
-            error: function (error) {
-                console.log('Erro na requisição:', error);
-                $("#loading-overlay").hide();
-            },
-            complete: function () {
-                // Reativar o botão após a requisição ser concluída (bem-sucedida ou com erro)
-                $('#btnExcluir').prop('disabled', false);
-            }
-        });
-    });
 }
 
-function modalExcluirEquipamento(funcionario, codigo,id_solicitacao) {
+// Botão de excluir do modal modalExcluirSolicitacao
+$('#btnExcluir').one('click',function () {
+
+    var id_solicitacao = $(this).data('id_solicitacao');
+
+    $("#loading-overlay").show();
+    
+    $(this).prop('disabled', true);
+    // Realizar a requisição AJAX para o backend
+    $.ajax({
+        type: 'POST',
+        url: '/excluir-solicitacao',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),
+        success: function (response) {
+            console.log(response);
+            $('#modalExcluirSolicitacao').modal('hide');
+            exibirMensagem('sucesso', 'Excluido com Sucesso');
+            $("#loading-overlay").hide();
+            location.reload();
+        },
+        error: function (error) {
+            console.log('Erro na requisição:', error);
+            $("#loading-overlay").hide();
+        },
+        complete: function () {
+            // Reativar o botão após a requisição ser concluída (bem-sucedida ou com erro)
+            $('#btnExcluir').prop('disabled', false);
+        }
+    });
+});
+
+function modalExcluirEquipamento(funcionario, codigo,id,id_solicitante) {
+
+    $('#btnExcluirEquipamento').data('info', {codigo:codigo,id:id,id_solicitante:id_solicitante});
+
+    console.log(id)
 
     $('#modalExecutarSolicitacao').modal('hide');
     
-    $('#modalExcluirEquipamento .modal-body').text('Tem certeza que quer remover o equipamento de EPI '+ codigo +' do funcionário(a) ' + funcionario + ' ? ');
+    $('#modalExcluirEquipamento .modal-body').text('Tem certeza que deseja remover o equipamento de EPI '+ codigo +' do funcionário(a) ' + funcionario + ' ? ');
 
     $('#modalExcluirEquipamento').modal('show');
 
-
-    // $('#btnExcluir').click(function () {
-
-    //     $("#loading-overlay").show();
-        
-    //     $('#btnExcluir').prop('disabled', true);
-    //     // Realizar a requisição AJAX para o backend
-    //     $.ajax({
-    //         type: 'POST',
-    //         url: '/excluir-solicitacao',
-    //         contentType: 'application/json',
-    //         data: JSON.stringify({ 'id_solicitacao': id_solicitacao }),
-    //         success: function (response) {
-    //             console.log(response);
-    //             $('#modalExcluirSolicitacao').modal('hide');
-    //             exibirMensagem('sucesso', 'Excluido com Sucesso');
-    //             $("#loading-overlay").hide();
-    //             location.reload();
-    //         },
-    //         error: function (error) {
-    //             console.log('Erro na requisição:', error);
-    //             $("#loading-overlay").hide();
-    //         },
-    //         complete: function () {
-    //             // Reativar o botão após a requisição ser concluída (bem-sucedida ou com erro)
-    //             $('#btnExcluir').prop('disabled', false);
-    //         }
-    //     });
-    // });
 }
+
+// Botão de excluir do modal modalExcluirSolicitacao
+$('#btnExcluirEquipamento').one('click',function () {
+
+    var info = $(this).data('info');
+
+    console.log(info)
+
+    var codigo = info.codigo;
+    var id = info.id;
+    var id_solicitante = info.id_solicitante;
+
+    codigo = codigo.split(' - ')[0]
+
+    $("#loading-overlay").show();
+    
+    $(this).prop('disabled', true);
+    // Realizar a requisição AJAX para o backend
+    $.ajax({
+        type: 'POST',
+        url: '/excluir-equipamento',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'id': id, 'codigo':codigo, 'id_solicitante':id_solicitante}),
+        success: function (response) {
+            console.log(response);
+            $('#modalExcluirSolicitacao').modal('hide');
+            exibirMensagem('sucesso', 'Excluido com Sucesso');
+            $("#loading-overlay").hide();
+            location.reload();
+        },
+        error: function (error) {
+            console.log('Erro na requisição:', error);
+            $("#loading-overlay").hide();
+        },
+        complete: function () {
+            // Reativar o botão após a requisição ser concluída (bem-sucedida ou com erro)
+            $('#btnExcluirEquipamento').prop('disabled', false);
+        }
+    });
+});
 
 $(function () {
     $('[data-toggle="tooltip"]').tooltip()

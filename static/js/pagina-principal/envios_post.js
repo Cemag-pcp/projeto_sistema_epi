@@ -64,6 +64,7 @@ function alterarDadosExecucao(id_solicitacao) {
 
         
     saveButton.addEventListener("click", function(event) {
+        let motivo = "Primeira Assinatura";
         $("#loading-overlay").show();
         if (signaturePad.isEmpty()) {
             alert("Faça sua assinatura.");
@@ -82,7 +83,8 @@ function alterarDadosExecucao(id_solicitacao) {
                 },
                 body: JSON.stringify({
                     id_solicitacao: id_solicitacao,
-                    dataURL: dataURL
+                    dataURL: dataURL,
+                    motivo: motivo
                 }),
             })
             .then(response => response.json())
@@ -139,3 +141,5 @@ function dataURLToBlob(dataURL) {
 
     return new Blob([uInt8Array], { type: contentType });
 }
+
+
