@@ -241,24 +241,6 @@
       });
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-      // Obter o elemento de input
-      var inputElement = document.getElementById("inputDate1");
-
-      // Verificar se há um valor salvo no armazenamento local
-      var savedValue = localStorage.getItem("inputDate1");
-
-      // Se houver um valor salvo, definir o valor do input
-      if (savedValue !== null) {
-        inputElement.value = savedValue;
-      }
-
-      // Adicionar um ouvinte de evento para salvar o valor quando o usuário digitar
-      inputElement.addEventListener("input", function () {
-        // Salvar o valor no armazenamento local
-        localStorage.setItem("inputDate1", inputElement.value);
-      });
-    });
   </script>
 
 {% endblock %}

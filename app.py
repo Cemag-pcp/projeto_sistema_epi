@@ -78,6 +78,7 @@ def pagina_inicial():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    # PRIMEIRA TABELA - Todos os itens solicitados
     s = """SELECT
             solic.*,
             hist.status,
@@ -118,7 +119,32 @@ def pagina_inicial():
 
     tb_solicitacoes_list = tb_solicitacoes.values.tolist()
 
-    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list)
+    quantidade_solicitacoes = len(tb_solicitacoes_list)
+
+    # SEGUNDA TABELA - Identificar troca de equipamentos
+    query_troca = """SELECT 
+                        TO_CHAR(sistema_epi.tb_assinatura.data_assinatura, 'DD/MM/YYYY') AS data_assinatura_formatada,
+                        sistema_epi.tb_solicitacoes.codigo_item,
+                        requisicao.funcionarios.nome AS nome_funcionario_recebe,
+                        sistema_epi.tb_itens.vida_util - EXTRACT(DAY FROM AGE(DATE_TRUNC('day', NOW()), DATE_TRUNC('day', sistema_epi.tb_assinatura.data_assinatura))) AS diferenca_vida_tempo
+                    FROM 
+                        sistema_epi.tb_solicitacoes
+                    LEFT JOIN 
+                        sistema_epi.tb_assinatura ON sistema_epi.tb_solicitacoes.id_solicitacao = sistema_epi.tb_assinatura.id_solicitacao
+                    LEFT JOIN 
+                        sistema_epi.tb_itens ON sistema_epi.tb_solicitacoes.codigo_item LIKE CONCAT('%', sistema_epi.tb_itens.codigo, '%')
+                    LEFT JOIN
+                        requisicao.funcionarios ON sistema_epi.tb_solicitacoes.funcionario_recebe = requisicao.funcionarios.matricula
+                    WHERE 
+                        sistema_epi.tb_assinatura.data_assinatura IS NOT NULL;
+                """
+    
+    cur.execute(query_troca)
+    lista_itens_assinados = cur.fetchall()
+
+    quantidade_entregas = len(lista_itens_assinados)
+
+    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list,lista_itens_assinados=lista_itens_assinados,quantidade_solicitacoes=quantidade_solicitacoes,quantidade_entregas=quantidade_entregas)
 
 @app.route('/receber-assinatura', methods=['POST'])
 @login_required
