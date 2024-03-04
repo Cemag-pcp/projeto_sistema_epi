@@ -7,7 +7,8 @@ $(document).ready(function() {
   $('#dataTable_entregas').DataTable({
     "info":false,
     "aLengthMenu":[4,10],
-    "iDisplayLength":4
+    "iDisplayLength":4,
+    order: [[3, 'asc']]
   });
 });
 

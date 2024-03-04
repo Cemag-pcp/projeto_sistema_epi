@@ -24,7 +24,7 @@
         <div class="col-sm-4 mb-2">
             <div class="row">
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-success shadow h-100 py-2">
+                    <div class="card border-left-success shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
@@ -41,7 +41,7 @@
                 </div>
         
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card border-left-warning shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
@@ -59,7 +59,7 @@
             </div>
             <div class="row">
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-2">
+                    <div class="card border-left-primary shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
@@ -76,7 +76,7 @@
                 </div>
         
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-2">
+                    <div class="card border-left-warning shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
@@ -106,7 +106,7 @@
                                     <th>Data Entrega</th>
                                     <th>Item</th>
                                     <th>Funcionário</th>
-                                    <th>Tempo para troca</th>
+                                    <th>Tempo para troca (em dias)</th>
                                 </tr>
                             </thead>
                             <tfoot>
@@ -114,7 +114,7 @@
                                     <th>Data Entrega</th>
                                     <th>Item</th>
                                     <th>Funcionário</th>
-                                    <th>Tempo para troca</th>
+                                    <th>Tempo para troca (em dias)</th>
                                 </tr>
                             </tfoot>
                             <tbody>
@@ -123,7 +123,7 @@
                                     <td>{{dados[0]}}</td>
                                     <td>{{dados[1]}}</td>
                                     <td>{{dados[2]}}</td>
-                                    <td>{{dados[3]}} dias</td>
+                                    <td>{{dados[3]}}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
@@ -131,7 +131,7 @@
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button id="envio_troca" class="btn btn-primary btn-block w-25">Enviar</button>
+                    <button id="envio_troca" style="font-size: 14px;" class="btn btn-primary btn-block w-25">Enviar</button>
                 </div>
             </div>
         </div>
@@ -352,6 +352,47 @@
     </div>
 </div>
 
+<!-- Modal Solicitação (Ao clciar em Enviar na tela principal) -->
+<div class="modal fade" data-backdrop="static" id="modalSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalSolicitacaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                <h5 class="modal-title" id="numeroOrdem_edicao">Solicitar itens vencidos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="modalSolicitacaoBody" class="modal-body" style="overflow-y: auto; height: 550px;">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <label>Equipamento</label>
+                        <input id="equipamentoTroca" class="form-control" readonly>
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        <label>Solicitante</label>
+                        <input id="solicitanteTroca" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <label>Motivo</label>
+                        <input id="motivoTroca" class="form-control" readonly>
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        <label>Funcionário</label>
+                        <input id="funcionarioTroca" class="form-control" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="modal-footer">
+                <button class="btn btn-primary btn-block">Solicitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -426,53 +467,45 @@
 <script src="static/js/pagina-principal/vida_util.js"></script>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var linhas = document.querySelectorAll('.all_linha');
-        var valoresClicados = []; // Array global para armazenar os valores clicados
+    var valoresClicados = [];
 
-        linhas.forEach(function (linha) {
-            linha.addEventListener('click', function () {
-                // Adiciona ou remove a classe 'clicked'
-                linha.classList.toggle('clicked');
+   document.addEventListener('DOMContentLoaded', function () {
+    var linhas = document.querySelectorAll('.all_linha');
+    
+    linhas.forEach(function (linha) {
+        linha.addEventListener('click', function () {
+            linha.classList.toggle('clicked');
 
-                // Se a linha estiver clicada, extrai os valores e adiciona ao array
-                if (linha.classList.contains('clicked')) {
-                    var valores = extrairValoresDaLinha(linha);
-                    valoresClicados.push(valores);
-                } else {
-                    // Se a linha não estiver clicada, remove os valores do array
-                    var index = valoresClicados.findIndex(function (item) {
-                        return item[0] === linha;
-                    });
+            if (linha.classList.contains('clicked')) {
+                var valores = extrairValoresDaLinha(linha);
+                valoresClicados.push(valores);
+            } else {
+                var index = valoresClicados.findIndex(function (item) {
+                    return item[0] === linha;
+                });
 
-                    if (index !== -1) {
-                        valoresClicados.splice(index, 1);
-                    }
+                if (index !== -1) {
+                    valoresClicados.splice(index, 1);
                 }
-
-                // Exibe o array de valores clicados no console
-                console.log(valoresClicados);
-            });
-        });
-
-        function extrairValoresDaLinha(linha) {
-            // Obtém os elementos dentro da linha
-            var elementos = linha.getElementsByTagName('td');
-            
-            // Array para armazenar os valores
-            var valores = [];
-
-            // Itera pelos elementos e extrai os valores
-            for (var i = 1; i <= 2; i++) {
-                valores.push(elementos[i].textContent);
             }
-
-            // Adiciona a própria linha como primeiro elemento do array de valores
-            valores.unshift(linha);
-
-            return valores;
-        }
+        });
     });
+    
+
+    function extrairValoresDaLinha(linha) {
+        var elementos = linha.getElementsByTagName('td');
+        var valores = [];
+
+        for (var i = 1; i <= 3; i++) {
+            valores.push(elementos[i].textContent);
+        }
+
+        valores.unshift(linha);
+
+        return valores;
+    }
+});
+
 </script>
 
 {% endblock %}

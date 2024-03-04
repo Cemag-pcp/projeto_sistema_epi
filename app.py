@@ -435,6 +435,10 @@ def setor_operador(operador):
 @app.route('/solicitacao-material', methods=['GET','POST'])
 def rota_solicitacao_material():
 
+    """
+    Rota para de solicitação de material
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -449,10 +453,6 @@ def rota_solicitacao_material():
     solicitante = data[0][0]
 
     nome = solicitante.split(' - ')[1]
-
-    """
-    Rota para de solicitação de material
-    """
 
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('solicitacao-material.html', solicitante=solicitante,nome=nome)

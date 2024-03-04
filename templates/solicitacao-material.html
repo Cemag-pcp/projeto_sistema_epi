@@ -146,8 +146,6 @@
     </div>
 </div>
 
-<input type="text" id="pegando_nome" value="{{nome}}" style="display: none;">
-
 {% endblock %}
 
 {% block scripts %}
@@ -161,6 +159,8 @@
 <script>
     $(document).ready(function() {
         nome_solicitante = $('#pegando_nome').val()
+
+        console.log(nome_solicitante)
 
         $('#nome_logado').text(nome_solicitante)
         // Verifica se o valor é '4345 - JOSE EDENILSON DE CASTRO'
