@@ -15,7 +15,7 @@ function excluirClone(botao) {
         }
 
     } else {
-        alert("Deixe pelo menos 1 grupo de campos")
+        exibirMensagem('aviso','Deixe pelo menos 1 grupo de campos')
     }
 
 }

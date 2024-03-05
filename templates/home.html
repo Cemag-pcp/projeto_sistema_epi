@@ -16,24 +16,22 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Tabela de Solicitações</h1>
-    <p class="mb-4">Tabela principal para visualizar as solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
+    <h1 class="h3 mb-2 text-gray-800">Sistema de Controle de EPI - Panorama Geral</h1>
+    <p class="mb-4">Tabelas para visualizar as entregas e solicitações dos <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
 
     <!-- DataTale Itens Entregues -->
     <div class="row">
-        <div class="col-sm-4 mb-2">
+        <div class="col-sm-3 mb-2">
             <div class="row">
                 <div class="col-xl-12 mb-4">
                     <div class="card border-left-success shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                        Quantidade de Entregas</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{quantidade_entregas}}</div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Quantidade de Entregas</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fa-solid fa-clipboard-check fa-2x text-gray-300"></i>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_assinados}}</div>
                                 </div>
                             </div>
                         </div>
@@ -41,16 +39,14 @@
                 </div>
         
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-3">
+                    <div class="card border-left-info shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        Quantidade de Solicitações</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}</div>
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Quantidade de Solicitações</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fa-solid fa-play fa-2x text-gray-300"></i>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}</div>
                                 </div>
                             </div>
                         </div>
@@ -59,33 +55,29 @@
             </div>
             <div class="row">
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-primary shadow h-100 py-3">
+                    <div class="card border-left-secondary shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                        ...</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">N° de trabalhadores que receberam EPI</div>
                                 </div>
                                 <div class="col-auto">
-                                    <i class="fa-solid fa-globe fa-2x text-gray-300"></i>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_trabalhadores}}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div> 
         
                 <div class="col-xl-12 mb-4">
-                    <div class="card border-left-warning shadow h-100 py-3">
+                    <div class="card border-left-primary shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                        ...</div>
-                                    <div class="h5 mb-0 font-weight-bold text-gray-800"></div>
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EPI's substituidas</div>
                                 </div>
                                 <div class="col-auto">
-                                <i class="fa-solid fa-hourglass-start fa-2x text-gray-300"></i>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_devolucao}}</div>
                                 </div>
                             </div>
                         </div>
@@ -93,7 +85,7 @@
                 </div> 
             </div>
         </div>
-        <div class="col-sm-8 mb-2">
+        <div class="col-sm-9 mb-2">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
                     <h6 class="m-0 font-weight-bold text-primary">Tabela de itens entregues</h6>
@@ -215,7 +207,7 @@
                             <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}" style="max-width: 150px; cursor: default;">{{row[2]}}</td>
                             <td>{{row[4]}}</td>
                             <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}" style="max-width: 200px; cursor: default;">{{row[3]}}</td>
-                            {% if row[10] == None %}
+                            {% if row[11] == None %}
                             <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                             {% else %}
                             <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
@@ -386,7 +378,7 @@
                 </div>
             </div> 
             <div class="modal-footer">
-                <button class="btn btn-primary btn-block">Solicitar</button>
+                <button id="solicitar_substituicao" class="btn btn-primary btn-block">Solicitar</button>
             </div>
         </div>
     </div>

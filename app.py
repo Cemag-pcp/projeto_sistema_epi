@@ -123,28 +123,29 @@ def pagina_inicial():
 
     # SEGUNDA TABELA - Identificar troca de equipamentos
     query_troca = """SELECT 
-                        TO_CHAR(sistema_epi.tb_assinatura.data_assinatura, 'DD/MM/YYYY') AS data_assinatura_formatada,
-                        sistema_epi.tb_solicitacoes.codigo_item,
-                        requisicao.funcionarios.nome AS nome_funcionario_recebe,
-                        sistema_epi.tb_itens.vida_util - EXTRACT(DAY FROM AGE(DATE_TRUNC('day', NOW()), DATE_TRUNC('day', sistema_epi.tb_assinatura.data_assinatura))) AS diferenca_vida_tempo
-                    FROM 
-                        sistema_epi.tb_solicitacoes
-                    LEFT JOIN 
-                        sistema_epi.tb_assinatura ON sistema_epi.tb_solicitacoes.id_solicitacao = sistema_epi.tb_assinatura.id_solicitacao
-                    LEFT JOIN 
-                        sistema_epi.tb_itens ON sistema_epi.tb_solicitacoes.codigo_item LIKE CONCAT('%', sistema_epi.tb_itens.codigo, '%')
-                    LEFT JOIN
-                        requisicao.funcionarios ON sistema_epi.tb_solicitacoes.funcionario_recebe = requisicao.funcionarios.matricula
-                    WHERE 
-                        sistema_epi.tb_assinatura.data_assinatura IS NOT NULL;
-                """
+                TO_CHAR(sistema_epi.tb_assinatura.data_assinatura, 'DD/MM/YYYY') AS data_assinatura_formatada,
+                sistema_epi.tb_solicitacoes.codigo_item,
+                CONCAT(requisicao.funcionarios.matricula, ' - ', requisicao.funcionarios.nome) AS matricula_nome_funcionario_recebe,
+                sistema_epi.tb_itens.vida_util - EXTRACT(DAY FROM AGE(DATE_TRUNC('day', NOW()), DATE_TRUNC('day', sistema_epi.tb_assinatura.data_assinatura))) AS diferenca_vida_tempo
+            FROM 
+                sistema_epi.tb_solicitacoes
+            LEFT JOIN 
+                sistema_epi.tb_assinatura ON sistema_epi.tb_solicitacoes.id_solicitacao = sistema_epi.tb_assinatura.id_solicitacao
+            LEFT JOIN 
+                sistema_epi.tb_itens ON sistema_epi.tb_solicitacoes.codigo_item LIKE CONCAT('%', sistema_epi.tb_itens.codigo, '%')
+            LEFT JOIN
+                requisicao.funcionarios ON sistema_epi.tb_solicitacoes.funcionario_recebe = requisicao.funcionarios.matricula
+            WHERE 
+                sistema_epi.tb_assinatura.data_assinatura IS NOT NULL AND sistema_epi.tb_solicitacoes.status_devolucao IS NULL;
+            """
     
     cur.execute(query_troca)
     lista_itens_assinados = cur.fetchall()
 
-    quantidade_entregas = len(lista_itens_assinados)
+    quantidade_assinados,quantidade_devolucao,quantidade_trabalhadores = cardsPaginaInicial(cur)
 
-    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list,lista_itens_assinados=lista_itens_assinados,quantidade_solicitacoes=quantidade_solicitacoes,quantidade_entregas=quantidade_entregas)
+    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list,lista_itens_assinados=lista_itens_assinados,quantidade_solicitacoes=quantidade_solicitacoes,
+                           quantidade_assinados=quantidade_assinados,quantidade_devolucao=quantidade_devolucao,quantidade_trabalhadores=quantidade_trabalhadores)
 
 @app.route('/receber-assinatura', methods=['POST'])
 @login_required
@@ -212,7 +213,7 @@ def dados_execucao():
         'matricula': info_gerais[-1][2],
         'funcionario': info_gerais[-1][7],
         'data_solicitacao': info_gerais[0][8],
-        'data_assinado': info_gerais[-1][9],
+        'data_assinado': info_gerais[-1][10],
     }
 
     equipamentos = []
@@ -300,6 +301,59 @@ def query_funcionario_solicitante():
 
     return funcionarios, solicitantes
 
+def cardsPaginaInicial(cur):
+
+    query_quantidade_assinatura = """SELECT *
+                    FROM sistema_epi.tb_assinatura
+                     """
+
+    cur.execute(query_quantidade_assinatura)
+    lista_quantidade_assinados = cur.fetchall()
+
+    quantidade_assinados = len(lista_quantidade_assinados)
+
+    query_quantidade_devolucao = """SELECT *
+                                FROM sistema_epi.tb_solicitacoes
+                                WHERE status_devolucao IS NOT NULL"""
+    
+    cur.execute(query_quantidade_devolucao)
+    lista_quantidade_devolucao = cur.fetchall()
+
+    quantidade_devolucao = len(lista_quantidade_devolucao)
+
+    query_quantidade_devolucao = """SELECT *
+                                FROM sistema_epi.tb_solicitacoes
+                                WHERE status_devolucao IS NOT NULL"""
+    
+    cur.execute(query_quantidade_devolucao)
+    lista_quantidade_devolucao = cur.fetchall()
+
+    quantidade_devolucao = len(lista_quantidade_devolucao)
+
+    query_quantidade_trabalhadores = """SELECT DISTINCT funcionario_recebe
+                                    FROM sistema_epi.tb_solicitacoes"""
+    
+    cur.execute(query_quantidade_trabalhadores)
+    lista_quantidade_trabalhadores = cur.fetchall()
+    quantidade_trabalhadores = len(lista_quantidade_trabalhadores)
+
+    return quantidade_assinados,quantidade_devolucao,quantidade_trabalhadores
+
+def verifica_existencia_solicitacao(cur, matricula_recebedor, codigo):
+    """
+    Verifica se já existe uma solicitação com o mesmo matricula_recebedor e código na tabela sistema_epi.tb_solicitacoes.
+    Retorna True se existir, False caso contrário.
+    """
+    sql ="""SELECT *
+            FROM sistema_epi.tb_solicitacoes
+        WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao IS NULL
+        ORDER BY id_solicitacao DESC
+        LIMIT 1;"""
+
+    cur.execute(sql,(matricula_recebedor,codigo))
+
+    return cur.fetchone() is not None
+
 def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
     """
     Função para inputar dados na tabela de solicitações do schema: sistema_epi
@@ -313,7 +367,7 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
         # Adicionar as novas chaves e valores
         item.update(novos_campos)
     
-    print(campos_solicitacao)
+    print("campos_solicitacao",campos_solicitacao)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                     password=DB_PASS, host=DB_HOST)
@@ -328,7 +382,18 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
         motivo = list(item.values())[4]
         matricula_recebedor = list(item.values())[3].split()[0]
 
-        print(id_solicitacao, matricula_solicitante, codigo, quantidade, motivo,matricula_recebedor)
+        if verifica_existencia_solicitacao(cur, matricula_recebedor,codigo) == True:
+
+            query ="""UPDATE sistema_epi.tb_solicitacoes
+            SET status_devolucao = %s
+            WHERE id = (
+                SELECT id
+                    FROM sistema_epi.tb_solicitacoes
+                WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao IS NULL
+                ORDER BY id_solicitacao DESC
+                LIMIT 1);"""
+            
+            cur.execute(query, (motivo,matricula_recebedor,codigo))
 
         sql = """INSERT INTO sistema_epi.tb_solicitacoes 
             (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe)
@@ -461,7 +526,6 @@ def rota_solicitacao_material():
 @app.route('/dashboard', methods=['GET','POST'])
 def dashboard():
 
-    
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('dashboard.html')
 
@@ -510,7 +574,6 @@ def criar_solicitacao():
     for id in lista_id_solicitacao:
         print(id)
         base_tb_historico(id,status,motivo)
-        
     
     return redirect(url_for('rota_solicitacao_material'))
 

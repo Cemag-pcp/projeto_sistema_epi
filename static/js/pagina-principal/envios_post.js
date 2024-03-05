@@ -142,4 +142,61 @@ function dataURLToBlob(dataURL) {
     return new Blob([uInt8Array], { type: contentType });
 }
 
+// Assuming you have a button or event triggering the POST request
+$('#solicitar_substituicao').on('click', function () {
+    // Initialize an array to store the data
+    $('#loading-overlay').show();
+    const requestData = [];
+
+    let invalidInput = false;
+
+    // Use jQuery to select all elements with IDs starting with "equipamentoTroca"
+    $('[id^=equipamentoTroca]').each(function (i) {
+        const quantidadeValue = $('#quantidadeTroca' + i).val();
+
+        // Check if quantidadeValue is empty or less than 1
+        if (!quantidadeValue || parseInt(quantidadeValue) < 1) {
+            // Show an alert and set invalidInput to true
+            exibirMensagem('aviso','Campo de quantidade contém valores inválidos')
+            invalidInput = true;
+            $('#loading-overlay').hide();
+            return false; // Exit the loop
+        }
+        // Create an object to store data for each iteration
+        const data = {
+            solicitante: $('#solicitanteTroca' + i).val(),
+            equipamento: $('#equipamentoTroca' + i).val(),
+            quantidade: quantidadeValue,
+            funcionario: $('#funcionarioTroca' + i).val(),
+            motivo: $('#motivoTroca' + i).val()    
+        };
+
+        // Push the data object into the requestData array
+        requestData.push(data);
+    });
+
+    if (invalidInput) {
+        $('#loading-overlay').hide();
+        return; // Exit the click event handler
+    }
+
+    // Make an AJAX POST request to the Flask route
+    $.ajax({
+        url: '/solicitacao',
+        type: 'POST',
+        data: JSON.stringify(requestData),
+        contentType: 'application/json',
+        success: function () {
+            // Add success parameter to the URL when reloading the page
+            exibirMensagem('sucess','Nova solicitação enviada com sucesso')
+            $("#loading-overlay").hide();
+            window.location.reload();
+        },
+        error: function (error) {
+            console.error('Erro na requisição AJAX:', error);
+            $("#loading-overlay").hide();
+        }
+    });
+});
+
 

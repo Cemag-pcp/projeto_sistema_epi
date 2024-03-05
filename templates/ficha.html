@@ -28,7 +28,7 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="p-3">
-                            <label for="data_filtro">Operador:</label>
+                            <label for="data_filtro">Funcionário:</label>
                             <select class="form-control" id="operadorFicha" name="operadorFicha">
                                 <option value="" selected></option>
                                 {% for funcionario in funcionarios %}
@@ -40,7 +40,7 @@
                     <div class="col-md-6">
                         <div class="p-3">
                             <label for="data_filtro">Data:
-                                <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Se a data estiver em branco, todas as solicitações serão exibidas na ficha">
+                                <button type="button" style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Se a data estiver em branco, todas as solicitações do funcionário serão exibidas na ficha">
                                     <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: gray;"></i>
                                 </button>  
                             </label>
