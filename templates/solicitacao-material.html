@@ -2,9 +2,6 @@
 
 {% block links %}
 
-    <!-- Dropdown input list -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
-
     <link rel="stylesheet" href="/static/css/assinatura.css">
 
 {% endblock %}
@@ -54,7 +51,7 @@
                                     </div>
                                 </div>
                                 <div class="row form-group">
-                                    <div class="col-sm-6">
+                                    <div class="col-sm-10">
                                         <label for="inputOperador">Operador <small>(Para quem?):</small></label>
                                         <div class="input-group">
                                             <input type="text" class="form-control" id="inputOperador" name="nameOperador" autocomplete="off" aria-describedby="basic-addon2" onclick="getId_operadores(this)" required>
