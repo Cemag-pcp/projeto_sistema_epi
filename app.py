@@ -942,7 +942,7 @@ def ficha():
     
     else:
 
-        funcionarios, solicitantes = query_filtro_historico()
+        funcionarios, solicitantes,itens = query_filtro_historico()
     
     return render_template('ficha.html',funcionarios=funcionarios)
 
