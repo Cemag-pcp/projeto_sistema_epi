@@ -13,4 +13,4 @@ pillow==9.3.0
 openpyxl==3.0.9
 pip==21.1.2
 convertapi
-werkzeug==2.0.1
+Werkzeug>=2.2.2
