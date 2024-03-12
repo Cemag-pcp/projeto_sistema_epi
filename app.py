@@ -1,7 +1,6 @@
 import base64
 from PIL import Image
 from io import BytesIO
-from pdfkit import from_file
 from flask import Flask, render_template, request, jsonify,redirect, send_file, url_for,flash,session
 import datetime
 import warnings
@@ -11,9 +10,7 @@ from openpyxl import load_workbook
 from openpyxl.drawing.image import Image as imge
 import psycopg2.extras 
 from functools import wraps
-from psycopg2.extras import execute_values
 from datetime import datetime,timedelta
-import cachetools
 import uuid
 import copy
 import os
