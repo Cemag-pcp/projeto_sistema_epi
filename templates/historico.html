@@ -7,24 +7,25 @@
     <!-- CSS do campo de assinatura -->
     <link rel="stylesheet" href="/static/css/assinatura.css">
 
-    <!-- CSS dropdown inputs -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
-
 {% endblock %}
 
 {% block container %}
 <div class="container-fluid">
+  <!-- Page Heading -->
+    <h1 class="h3 mb-2 text-gray-800">Histórico de Solicitações</h1>
+    <p class="mb-4">Tabela para visualizar o histórico de solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
+
     <div class="card shadow mb-4">
         <div class="card-header py-3">
           <h6 class="m-0 font-weight-bold text-primary">Filtros do Histórico</h6>
         </div>
-        <div class="card-body">
+        <div class="card-body p-5">
             <div class="row">
-              <div class="col-md-4 mb-4">
+              <div class="col-md-3 mb-4">
                 <label for="data_filtro">Data:</label>
                 <input type="text" class="form-control" id="inputDate1" name="datetimes" autocomplete="off">
               </div>
-              <div class="col-md-4 mb-4">
+              <div class="col-md-3 mb-4">
                 <label for="funcionario-historico">Funcionário:</label>
                 <select class="form-control" id="funcionario-historico">
                     <option value="" selected></option>
@@ -33,7 +34,7 @@
                     {% endfor %}
                 </select>
               </div>
-              <div class="col-md-4 mb-4">
+              <div class="col-md-3 mb-4">
                 <label for="solicitante_historico">Solicitante:</label>
                 <select class="form-control" id="solicitante_historico">
                     <option value="" selected></option>
@@ -42,14 +43,21 @@
                     {% endfor %}
                 </select>
               </div>
+              <div class="col-md-3 mb-4">
+                <label for="itens_historico">Equipamento:</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="itens_historico" autocomplete="off" aria-describedby="basic-addon2" required>
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-danger" type="button" onclick="apagarConteudo(this)"><strong>x</strong></button>
+                  </div>
+                </div>
+              <ul class="dropdown-list" id="list_itens_historico">
+              </ul>
+              </div>
             </div>
             <button type="submit" id="filtrar_historico" class="btn btn-primary">Filtrar</button>
         </div>
       </div>
-
-    <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Histórico de Solicitações</h1>
-    <p class="mb-4">Tabela para visualizar o histórico de solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
 
     <!-- DataTales Example -->
     <div class="card shadow mb-4">
@@ -117,6 +125,10 @@
 <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
+<script src="/static/js/historico/populando_lista_historico.js"></script>
+<script src="/static/js/formulario-solicitacao/apagar-input-solicitacao.js"></script>
+<!-- <script src="/static/js/formulario-solicitacao/clonando-populando.js"></script> -->
+
 <script>
 
       function criarLinha(row) {
@@ -143,7 +155,7 @@
           }
       }
 
-      function historicoFuncionario(funcionario,data,solicitante_historico) {
+      function historicoFuncionario(funcionario,data,solicitante_historico,equipamento_historico) {
           $("#loading-overlay").show();
           
           if (funcionario !== null) {
@@ -170,7 +182,7 @@
             type: 'POST',
             dataType: 'json',
             contentType: 'application/json',
-            data: JSON.stringify({ 'matricula': matricula , 'data': data, 'solicitante_historico':matricula_solicitante}),
+            data: JSON.stringify({ 'matricula': matricula , 'data': data, 'solicitante_historico':matricula_solicitante,'equipamento_historico':equipamento_historico}),
             success: function (response) {
                 console.log('Response:', response);
                 atualizarTabela(response);
@@ -195,7 +207,8 @@
           funcionario = $('#funcionario-historico').val();
           data = $('#inputDate1').val();
           solicitante_historico = $('#solicitante_historico').val();
-          historicoFuncionario(funcionario,data,solicitante_historico);
+          equipamento_historico = $('#itens_historico').val();
+          historicoFuncionario(funcionario,data,solicitante_historico,equipamento_historico);
       });
 
 </script>
@@ -241,24 +254,6 @@
       });
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-      // Obter o elemento de input
-      var inputElement = document.getElementById("inputDate1");
-
-      // Verificar se há um valor salvo no armazenamento local
-      var savedValue = localStorage.getItem("inputDate1");
-
-      // Se houver um valor salvo, definir o valor do input
-      if (savedValue !== null) {
-        inputElement.value = savedValue;
-      }
-
-      // Adicionar um ouvinte de evento para salvar o valor quando o usuário digitar
-      inputElement.addEventListener("input", function () {
-        // Salvar o valor no armazenamento local
-        localStorage.setItem("inputDate1", inputElement.value);
-      });
-    });
   </script>
 
 {% endblock %}

@@ -16,10 +16,120 @@
 <div class="container-fluid">
 
     <!-- Page Heading -->
-    <h1 class="h3 mb-2 text-gray-800">Tabela de Solicitações</h1>
-    <p class="mb-4">Tabela principal para visualizar as solicitações de <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
+    <h1 class="h3 mb-2 text-gray-800">Sistema de Controle de EPI - Panorama Geral</h1>
+    <p class="mb-4">Tabelas para visualizar as entregas e solicitações dos <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
 
-    <!-- DataTales Example -->
+    <!-- DataTale Itens Entregues -->
+    <div class="row">
+        <div class="col-sm-3 mb-2">
+            <div class="row">
+                <div class="col-xl-12 mb-4">
+                    <div class="card border-left-success shadow h-100 py-3">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Quantidade de Entregas</div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_assinados}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+        
+                <div class="col-xl-12 mb-4">
+                    <div class="card border-left-info shadow h-100 py-3">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Quantidade de Solicitações</div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+            <div class="row">
+                <div class="col-xl-12 mb-4">
+                    <div class="card border-left-secondary shadow h-100 py-3">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">N° de trabalhadores que receberam EPI</div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_trabalhadores}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+        
+                <div class="col-xl-12 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-3">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EPI's substituidas</div>
+                                </div>
+                                <div class="col-auto">
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_devolucao}}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> 
+            </div>
+        </div>
+        <div class="col-sm-9 mb-2">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Tabela de itens entregues</h6>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="dataTable_entregas" width="100%" cellspacing="0" style="font-size: 14px;">
+                            <thead>
+                                <tr>
+                                    <th>Data Entrega</th>
+                                    <th>Item</th>
+                                    <th>Funcionário</th>
+                                    <th>Tempo para troca (em dias)</th>
+                                </tr>
+                            </thead>
+                            <tfoot>
+                                <tr>
+                                    <th>Data Entrega</th>
+                                    <th>Item</th>
+                                    <th>Funcionário</th>
+                                    <th>Tempo para troca (em dias)</th>
+                                </tr>
+                            </tfoot>
+                            <tbody>
+                                {% for dados in lista_itens_assinados %}
+                                <tr class="all_linha">
+                                    <td>{{dados[0]}}</td>
+                                    <td>{{dados[1]}}</td>
+                                    <td>{{dados[2]}}</td>
+                                    <td>{{dados[3]}}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button id="envio_troca" style="font-size: 14px;" class="btn btn-primary btn-block w-25">Enviar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DataTale Solicitações -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
             <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
@@ -64,7 +174,7 @@
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0" style="font-size: 14px;">
                     <thead>
                         <tr>
                             <th>Data</th>
@@ -97,7 +207,7 @@
                             <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}" style="max-width: 150px; cursor: default;">{{row[2]}}</td>
                             <td>{{row[4]}}</td>
                             <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}" style="max-width: 200px; cursor: default;">{{row[3]}}</td>
-                            {% if row[10] == None %}
+                            {% if row[11] == None %}
                             <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                             {% else %}
                             <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
@@ -234,6 +344,47 @@
     </div>
 </div>
 
+<!-- Modal Solicitação (Ao clciar em Enviar na tela principal) -->
+<div class="modal fade" data-backdrop="static" id="modalSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalSolicitacaoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                <h5 class="modal-title" id="numeroOrdem_edicao">Solicitar itens vencidos</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="modalSolicitacaoBody" class="modal-body" style="overflow-y: auto; height: 550px;">
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <label>Equipamento</label>
+                        <input id="equipamentoTroca" class="form-control" readonly>
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        <label>Solicitante</label>
+                        <input id="solicitanteTroca" class="form-control" readonly>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 mb-4">
+                        <label>Motivo</label>
+                        <input id="motivoTroca" class="form-control" readonly>
+                    </div>
+                    <div class="col-sm-6 mb-4">
+                        <label>Funcionário</label>
+                        <input id="funcionarioTroca" class="form-control" readonly>
+                    </div>
+                </div>
+            </div> 
+            <div class="modal-footer">
+                <button id="solicitar_substituicao" class="btn btn-primary btn-block">Solicitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Modal para excluir maquina -->
 <div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -306,5 +457,47 @@
 <script src="static/js/pagina-principal/lista_input.js"></script>
 <script src="static/js/pagina-principal/modal.js"></script>
 <script src="static/js/pagina-principal/vida_util.js"></script>
+
+<script>
+    var valoresClicados = [];
+
+   document.addEventListener('DOMContentLoaded', function () {
+    var linhas = document.querySelectorAll('.all_linha');
+    
+    linhas.forEach(function (linha) {
+        linha.addEventListener('click', function () {
+            linha.classList.toggle('clicked');
+
+            if (linha.classList.contains('clicked')) {
+                var valores = extrairValoresDaLinha(linha);
+                valoresClicados.push(valores);
+            } else {
+                var index = valoresClicados.findIndex(function (item) {
+                    return item[0] === linha;
+                });
+
+                if (index !== -1) {
+                    valoresClicados.splice(index, 1);
+                }
+            }
+        });
+    });
+    
+
+    function extrairValoresDaLinha(linha) {
+        var elementos = linha.getElementsByTagName('td');
+        var valores = [];
+
+        for (var i = 1; i <= 3; i++) {
+            valores.push(elementos[i].textContent);
+        }
+
+        valores.unshift(linha);
+
+        return valores;
+    }
+});
+
+</script>
 
 {% endblock %}

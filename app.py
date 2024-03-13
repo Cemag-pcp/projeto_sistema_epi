@@ -75,19 +75,22 @@ def pagina_inicial():
                             password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    # PRIMEIRA TABELA - Todos os itens solicitados
     s = """SELECT
             solic.*,
             hist.status,
-            ass.assinatura,ass.data_assinatura
-            FROM sistema_epi.tb_solicitacoes AS solic
-            LEFT JOIN (
+            ass.assinatura,
+            ass.data_assinatura
+        FROM sistema_epi.tb_solicitacoes AS solic
+        LEFT JOIN (
             SELECT
                 id_solicitacao,
                 status,
                 ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
             FROM sistema_epi.tb_historico_solicitacoes
-            ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
-            LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao;
+        ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
+        LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
+        WHERE solic.status_devolucao IS NULL;
         """
 
     tb_solicitacoes = pd.read_sql_query(s, conn)
@@ -115,7 +118,31 @@ def pagina_inicial():
 
     tb_solicitacoes_list = tb_solicitacoes.values.tolist()
 
-    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list)
+    # SEGUNDA TABELA - Identificar troca de equipamentos
+    query_troca = """SELECT 
+                TO_CHAR(sistema_epi.tb_assinatura.data_assinatura, 'DD/MM/YYYY') AS data_assinatura_formatada,
+                sistema_epi.tb_solicitacoes.codigo_item,
+                CONCAT(requisicao.funcionarios.matricula, ' - ', requisicao.funcionarios.nome) AS matricula_nome_funcionario_recebe,
+                sistema_epi.tb_itens.vida_util - EXTRACT(DAY FROM AGE(DATE_TRUNC('day', NOW()), DATE_TRUNC('day', sistema_epi.tb_assinatura.data_assinatura))) AS diferenca_vida_tempo
+            FROM 
+                sistema_epi.tb_solicitacoes
+            LEFT JOIN 
+                sistema_epi.tb_assinatura ON sistema_epi.tb_solicitacoes.id_solicitacao = sistema_epi.tb_assinatura.id_solicitacao
+            LEFT JOIN 
+                sistema_epi.tb_itens ON sistema_epi.tb_solicitacoes.codigo_item LIKE CONCAT('%', sistema_epi.tb_itens.codigo, '%')
+            LEFT JOIN
+                requisicao.funcionarios ON sistema_epi.tb_solicitacoes.funcionario_recebe = requisicao.funcionarios.matricula
+            WHERE 
+                sistema_epi.tb_assinatura.data_assinatura IS NOT NULL AND sistema_epi.tb_solicitacoes.status_devolucao IS NULL;
+            """
+    
+    cur.execute(query_troca)
+    lista_itens_assinados = cur.fetchall()
+
+    quantidade_assinados,quantidade_devolucao,quantidade_trabalhadores,quantidade_solicitacoes = cardsPaginaInicial(cur)
+
+    return render_template('home.html',tb_solicitacoes_list=tb_solicitacoes_list,lista_itens_assinados=lista_itens_assinados,quantidade_solicitacoes=quantidade_solicitacoes,
+                           quantidade_assinados=quantidade_assinados,quantidade_devolucao=quantidade_devolucao,quantidade_trabalhadores=quantidade_trabalhadores)
 
 @app.route('/receber-assinatura', methods=['POST'])
 @login_required
@@ -183,7 +210,7 @@ def dados_execucao():
         'matricula': info_gerais[-1][2],
         'funcionario': info_gerais[-1][7],
         'data_solicitacao': info_gerais[0][8],
-        'data_assinado': info_gerais[-1][9],
+        'data_assinado': info_gerais[-1][10],
     }
 
     equipamentos = []
@@ -238,7 +265,7 @@ def gerar_id_solicitacao():
     return str(uuid.uuid1())
 
 
-def query_funcionario_solicitante():
+def query_filtro_historico():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)
@@ -261,6 +288,11 @@ def query_funcionario_solicitante():
                                 ) AS subconsulta
                             """
     
+    query_itens = """
+                        SELECT DISTINCT CONCAT(codigo,' - ',descricao)
+                        FROM sistema_epi.tb_itens
+                        """
+    
     cur.execute(query_funcionarios)
         
     funcionarios = cur.fetchall()
@@ -268,8 +300,71 @@ def query_funcionario_solicitante():
     cur.execute(query_solicitante)
     
     solicitantes = cur.fetchall()
+    
+    cur.execute(query_itens)
+    
+    itens = cur.fetchall()
 
-    return funcionarios, solicitantes
+    return funcionarios, solicitantes, itens
+
+def cardsPaginaInicial(cur):
+
+    query_quantidade_assinatura = """SELECT *
+                    FROM sistema_epi.tb_assinatura
+                     """
+
+    cur.execute(query_quantidade_assinatura)
+    lista_quantidade_assinados = cur.fetchall()
+
+    quantidade_assinados = len(lista_quantidade_assinados)
+
+    query_quantidade_devolucao = """SELECT *
+                                FROM sistema_epi.tb_solicitacoes
+                                WHERE status_devolucao IS NOT NULL"""
+    
+    cur.execute(query_quantidade_devolucao)
+    lista_quantidade_devolucao = cur.fetchall()
+
+    quantidade_devolucao = len(lista_quantidade_devolucao)
+
+    query_quantidade_devolucao = """SELECT *
+                                FROM sistema_epi.tb_solicitacoes
+                                WHERE status_devolucao IS NOT NULL"""
+    
+    cur.execute(query_quantidade_devolucao)
+    lista_quantidade_devolucao = cur.fetchall()
+
+    quantidade_devolucao = len(lista_quantidade_devolucao)
+
+    query_quantidade_trabalhadores = """SELECT DISTINCT funcionario_recebe
+                                    FROM sistema_epi.tb_solicitacoes"""
+    
+    cur.execute(query_quantidade_trabalhadores)
+    lista_quantidade_trabalhadores = cur.fetchall()
+    quantidade_trabalhadores = len(lista_quantidade_trabalhadores)
+
+    query_quantidade_solicitacoes = """SELECT DISTINCT id_solicitacao
+                                    FROM sistema_epi.tb_solicitacoes"""
+    cur.execute(query_quantidade_solicitacoes)
+    lista_quantidade_solicitacoes = cur.fetchall()
+    quantidade_solicitacoes = len(lista_quantidade_solicitacoes)
+
+    return quantidade_assinados,quantidade_devolucao,quantidade_trabalhadores,quantidade_solicitacoes
+
+def verifica_existencia_solicitacao(cur, matricula_recebedor, codigo):
+    """
+    Verifica se já existe uma solicitação com o mesmo matricula_recebedor e código na tabela sistema_epi.tb_solicitacoes.
+    Retorna True se existir, False caso contrário.
+    """
+    sql ="""SELECT *
+            FROM sistema_epi.tb_solicitacoes
+        WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao IS NULL
+        ORDER BY id_solicitacao DESC
+        LIMIT 1;"""
+
+    cur.execute(sql,(matricula_recebedor,codigo))
+
+    return cur.fetchone() is not None
 
 def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
     """
@@ -284,7 +379,7 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
         # Adicionar as novas chaves e valores
         item.update(novos_campos)
     
-    print(campos_solicitacao)
+    print("campos_solicitacao",campos_solicitacao)
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                     password=DB_PASS, host=DB_HOST)
@@ -299,7 +394,18 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
         motivo = list(item.values())[4]
         matricula_recebedor = list(item.values())[3].split()[0]
 
-        print(id_solicitacao, matricula_solicitante, codigo, quantidade, motivo,matricula_recebedor)
+        if verifica_existencia_solicitacao(cur, matricula_recebedor,codigo) == True:
+
+            query ="""UPDATE sistema_epi.tb_solicitacoes
+            SET status_devolucao = %s
+            WHERE id = (
+                SELECT id
+                    FROM sistema_epi.tb_solicitacoes
+                WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao IS NULL
+                ORDER BY id_solicitacao DESC
+                LIMIT 1);"""
+            
+            cur.execute(query, (motivo,matricula_recebedor,codigo))
 
         sql = """INSERT INTO sistema_epi.tb_solicitacoes 
             (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe)
@@ -406,6 +512,10 @@ def setor_operador(operador):
 @app.route('/solicitacao-material', methods=['GET','POST'])
 def rota_solicitacao_material():
 
+    """
+    Rota para de solicitação de material
+    """
+
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -421,10 +531,6 @@ def rota_solicitacao_material():
 
     nome = solicitante.split(' - ')[1]
 
-    """
-    Rota para de solicitação de material
-    """
-
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('solicitacao-material.html', solicitante=solicitante,nome=nome)
 
@@ -432,7 +538,6 @@ def rota_solicitacao_material():
 @app.route('/dashboard', methods=['GET','POST'])
 def dashboard():
 
-    
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
     return render_template('dashboard.html')
 
@@ -481,7 +586,6 @@ def criar_solicitacao():
     for id in lista_id_solicitacao:
         print(id)
         base_tb_historico(id,status,motivo)
-        
     
     return redirect(url_for('rota_solicitacao_material'))
 
@@ -620,7 +724,7 @@ def excluir_equipamento():
     return 'Dados recebidos com sucesso!'
 
 
-def condicao_historico(matricula, data_solicit,solicitante_historico):
+def condicao_historico(matricula, data_solicit,solicitante_historico,equipamento_historico):
 
     consulta_padrao = """
                     SELECT 
@@ -650,6 +754,8 @@ def condicao_historico(matricula, data_solicit,solicitante_historico):
         consulta_padrao += f" AND s.data_solicitada >= '{mes_inicial_formatado}' AND s.data_solicitada <= '{mes_final_formatado}'"
     if solicitante_historico:
         consulta_padrao += f" AND s.matricula_solicitante = '{solicitante_historico}'"
+    if equipamento_historico:
+        consulta_padrao += f" AND s.codigo_item = '{equipamento_historico}'"
 
     consulta_padrao += ' ORDER BY s.id desc;'
 
@@ -673,7 +779,9 @@ def historico():
 
         solicitante_historico = data['solicitante_historico']
 
-        query_historico = condicao_historico(matricula,data_solicit,solicitante_historico)
+        equipamento_historico = data['equipamento_historico']
+
+        query_historico = condicao_historico(matricula,data_solicit,solicitante_historico,equipamento_historico)
         
         cur.execute(query_historico)
         
@@ -695,9 +803,9 @@ def historico():
         return jsonify(historicos_dicts)
 
     else:
-        funcionarios, solicitantes = query_funcionario_solicitante()
+        funcionarios, solicitantes, itens = query_filtro_historico()
     
-    return render_template('historico.html',funcionarios=funcionarios,solicitantes=solicitantes)
+    return render_template('historico.html',funcionarios=funcionarios,solicitantes=solicitantes,itens=itens)
     
 @app.route('/ficha', methods=['GET','POST'])
 @login_required
@@ -831,7 +939,7 @@ def ficha():
     
     else:
 
-        funcionarios, solicitantes = query_funcionario_solicitante()
+        funcionarios, solicitantes,itens = query_filtro_historico()
     
     return render_template('ficha.html',funcionarios=funcionarios)
 

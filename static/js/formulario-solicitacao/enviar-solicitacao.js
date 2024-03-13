@@ -83,6 +83,11 @@
 // Enviar solicitação para o backend
 function enviarSolicitacao() {
 
+    if (verificarDuplicatas()) {
+        exibirMensagem('aviso','Digite as informações corretas para gerar a solicitação')
+        return;
+    }
+
     $("#loading-overlay").show();
     
     document.getElementById('btnEnviarSolicitacao').disabled = true;
@@ -144,7 +149,7 @@ function enviarSolicitacao() {
 
     // Verifique se pelo menos um botão de rádio foi marcado em algum grupo
     if (!radioMarcado) {
-        alert("Selecione uma opção de rádio em cada grupo")
+        exibirMensagem('aviso','Selecione uma opção de rádio em cada grupo')
         // exibirMensagem("aviso","Selecione uma opção de rádio em cada grupo")
         $("#loading-overlay").hide();
         document.getElementById('btnEnviarSolicitacao').disabled = false;
@@ -153,7 +158,7 @@ function enviarSolicitacao() {
 
     // Se algum campo estiver em branco, pare o loop
     if (campoEmBrancoEncontrado) {
-        alert("Preencha todos os campos")
+        exibirMensagem('aviso','Preencha todos os campos')
         // exibirMensagem("aviso","Preencha todos os campos")
         $("#loading-overlay").hide();
         document.getElementById('btnEnviarSolicitacao').disabled = false;
@@ -168,6 +173,7 @@ function enviarSolicitacao() {
         contentType: 'application/json',
         success: function () {
             // Adicione o parâmetro de sucesso à URL ao recarregar a página
+            exibirMensagem('sucess','Enviado com sucesso')
             $("#loading-overlay").hide();
             window.location.reload();
         },
@@ -178,4 +184,35 @@ function enviarSolicitacao() {
     });
 }
 // Fim Enviar solicitação para o backend
+
+// Função para verificar duplicatas
+function verificarDuplicatas() {
+    var inputsCodigo = document.querySelectorAll('[id^="inputCodigo"]');
+    var inputsOperador = document.querySelectorAll('[id^="inputOperador"]');
+    var inputsQuantidade = document.querySelectorAll('[id^="inputQuantidade"]');
+    var valoresCodigoOperadorQuantidade = [];
+
+    // Itere sobre os inputs de código, operador e quantidade simultaneamente
+    for (var i = 0; i < inputsCodigo.length; i++) {
+        var valorCodigo = inputsCodigo[i].value.trim();
+        var valorOperador = inputsOperador[i].value.trim();
+        var valorQuantidade = inputsQuantidade[i].value.trim();
+
+        // Verifique se a quantidade é menor que 1
+        if (parseInt(valorQuantidade) < 1) {
+            return true; // Quantidade menor que 1 encontrada
+        }
+
+        var chave = valorCodigo + '-' + valorOperador;
+
+        // Verifique se a combinação já existe no array
+        if (valoresCodigoOperadorQuantidade.includes(chave)) {
+            return true; // Duplicata encontrada
+        }
+
+        valoresCodigoOperadorQuantidade.push(chave);
+    }
+
+    return false; // Nenhuma duplicata ou quantidade menor que 1 encontrada
+}
 
