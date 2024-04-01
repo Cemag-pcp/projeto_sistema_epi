@@ -823,13 +823,18 @@ def ficha():
 
         matricula, operador = operadorFicha.split(' - ')
 
+        query_funcionario = f""" SELECT funcao, data_admissao,setor FROM requisicao.funcionarios WHERE nome = '{operador}'"""
+        
+        cur.execute(query_funcionario)
+        funcao_admissao = cur.fetchall()
+
         dateFicha = data['dateFicha']
 
         print(dateFicha)
 
         query = f"""
                     SELECT 
-                        s.data_solicitada,
+                        a.data_assinatura,
                         s.quantidade,
                         s.codigo_item,
                         s.motivo,
@@ -851,7 +856,7 @@ def ficha():
 
             mes_inicial_formatado = mes_inicial.strftime('%Y-%m-%d')
             mes_final_formatado = mes_final.strftime('%Y-%m-%d')
-            query += f" AND s.data_solicitada >= '{mes_inicial_formatado}' AND s.data_solicitada <= '{mes_final_formatado}'"
+            query += f" AND a.data_assinatura >= '{mes_inicial_formatado}' AND a.data_assinatura <= '{mes_final_formatado}'"
 
         cur.execute(query)
         lista_solicitacoes = cur.fetchall()
@@ -897,6 +902,9 @@ def ficha():
             num_assinaturas.append(i)
             ws['B4'] = operador
             ws['B5'] = int(matricula.replace(',', ''))
+            ws['B6'] = funcao_admissao[0][0]
+            ws['B7'] = funcao_admissao[0][1]
+            ws['B8'] = funcao_admissao[0][2]
 
             linha_destino = 27 + i
 
@@ -919,6 +927,15 @@ def ficha():
 
             # Abre a imagem PIL
             image = Image.open(image_buffer)
+
+            image_fixo = Image.open(image_buffer)
+
+            image_fixo.save(f"assinaturaL.png")
+
+            img_fixo = imge(f"assinaturaL.png")
+
+            img_fixo.height = 130
+            img_fixo.width = 150
             
             image.save(f"assinatura{i}.png")
 
@@ -927,13 +944,15 @@ def ficha():
             img.width = 150
             ws.add_image(img, f'G{linha_destino}')
 
-            
+        ws.add_image(img_fixo,'B22')
+        
         wb.save(r'downloads/Nova_ficha.xlsx')
         
         wb.close()
 
         for num in num_assinaturas:
             os.remove(f"assinatura{num}.png")
+        os.remove(f"assinaturaL.png")
 
         return jsonify('OK')
     
