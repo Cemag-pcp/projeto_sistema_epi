@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
 
 {% block links %}
-    <!-- CSS datatable -->
-    <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
-    
-    <!-- CSS do campo de assinatura -->
-    <link rel="stylesheet" href="/static/css/assinatura.css">
+<!-- CSS datatable -->
+<link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
-    <!-- CSS dropdown inputs -->
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+<!-- CSS do campo de assinatura -->
+<link rel="stylesheet" href="/static/css/assinatura.css">
+
+<!-- CSS dropdown inputs -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
 
 {% endblock %}
 
@@ -17,18 +20,21 @@
 
     <!-- Page Heading -->
     <h1 class="h3 mb-2 text-gray-800">Sistema de Controle de EPI - Panorama Geral</h1>
-    <p class="mb-4">Tabelas para visualizar as entregas e solicitações dos <code>Equipamentos de Proteção Individual (EPI)</code>.</p>
+    <p class="mb-4">Visualização de entregas e solicitações dos
+        <code>Equipamentos de Proteção Individual (EPI)</code>.
+    </p>
 
     <!-- DataTale Itens Entregues -->
     <div class="row">
-        <div class="col-sm-3 mb-2">
+        <div class="col-md-7 col-12 mb-2">
             <div class="row">
-                <div class="col-xl-12 mb-4">
+                <div class="col-xl-6 col-sm-6 mb-4">
                     <div class="card border-left-success shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Qnt. de Entregas</div>
+                                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Qnt. de
+                                        Entregas</div>
                                 </div>
                                 <div class="col-auto">
                                     <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_assinados}}</div>
@@ -37,44 +43,49 @@
                         </div>
                     </div>
                 </div>
-        
-                <div class="col-xl-12 mb-4">
+
+                <div class="col-xl-6 col-sm-6 mb-4">
                     <div class="card border-left-info shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Qnt. de Solicitações</div>
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Qnt. de
+                                        Solicitações</div>
                                 </div>
                                 <div class="col-auto">
-                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
             <div class="row">
-                <div class="col-xl-12 mb-4">
+                <div class="col-xl-6 col-sm-6 mb-4">
                     <div class="card border-left-secondary shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Trabalhoradores que receberam EPI</div>
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                        Trabalhoradores que receberam EPI</div>
                                 </div>
                                 <div class="col-auto">
-                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_trabalhadores}}</div>
+                                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_trabalhadores}}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div> 
-        
-                <div class="col-xl-12 mb-4">
+                </div>
+
+                <div class="col-xl-6 col-sm-6 mb-4">
                     <div class="card border-left-primary shadow h-100 py-3">
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EPI's substituidas</div>
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">EPI's
+                                        substituidas</div>
                                 </div>
                                 <div class="col-auto">
                                     <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_devolucao}}</div>
@@ -82,48 +93,48 @@
                             </div>
                         </div>
                     </div>
-                </div> 
+                </div>
             </div>
         </div>
-        <div class="col-sm-9 mb-2">
+        <div class="col-md-5 col-12 mb-2">
             <div class="card shadow mb-4">
                 <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Tabela de itens entregues</h6>
+                    <h6 class="m-0 font-weight-bold text-primary">Controle para renovação de entregas</h6>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="dataTable_entregas" width="100%" cellspacing="0" style="font-size: 14px;">
-                            <thead>
-                                <tr>
-                                    <th>Data Entrega</th>
-                                    <th>Item</th>
-                                    <th>Funcionário</th>
-                                    <th>Tempo para troca (em dias)</th>
-                                </tr>
-                            </thead>
-                            <tfoot>
-                                <tr>
-                                    <th>Data Entrega</th>
-                                    <th>Item</th>
-                                    <th>Funcionário</th>
-                                    <th>Tempo para troca (em dias)</th>
-                                </tr>
-                            </tfoot>
-                            <tbody>
-                                {% for dados in lista_itens_assinados %}
-                                <tr class="all_linha">
-                                    <td>{{dados[0]}}</td>
-                                    <td>{{dados[1]}}</td>
-                                    <td>{{dados[2]}}</td>
-                                    <td>{{dados[3]}}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <div id="no-more-tables">
+                        <div class="table-responsive">
+                            <table class="table table-bordered display no-more-tables" id="dataTable_entregas"
+                                cellspacing="0" style="font-size: 14px;">
+                                <thead class="cf">
+                                    <tr>
+                                        <th style="display: none;">Data Entrega</th>
+                                        <th>Item</th>
+                                        <th style="display: none;">Funcionário</th>
+                                        <th>Tempo para troca (em dias)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dados in lista_itens_assinados %}
+                                    <tr class="all_linha">
+                                        <td data-title="Data Entrega" style="display: none;">{{dados[0]}}</td>
+                                        <td data-title="Item" class="text-truncate" data-toggle="tooltip"
+                                            data-placement="top" title="{{dados[1]}}"
+                                            style="max-width: 200px; cursor: default;">
+                                            {{dados[1]}}
+                                        </td>
+                                        <td data-title="Funcionário" style="display: none;">{{dados[2]}}</td>
+                                        <td data-title="Próxima troca">{{dados[3]}}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
                 <div class="card-footer">
-                    <button id="envio_troca" style="font-size: 14px;" class="btn btn-primary btn-block w-25">Enviar</button>
+                    <button id="envio_troca" style="font-size: 14px;"
+                        class="btn btn-primary btn-block w-25">Enviar</button>
                 </div>
             </div>
         </div>
@@ -132,36 +143,38 @@
     <!-- DataTale Solicitações -->
     <div class="card shadow mb-4">
         <div class="card-header py-3">
-            <h6 class="m-0 font-weight-bold text-primary">Filtros</h6>
+            <h6 class="m-0 font-weight-bold text-primary">Solicitações</h6>
             <hr>
             <div class="row">
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="data-filter">Data</label>
                     <input class="form-control" id="data-filter" name="data-filter" autocomplete="off">
                 </div>
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="funcionario-filter">Funcionário</label>
                     <input class="form-control" id="funcionario-filter" name="funcionario-filter" autocomplete="off">
                 </div>
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="solicitante-filter">Solicitante</label>
                     <input id="solicitante-filter" class="form-control" autocomplete="off">
                 </div>
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="equipamento-filter">Equipamento</label>
                     <input id="equipamento-filter" class="form-control" autocomplete="off">
                 </div>
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="assinatura-filter">Assinatura</label>
-                    <select class="form-control form-control" id="assinatura-filter" style='padding: .375rem .25rem;' name="natureza-filter">
+                    <select class="form-control form-control" id="assinatura-filter" style='padding: .375rem .25rem;'
+                        name="natureza-filter">
                         <option value="">Todos</option>
                         <option>Solicitação Assinada</option>
                         <option>Assinatura Pendente</option>
                     </select>
                 </div>
-                <div class="col-sm-2 mb-2">
+                <div class="col-sm-2 col-sm-4 mb-2">
                     <label for="motivo-filter">Motivo</label>
-                    <select class="form-control form-control" id="motivo-filter" style='padding: .375rem .25rem;' name="risco-filter">
+                    <select class="form-control form-control" id="motivo-filter" style='padding: .375rem .25rem;'
+                        name="risco-filter">
                         <option value="">Todos</option>
                         <option>Perda</option>
                         <option>Dano</option>
@@ -173,331 +186,343 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0" style="font-size: 14px;">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th>Funcionário</th>
-                            <th>Solicitante</th>
-                            <th>Quantidade</th>
-                            <th>Equipamento</th>
-                            <th>Assinatura</th>
-                            <th>Motivo</th>
-                            <th>Opções</th>
-                        </tr>
-                    </thead>
-                    <tfoot>
-                        <tr>
-                            <th>Data</th>
-                            <th>Funcionário</th>
-                            <th>Solicitante</th>
-                            <th>Quantidade</th>
-                            <th>Equipamento</th>
-                            <th>Assinatura</th>
-                            <th>Motivo</th>
-                            <th>Opções</th>
-                        </tr>
-                    </tfoot>
-                    <tbody>
-                        {% for row in tb_solicitacoes_list %}
-                        <tr>
-                            <td style="max-width: 100px;">{{row[8]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[7]}}" style="max-width: 150px; cursor: default;">{{row[7]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}" style="max-width: 150px; cursor: default;">{{row[2]}}</td>
-                            <td>{{row[4]}}</td>
-                            <td class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}" style="max-width: 200px; cursor: default;">{{row[3]}}</td>
-                            {% if row[11] == None %}
-                            <td><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')" class="btn btn-warning btn-block">Assinatura Pendente</button></td>
-                            {% else %}
-                            <td><button class="btn btn-success btn-block" title="Agora está habilitado salvar as informações no campo de execução" disabled>Solicitação Assinada</button></td>
-                            {% endif %}
-                            <td>{{row[5]}}</td>
-                            <td style="align-items: center;">
-                                <div class="col-sm-4 d-flex justify-content-center align-items-center" style="padding-left: 0.35rem;">
-                                    <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="cursor: pointer;">
-                                        <i class="fa-solid fa-angle-down"></i>
-                                    </a>
-                                    <!-- </button> -->
-                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
-                                        <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;" onclick="modalExecucao('{{ row[0] }}','{{ row[7] }}','{{ row[2] }}')"> 
-                                            <i class="fa-solid fa-pencil"></i> Editar
+            <div id="no-more-tables">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0"
+                        style="font-size: 14px;">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Funcionário</th>
+                                <th>Solicitante</th>
+                                <th>Quantidade</th>
+                                <th>Equipamento</th>
+                                <th>Assinatura</th>
+                                <th>Motivo</th>
+                                <th>Opções</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in tb_solicitacoes_list %}
+                            <tr>
+                                <td data-title="Data" style="max-width: 100px;">{{row[8]}}</td>
+                                <td data-title="Funcionário" class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[7]}}"
+                                    style="max-width: 150px; cursor: default;">{{row[7]}}
+                                </td>
+                                <td data-title="Solicitante" class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[2]}}"
+                                    style="max-width: 150px; cursor: default;">{{row[2]}}
+                                </td>
+                                <td data-title="Quantidade" >{{row[4]}}</td>
+                                <td data-title="Equipamento" class="text-truncate" data-toggle="tooltip" data-placement="top" title="{{row[3]}}"
+                                    style="max-width: 200px; cursor: default;">{{row[3]}}
+                                </td>
+                                {% if row[11] == None %}
+                                <td data-title="Assinatura" ><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')"
+                                        class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                                {% else %}
+                                <td data-title="Assinatura" ><button class="btn btn-success btn-block"
+                                        title="Agora está habilitado salvar as informações no campo de execução"
+                                        disabled>Solicitação Assinada</button></td>
+                                {% endif %}
+                                <td data-title="Motivo" >{{row[5]}}</td>
+                                <td data-title="Opções" style="align-items: center;">
+                                    <div class="col-sm-4 d-flex justify-content-center align-items-center"
+                                        style="padding-left: 0.35rem;">
+                                        <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                            style="cursor: pointer;">
+                                            <i class="fa-solid fa-angle-down"></i>
                                         </a>
-                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
+                                        <!-- </button> -->
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+                                            <a id="btn_exec" class="dropdown-item dropdown_os" style="cursor: pointer;"
+                                                onclick="modalExecucao('{{ row[0] }}','{{ row[7] }}','{{ row[2] }}')">
+                                                <i class="fa-solid fa-pencil"></i> Editar
+                                            </a>
+                                            <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
                                             <i class="fa-solid fa-pencil"></i> Editar
                                         </a> -->
-                                        <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
+                                            <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
                                             <i class="fas fa-clock"></i> Histórico 
                                         </a> -->
-                                        <a class = "dropdown-item dropdown_os dropdownsss" style="cursor: pointer;" class="btn" onclick="modalExcluirSolicitacao('{{ row[7] }}','{{ row[0] }}')"> 
-                                            <i class="fas fa-trash"></i> Excluir 
-                                        </a>
+                                            <a class="dropdown-item dropdown_os dropdownsss" style="cursor: pointer;"
+                                                class="btn"
+                                                onclick="modalExcluirSolicitacao('{{ row[7] }}','{{ row[0] }}')">
+                                                <i class="fas fa-trash"></i> Excluir
+                                            </a>
+                                        </div>
                                     </div>
-                                </div>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
-    </div>
-</div>
 
-<!-- Modal edição de execução -->
-<div class="modal fade" data-backdrop="static" id="modalExecutarSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalExecutarSolicitacaoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao">Edição</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="overflow-y: auto; height: 550px;">
-                <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
-                <hr>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <label>Data da solicitação:</label>
-                        <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value="" class="form-control" disabled>
-                    </div>
-                    <div class="col-sm-8 mb-2">
-                        <label>Solicitante</label>
-                        <input type="text" class="form-control" id="solicitante_execucao" disabled>
-                    </div>
+    </div>
+
+    <!-- Modal edição de execução -->
+    <div class="modal fade" data-backdrop="static" id="modalExecutarSolicitacao" tabindex="-1" role="dialog"
+        aria-labelledby="modalExecutarSolicitacaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                    <h5 class="modal-title" id="numeroOrdem_edicao">Edição</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="row">
-                    <div class="col-sm-4 mb-2">
-                        <div class="info_data">
-                            <label>Data de Entrega</label>
+                <div class="modal-body" style="overflow-y: auto; height: 550px;">
+                    <h6 class="m-0 font-weight-bold text-primary">Informações gerais</h6>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <label>Data da solicitação:</label>
+                            <input type="datetime" name="dataSolicitacao" id="dataSolicitacao" value=""
+                                class="form-control" disabled>
                         </div>
-                        <input type="datetime" class="form-control" id="data_entrega_execucao" autocomplete="off" disabled> 
+                        <div class="col-sm-8 mb-2">
+                            <label>Solicitante</label>
+                            <input type="text" class="form-control" id="solicitante_execucao" disabled>
+                        </div>
                     </div>
-                    <div class="col-sm-8 mb-2">
-                        <label>Funcionário</label>
-                        <input type="text" class="form-control" id="funcionario_execucao" disabled>
+                    <div class="row">
+                        <div class="col-sm-4 mb-2">
+                            <div class="info_data">
+                                <label>Data de Entrega</label>
+                            </div>
+                            <input type="datetime" class="form-control" id="data_entrega_execucao" autocomplete="off"
+                                disabled>
+                        </div>
+                        <div class="col-sm-8 mb-2">
+                            <label>Funcionário</label>
+                            <input type="text" class="form-control" id="funcionario_execucao" disabled>
+                        </div>
+                    </div>
+                    <div id="containerEquipamentos">
+
                     </div>
                 </div>
-                <div id="containerEquipamentos">
-                    
+                <div class="modal-footer">
+                    <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
                 </div>
-            </div> 
-            <div class="modal-footer">
-                <button id="salvarExecucao" type="submit" class="btn btn-primary btn-block">Alterar</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Assinatura -->
-<div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog" aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao">Editar</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <h6 class="m-0 font-weight-bold text-primary">Assinatura</h6>
-                <hr>
-                <div class="wrapper">
-                    <img class="imagem-responsiva" width=300 height=200/>
-                    <canvas id="signature-pad" class="signature-pad" width=300 height=200></canvas>
+    <!-- Modal Assinatura -->
+    <div class="modal fade" data-backdrop="static" id="modalAssinatura" tabindex="-1" role="dialog"
+        aria-labelledby="modalAssinaturaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                    <h5 class="modal-title" id="numeroOrdem_edicao">Editar</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="row">
-                    <div class="col-sm-6 mt-4">
-                        <button class="btn btn-secondary btn-block" id="clear">Clear</button>
+                <div class="modal-body">
+                    <h6 class="m-0 font-weight-bold text-primary">Assinatura</h6>
+                    <hr>
+                    <div class="wrapper">
+                        <img class="imagem-responsiva" width=300 height=200 />
+                        <canvas id="signature-pad" class="signature-pad" width=300 height=200></canvas>
                     </div>
-                    <div class="col-sm-6 mt-4">
-                        <button class="btn btn-primary btn-block"  id="save">Save</button>
+                    <div class="row">
+                        <div class="col-sm-6 mt-4">
+                            <button class="btn btn-secondary btn-block" id="clear">Clear</button>
+                        </div>
+                        <div class="col-sm-6 mt-4">
+                            <button class="btn btn-primary btn-block" id="save">Save</button>
+                        </div>
                     </div>
                 </div>
-            </div> 
-        </div>
-    </div>
-</div>
-
-<!-- Modal timeline -->
-<div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog" aria-labelledby="modalTimelineLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body" style="height: 700px; overflow-y: auto;">
-                <div class="list-group" id="listaHistorico">
-                    
-                </div>
-            </div>
-            <div class="modal-footer">
-                
             </div>
         </div>
     </div>
-</div>
 
-<!-- Modal Solicitação (Ao clciar em Enviar na tela principal) -->
-<div class="modal fade" data-backdrop="static" id="modalSolicitacao" tabindex="-1" role="dialog" aria-labelledby="modalSolicitacaoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
-                <h5 class="modal-title" id="numeroOrdem_edicao">Solicitar itens vencidos</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div id="modalSolicitacaoBody" class="modal-body" style="overflow-y: auto; height: 550px;">
-                <div class="row">
-                    <div class="col-sm-6 mb-4">
-                        <label>Equipamento</label>
-                        <input id="equipamentoTroca" class="form-control" readonly>
-                    </div>
-                    <div class="col-sm-6 mb-4">
-                        <label>Solicitante</label>
-                        <input id="solicitanteTroca" class="form-control" readonly>
+    <!-- Modal timeline -->
+    <div class="modal fade" data-backdrop="static" id="modalTimeline" tabindex="-1" role="dialog"
+        aria-labelledby="modalTimelineLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h6 class="m-0 font-weight-bold text-primary">Histórico</h6>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" style="height: 700px; overflow-y: auto;">
+                    <div class="list-group" id="listaHistorico">
+
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-sm-6 mb-4">
-                        <label>Motivo</label>
-                        <input id="motivoTroca" class="form-control" readonly>
+                <div class="modal-footer">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Solicitação (Ao clciar em Enviar na tela principal) -->
+    <div class="modal fade" data-backdrop="static" id="modalSolicitacao" tabindex="-1" role="dialog"
+        aria-labelledby="modalSolicitacaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- <h5 class="modal-title" id="modalExecucaoLabel">Execução da </h5> -->
+                    <h5 class="modal-title" id="numeroOrdem_edicao">Solicitar itens vencidos</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div id="modalSolicitacaoBody" class="modal-body" style="overflow-y: auto; height: 550px;">
+                    <div class="row">
+                        <div class="col-sm-6 col-6 mb-4">
+                            <label>Equipamento</label>
+                            <input id="equipamentoTroca" class="form-control" readonly>
+                        </div>
+                        <div class="col-sm-6 col-6 mb-4">
+                            <label>Solicitante</label>
+                            <input id="solicitanteTroca" class="form-control" readonly>
+                        </div>
                     </div>
-                    <div class="col-sm-6 mb-4">
-                        <label>Funcionário</label>
-                        <input id="funcionarioTroca" class="form-control" readonly>
+                    <div class="row">
+                        <div class="col-sm-6 col-6 mb-4">
+                            <label>Motivo</label>
+                            <input id="motivoTroca" class="form-control" readonly>
+                        </div>
+                        <div class="col-sm-6 col-6 mb-4">
+                            <label>Funcionário</label>
+                            <input id="funcionarioTroca" class="form-control" readonly>
+                        </div>
                     </div>
                 </div>
-            </div> 
-            <div class="modal-footer">
-                <button id="solicitar_substituicao" class="btn btn-primary btn-block">Solicitar</button>
+                <div class="modal-footer">
+                    <button id="solicitar_substituicao" class="btn btn-primary btn-block">Solicitar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Modal para excluir maquina -->
+    <div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog"
+        aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="TituloModalCentralizado">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                        Atenção
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
 
-<!-- Modal para excluir maquina -->
-<div class="modal fade" id="modalExcluirSolicitacao" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="TituloModalCentralizado">
-                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
-                    Atenção
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="modalExcluirEquipamento" tabindex="-1" role="dialog" aria-labelledby="TituloModalCentralizado" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="TituloModalCentralizado">
-                    <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
-                    Atenção
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-            
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="btnExcluirEquipamento">Excluir</button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div id="mensagem"></div>
+    <div class="modal fade" id="modalExcluirEquipamento" tabindex="-1" role="dialog"
+        aria-labelledby="TituloModalCentralizado" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="TituloModalCentralizado">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                        Atenção
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
 
-{% endblock %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnExcluirEquipamento">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-{% block scripts %}
-<!-- script para datatable -->
-<script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+    <div id="mensagem"></div>
 
-<!-- Plugin icons -->
-<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+    {% endblock %}
 
-<!-- Plugin assinatura -->
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
+    {% block scripts %}
+    <!-- script para datatable -->
+    <script src="static/vendor/datatables/jquery.dataTables.min.js"></script>
+    <script src="static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<!-- script com a construção das tabelas -->
-<script src="static/js/demo/datatables-demo.js"></script>
+    <!-- Plugin icons -->
+    <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 
-<!-- Script menssagem -->
-<script src="static/js/mensagem.js"></script>
+    <!-- Plugin assinatura -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@3.0.0-beta.3/dist/signature_pad.min.js"></script>
 
-<script src="static/js/pagina-principal/envios_post.js"></script>
-<script src="static/js/pagina-principal/filtros.js"></script>
-<script src="static/js/pagina-principal/formatar_data.js"></script>
-<script src="static/js/pagina-principal/lista_input.js"></script>
-<script src="static/js/pagina-principal/modal.js"></script>
-<script src="static/js/pagina-principal/vida_util.js"></script>
+    <!-- script com a construção das tabelas -->
+    <script src="static/js/demo/datatables-demo.js"></script>
 
-<script>
-    var valoresClicados = [];
+    <!-- Script menssagem -->
+    <script src="static/js/mensagem.js"></script>
 
-   document.addEventListener('DOMContentLoaded', function () {
-    var linhas = document.querySelectorAll('.all_linha');
-    
-    linhas.forEach(function (linha) {
-        linha.addEventListener('click', function () {
-            linha.classList.toggle('clicked');
+    <script src="static/js/pagina-principal/envios_post.js"></script>
+    <script src="static/js/pagina-principal/filtros.js"></script>
+    <script src="static/js/pagina-principal/formatar_data.js"></script>
+    <script src="static/js/pagina-principal/lista_input.js"></script>
+    <script src="static/js/pagina-principal/modal.js"></script>
+    <script src="static/js/pagina-principal/vida_util.js"></script>
 
-            if (linha.classList.contains('clicked')) {
-                var valores = extrairValoresDaLinha(linha);
-                valoresClicados.push(valores);
-            } else {
-                var index = valoresClicados.findIndex(function (item) {
-                    return item[0] === linha;
+    <script>
+        var valoresClicados = [];
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var linhas = document.querySelectorAll('.all_linha');
+
+            linhas.forEach(function (linha) {
+                linha.addEventListener('click', function () {
+                    linha.classList.toggle('clicked');
+
+                    if (linha.classList.contains('clicked')) {
+                        var valores = extrairValoresDaLinha(linha);
+                        valoresClicados.push(valores);
+                    } else {
+                        var index = valoresClicados.findIndex(function (item) {
+                            return item[0] === linha;
+                        });
+
+                        if (index !== -1) {
+                            valoresClicados.splice(index, 1);
+                        }
+                    }
                 });
+            });
 
-                if (index !== -1) {
-                    valoresClicados.splice(index, 1);
+
+            function extrairValoresDaLinha(linha) {
+                var elementos = linha.getElementsByTagName('td');
+                var valores = [];
+
+                for (var i = 1; i <= 3; i++) {
+                    valores.push(elementos[i].textContent);
                 }
+
+                valores.unshift(linha);
+
+                return valores;
             }
         });
-    });
-    
 
-    function extrairValoresDaLinha(linha) {
-        var elementos = linha.getElementsByTagName('td');
-        var valores = [];
+    </script>
 
-        for (var i = 1; i <= 3; i++) {
-            valores.push(elementos[i].textContent);
-        }
-
-        valores.unshift(linha);
-
-        return valores;
-    }
-});
-
-</script>
-
-{% endblock %}
+    {% endblock %}

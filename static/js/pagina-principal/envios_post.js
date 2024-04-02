@@ -68,6 +68,7 @@ function alterarDadosExecucao(id_solicitacao) {
         $("#loading-overlay").show();
         if (signaturePad.isEmpty()) {
             alert("Faça sua assinatura.");
+            $("#loading-overlay").hide();
         } else {
             // Desabilitar o botão para evitar múltiplos cliques
             saveButton.disabled = true;

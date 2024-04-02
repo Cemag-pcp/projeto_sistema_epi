@@ -352,25 +352,25 @@ function modalSolicitacao() {
             </div>
             <hr>
             <div class="row">
-                <div class="col-sm-6 mb-4">
+                <div class="col-sm-6 col-6 mb-4">
                     <label>Equipamento</label>
                     <input id="equipamentoTroca${i}" class="form-control text-truncate" data-toggle="tooltip" data-placement="top" title="${item[1]}" style="cursor: default;" value="${item[1]}" readonly>
                 </div>
-                <div class="col-sm-6 mb-4">
+                <div class="col-sm-6 col-6 mb-4">
                     <label>Solicitante</label>
                     <input id="solicitanteTroca${i}" value="4345 - JOSE EDENILSON DE CASTRO" class="form-control" readonly>
                 </div>
             </div> 
             <div class="row">
-                <div class="col-sm-6 mb-4">
+                <div class="col-sm-6 col-6 mb-4">
                     <label>Funcionário</label>
                     <input id="funcionarioTroca${i}" class="form-control text-truncate" data-toggle="tooltip" data-placement="top" title="${item[2]}" style="cursor: default;" value="${item[2]}" readonly>
                 </div>
-                <div class="col-sm-4 mb-4">
+                <div class="col-sm-4 col-6 mb-4">
                     <label>Motivo</label>
                     <input id="motivoTroca${i}" class="form-control" value="Substituição" readonly>
                 </div>
-                <div class="col-sm-2 mb-4">
+                <div class="col-sm-2 col-4 mb-4">
                     <label>Quantidade</label>
                     <input type="number" id="quantidadeTroca${i}" class="form-control">
                 </div>
