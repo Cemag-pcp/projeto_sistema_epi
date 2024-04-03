@@ -149,7 +149,7 @@ function enviarSolicitacao() {
 
     // Verifique se pelo menos um botão de rádio foi marcado em algum grupo
     if (!radioMarcado) {
-        exibirMensagem('aviso','Selecione uma opção de rádio em cada grupo')
+        exibirMensagem('aviso','Preencha todos os campos.')
         // exibirMensagem("aviso","Selecione uma opção de rádio em cada grupo")
         $("#loading-overlay").hide();
         document.getElementById('btnEnviarSolicitacao').disabled = false;
