@@ -143,7 +143,7 @@ function clonarCampos() {
         // Atualize o atributo 'name' dos elementos <input> do tipo rádio
         novoCamposSolicitacao.querySelectorAll('input[type="radio"]').forEach(function (radio) {
             radio.checked = false;
-            
+
             var radioName = radio.getAttribute('name');
             if (radioName) {
                 var newRadioName = radioName.replace(/-clone_\d+$/, '') + '-clone_' + timestamp;
@@ -153,7 +153,11 @@ function clonarCampos() {
 
         // Limpe os valores dos campos clonados
         novoCamposSolicitacao.querySelectorAll('input[type="text"], input[type="number"], select').forEach(function (elemento) {
-            elemento.value = '';
+            // Verifica se o id do elemento começa com "inputCodigo"
+            if (elemento.id.startsWith('inputCodigo') || elemento.id.startsWith('inputQuantidade')) {
+                // Limpa o valor do elemento
+                elemento.value = '';
+            }
         });
 
         // Adicione o novo conjunto de campos após o último conjunto clonado
