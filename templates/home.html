@@ -67,8 +67,7 @@
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
-                                        Trabalhoradores que receberam EPI</div>
+                                    <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">Trabalhoradores que receberam EPI</div>
                                 </div>
                                 <div class="col-auto">
                                     <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_trabalhadores}}
@@ -238,9 +237,9 @@
                                                 onclick="modalExecucao('{{ row[0] }}','{{ row[7] }}','{{ row[2] }}')">
                                                 <i class="fa-solid fa-pencil"></i> Editar
                                             </a>
-                                            <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalAssinatura('{{ row[1] }}')"> 
-                                            <i class="fa-solid fa-pencil"></i> Editar
-                                        </a> -->
+                                            <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalExcluirAssinatura('{{ row[7] }}','{{ row[0] }}')"> 
+                                                <i class="fas fa-trash"></i> Excluir apenas assinatura
+                                            </a>
                                             <!-- <a class = "dropdown-item" style="cursor: pointer;" class="btn" onclick="modalTimeline('{{ row[0] }}','{{ row[3] }}','{{ row[7] }}')"> 
                                             <i class="fas fa-clock"></i> Histórico 
                                         </a> -->
@@ -427,6 +426,29 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" id="btnExcluir">Excluir</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="modalExcluirAssinatura" tabindex="-1" role="dialog"
+        aria-labelledby="assinaturaModal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> <!-- Ícone de atenção -->
+                        Atenção
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="btnExcluirAssinatura">Excluir</button>
                 </div>
             </div>
         </div>

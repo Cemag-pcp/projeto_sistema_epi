@@ -24,16 +24,12 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
             if (response.data_assinado === null) {
 
-                console.log('Entrou')
-
                 $('#data_entrega_execucao').val('');
                 $('#previsao_entrega_execucao').val('');
                 $('.info_data').append(`<button type="button" id='info' style="background: none; border: none; padding: 0; font-size: inherit;" data-toggle="tooltip" data-placement="top" title="Data de entrega e Previsão de troca só exibirão após a assinatura">
                                             <i class="fa-solid fa-circle-info" aria-hidden="true" style="color: #4e73df;"></i>
                                         </button>`)
             } else {
-                console.log('Entrou ELSE')
-                console.log(response.data_assinado)
                 $('#data_entrega_execucao').val(formatarDataBr(response.data_assinado));
 
                 // Atribui o valor calculado ao campo #previsao_entrega_execucao
@@ -138,17 +134,30 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                     inputCodigo.addEventListener('focus', function() {
                         carregarItens(listCodigo);
                     });
-                    var list = [listCodigo,inputQuantidade,selectMotivo]
 
-                    for(var i = 0; i < list.length;i++){
-                        list[i].addEventListener('click', function() {
-                            if(inputCodigo.value == equipamento.codigo && inputQuantidade.value == equipamento.quantidade && selectMotivo.value == equipamento.motivo || inputQuantidade.value < 1){
-                                $('#salvarExecucao').prop('disabled',true)
-                            } else {
-                                $('#salvarExecucao').prop('disabled',false);
-                            }
-                        });
-                    }
+                    listCodigo.addEventListener('click', function() {
+                        if(inputCodigo.value == equipamento.codigo && selectMotivo.value == equipamento.motivo){
+                            $('#salvarExecucao').prop('disabled',true)
+                        } else {
+                            $('#salvarExecucao').prop('disabled',false);
+                        }
+                    });
+
+                    selectMotivo.addEventListener('change',function(){
+                        if(selectMotivo.value == equipamento.motivo){
+                            $('#salvarExecucao').prop('disabled',true)
+                        } else {
+                            $('#salvarExecucao').prop('disabled',false);
+                        }
+                    })
+                    
+                    inputQuantidade.addEventListener('input', function() {
+                        if(inputQuantidade.value == equipamento.quantidade || inputQuantidade.value < 1){
+                            $('#salvarExecucao').prop('disabled',true)
+                        } else {
+                            $('#salvarExecucao').prop('disabled',false);
+                        }
+                    });
 
                 });
                 
@@ -166,10 +175,40 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
 }
 
-$('#salvarExecucao').one('click',function(){
+$('#salvarExecucao').one('click',function() {
     var id_solicitante = $(this).data('id_solicitante');
 
     alterarDadosExecucao(id_solicitante)
+})
+
+$('#btnExcluirAssinatura').one('click',function() {
+
+    $("#loading-overlay").show();
+    var id_solicitante = $(this).data('id_solicitacao');
+
+
+    console.log(id_solicitante)
+
+    // Agora, você pode enviar esses dados em uma requisição POST
+    fetch('excluir-assinatura', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id_solicitante: id_solicitante }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Resposta do servidor:', data);
+        exibirMensagem('sucesso', 'Assinatura removida.')
+        $('#modalExcluirAssinatura').modal('hide');
+        $("#loading-overlay").hide();
+        location.reload()
+    })
+    .catch(error => {
+        console.error('Erro ao fazer a requisição:', error);
+        $("#loading-overlay").hide();
+    });
 })
 
 function modalAssinatura(nome_funcionario,id_solicitacao,id,data) {
@@ -280,6 +319,17 @@ function modalExcluirSolicitacao(funcionario, id_solicitacao) {
 
 }
 
+function modalExcluirAssinatura(funcionario, id_solicitacao) {
+
+    $('#btnExcluirAssinatura').data('id_solicitacao', id_solicitacao);
+    console.log(id_solicitacao)
+
+    $('#modalExcluirAssinatura .modal-body').text('Tem certeza que quer remover a assinatura do(a) ' + funcionario + ' ? ');
+
+    $('#modalExcluirAssinatura').modal('show');
+
+}
+
 // Botão de excluir do modal modalExcluirSolicitacao
 $('#btnExcluir').one('click',function () {
 
@@ -344,7 +394,8 @@ function modalSolicitacao() {
 
     for (var i = 0; i < valoresClicados.length; i++) {
         var item = valoresClicados[i];
-        console.log(item[1])
+        var itemEquipamento = item[1].trim();
+    
         var content = `
             <hr>
             <div class="d-flex justify-content-between mb-3">
@@ -354,7 +405,7 @@ function modalSolicitacao() {
             <div class="row">
                 <div class="col-sm-6 col-6 mb-4">
                     <label>Equipamento</label>
-                    <input id="equipamentoTroca${i}" class="form-control text-truncate" data-toggle="tooltip" data-placement="top" title="${item[1]}" style="cursor: default;" value="${item[1]}" readonly>
+                    <input id="equipamentoTroca${i}" class="form-control text-truncate" data-toggle="tooltip" data-placement="top" title="${itemEquipamento}" style="cursor: default;" value="${itemEquipamento}" readonly>
                 </div>
                 <div class="col-sm-6 col-6 mb-4">
                     <label>Solicitante</label>

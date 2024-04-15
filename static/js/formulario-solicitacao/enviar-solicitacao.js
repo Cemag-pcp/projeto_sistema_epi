@@ -95,6 +95,23 @@ function enviarSolicitacao() {
     // Selecione todos os camposSolicitacao e seus clones
     var campoSolicitante = document.getElementById('inputSolicitante').value;
     var camposSolicitacao = document.querySelectorAll('[id^="camposSolicitacao"]');
+    var inputDropdown = document.getElementById('inputOperador');
+    var listaDropdown = document.getElementById('listOperador');
+    var itens = listaDropdown.getElementsByTagName('li');
+
+    var inputValor = inputDropdown.value.trim().toLowerCase();
+
+    var estaNaLista = Array.from(itens).some(function (item) {
+        var textoItem = item.textContent.toLowerCase();
+        return textoItem === inputValor;
+    });
+
+    if (!estaNaLista) {
+        $("#loading-overlay").hide();
+        exibirMensagem('aviso','Preencha o operador da forma correta')
+        document.getElementById('btnEnviarSolicitacao').disabled = false;
+        return
+    } 
 
     // Crie um array para armazenar os dados
     var dados = [];
@@ -165,7 +182,6 @@ function enviarSolicitacao() {
         return;
     }
 
-    // Se nenhum problema for encontrado, prossiga com a chamada AJAX
     $.ajax({
         url: '/solicitacao',
         type: 'POST',

@@ -327,15 +327,6 @@ def cardsPaginaInicial(cur):
 
     quantidade_devolucao = len(lista_quantidade_devolucao)
 
-    query_quantidade_devolucao = """SELECT *
-                                FROM sistema_epi.tb_solicitacoes
-                                WHERE status_devolucao IS NOT NULL"""
-    
-    cur.execute(query_quantidade_devolucao)
-    lista_quantidade_devolucao = cur.fetchall()
-
-    quantidade_devolucao = len(lista_quantidade_devolucao)
-
     query_quantidade_trabalhadores = """SELECT DISTINCT funcionario_recebe
                                     FROM sistema_epi.tb_solicitacoes"""
     
@@ -614,7 +605,7 @@ def alterar_dados():
         dados = request.get_json()
 
         # Acesse os dados específicos, por exemplo, os equipamentos
-        equipamentos = dados.get('equipamentos', [])
+        equipamentos = dados.get('equipamentos')
         id_solicitacao = equipamentos[0]['id_solicitacao']
         print(id_solicitacao)
 
@@ -722,6 +713,28 @@ def excluir_equipamento():
     conn.close()
 
     return 'Dados recebidos com sucesso!'
+
+@app.route('/excluir-assinatura', methods=['POST'])
+@login_required
+def excluir_assinatura():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    id_solicitante = data['id_solicitante']
+
+    query_assinatura = f"""DELETE FROM sistema_epi.tb_assinatura
+                        WHERE id_solicitacao = '{id_solicitante}'
+                        """
+    
+    cur.execute(query_assinatura)
+
+    conn.commit()
+    conn.close()
+
+    return jsonify('Dados recebidos com sucesso!')
 
 
 def condicao_historico(matricula, data_solicit,solicitante_historico,equipamento_historico):
