@@ -178,29 +178,21 @@ function carregarOperadores2(inputId, listId) {
     var inputOperador = document.getElementById(inputId);
     var listOperador = document.getElementById(listId);
 
-    // Verifica se os operadores estão em cache
-    var operadoresCache = localStorage.getItem('operadoresCache');
+    // Caso contrário, faz a solicitação AJAX
+    $.ajax({
+        url: '/operadores',
+        type: 'GET',
+        success: function (data) {
+            // Atualiza o menu de operadores com as opções retornadas do servidor
+            console.log(data);
+            // Adiciona os operadores à lista
 
-    if (operadoresCache) {
-        // Se estiver em cache, utiliza os dados do cache
-        atualizarLista(JSON.parse(operadoresCache));
-    } else {
-        // Caso contrário, faz a solicitação AJAX
-        $.ajax({
-            url: '/operadores',
-            type: 'GET',
-            success: function (data) {
-                // Atualiza o menu de operadores com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os operadores à lista
+            // Atualiza o cache com os novos dados
+            localStorage.setItem('operadoresCache', JSON.stringify(data));
 
-                // Atualiza o cache com os novos dados
-                localStorage.setItem('operadoresCache', JSON.stringify(data));
-
-                atualizarLista(data);
-            }
-        });
-    }
+            atualizarLista(data);
+        }
+    });
 
     function atualizarLista(operadores) {
         listOperador.innerHTML = '';
