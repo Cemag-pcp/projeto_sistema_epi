@@ -1014,5 +1014,64 @@ def pegar_assinatur():
 
     return 'sucess'
 
+
+# Funcionários
+
+#Listar setores para funcionários
+@app.route('/listar-setores-funcionarios', methods=['GET'])
+def lista_setor_cadastro():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query = """select distinct setor from requisicao.funcionarios f"""
+
+    cur.execute(query)
+    lista_setores = cur.fetchall()
+
+    return lista_setores
+
+#Receber cadastro de funcionario
+@app.route('/cadastrar-funcionario', methods=['POST'])
+def cadastrar_funcionario():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    nome = request.form.get('nome')
+    matricula = request.form.get('matricula')
+    setor = request.form.get('setor')
+    data_admissao = request.form.get('data_admissao')
+
+    print(data_admissao)
+
+    query_consulta = """select * from requisicao.funcionarios where matricula = %s"""
+    cur.execute(query_consulta,(matricula,))
+
+    data = cur.fetchall()
+
+    if len(data) > 0:
+        tipo_mensagem = 'aviso'
+        mensagem = 'Matrícula ja existe'
+
+    else:
+        query_insert = """insert into requisicao.funcionarios (matricula,nome,data_admissao,setor) values(%s,%s,%s,%s)"""
+        cur.execute(query_insert,(matricula,nome,data_admissao,setor,))
+
+        conn.commit()
+
+        tipo_mensagem = 'sucesso'
+        mensagem = 'Cadastrado com sucesso'
+
+    conn.close()
+
+    return jsonify({
+        'tipo_mensagem':tipo_mensagem,
+        'mensagem':mensagem,
+    })
+
+
 if __name__ == '__main__':
     app.run(debug=True)
