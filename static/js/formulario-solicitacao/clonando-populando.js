@@ -74,30 +74,17 @@ configurarDropdown('inputCodigo', 'listCodigo');
 function carregarItens2(inputId, listId) {
     var inputCodigo = document.getElementById(inputId);
     var listCodigo = document.getElementById(listId);
+    $("#loading-overlay").show();
 
-    // Verifica se os itens estão em cache
-    var itensCache = localStorage.getItem('itensCache');
-
-    if (itensCache) {
-        // Se estiver em cache, utiliza os dados do cache
-        atualizarLista(JSON.parse(itensCache));
-    } else {
-        // Caso contrário, faz a solicitação AJAX
-        $.ajax({
-            url: '/itens',
-            type: 'GET',
-            success: function (data) {
-                // Atualiza o menu de itens com as opções retornadas do servidor
-                console.log(data);
-                // Adiciona os itens à lista
-
-                // Atualiza o cache com os novos dados
-                localStorage.setItem('itensCache', JSON.stringify(data));
-
-                atualizarLista(data);
-            }
-        });
-    }
+    // Caso contrário, faz a solicitação AJAX
+    $.ajax({
+        url: '/itens',
+        type: 'GET',
+        success: function (data) {
+            atualizarLista(data);
+            $("#loading-overlay").hide();
+        }
+    });
 
     function atualizarLista(itens) {
         listCodigo.innerHTML = '';
@@ -109,6 +96,7 @@ function carregarItens2(inputId, listId) {
         });
     }
 }
+
 // Fim Carregando itens para inputs clonados
 
 // Clonando campos
@@ -177,6 +165,7 @@ function clonarCampos() {
 function carregarOperadores2(inputId, listId) {
     var inputOperador = document.getElementById(inputId);
     var listOperador = document.getElementById(listId);
+    $("#loading-overlay").show();
 
     // Caso contrário, faz a solicitação AJAX
     $.ajax({
@@ -184,13 +173,9 @@ function carregarOperadores2(inputId, listId) {
         type: 'GET',
         success: function (data) {
             // Atualiza o menu de operadores com as opções retornadas do servidor
-            console.log(data);
-            // Adiciona os operadores à lista
-
-            // Atualiza o cache com os novos dados
-            localStorage.setItem('operadoresCache', JSON.stringify(data));
 
             atualizarLista(data);
+            $("#loading-overlay").hide();
         }
     });
 

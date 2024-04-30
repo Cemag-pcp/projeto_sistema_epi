@@ -2,23 +2,23 @@
 function carregarOperadores() {
     var inputOperador = document.getElementById('inputOperador');
     var listOperador = document.getElementById('listOperador');
+    $("#loading-overlay").show();
 
     // Faz a solicitação AJAX diretamente para obter a lista de operadores
     $.ajax({
         url: '/operadores',
         type: 'GET',
         success: function (data) {
-            // Atualiza o menu de operadores com as opções retornadas do servidor
-            console.log(data);
-
             // Atualiza a lista de operadores
             atualizarLista(data);
+            $("#loading-overlay").hide();
 
             // Opcional: Se quiser armazenar os dados em cache para futuras requisições
             // localStorage.setItem('operadoresCache', JSON.stringify(data));
         },
         error: function (error) {
             console.error('Erro ao obter dados de operadores:', error);
+            $("#loading-overlay").hide();
         }
     });
 
@@ -35,7 +35,7 @@ function carregarOperadores() {
 
 // Adiciona eventos tanto para o clique quanto para o foco
 inputOperador.addEventListener('click', carregarOperadores);
-inputOperador.addEventListener('focus', carregarOperadores);
+// inputOperador.addEventListener('focus', carregarOperadores);
 // Fim Populando lista de operadores
 
 // Populando lista de itens 
@@ -44,19 +44,14 @@ var listCodigo = document.getElementById('listCodigo');
 
 function carregarItens() {
     // Verifica se os itens estão em cache
+    $("#loading-overlay").show();
 
     $.ajax({
         url: '/itens',
         type: 'GET',
         success: function (data) {
-            // Atualiza o menu de máquinas com as opções retornadas do servidor
-            console.log(data);
-            // Adiciona os itens à lista
-
-            // Atualiza o cache com os novos dados
-            localStorage.setItem('itensCache', JSON.stringify(data));
-
             atualizarLista(data);
+            $("#loading-overlay").hide();
         }
     });
 }
@@ -73,5 +68,5 @@ function atualizarLista(itens) {
 
 // Adiciona eventos tanto para o clique quanto para o foco
 inputCodigo.addEventListener('click', carregarItens);
-inputCodigo.addEventListener('focus', carregarItens);
+// inputCodigo.addEventListener('focus', carregarItens);
 // Fim Populando lista de itens 

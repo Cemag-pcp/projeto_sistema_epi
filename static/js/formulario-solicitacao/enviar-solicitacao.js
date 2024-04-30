@@ -99,10 +99,19 @@ function enviarSolicitacao() {
     var listaDropdown = document.getElementById('listOperador');
     var itens = listaDropdown.getElementsByTagName('li');
 
+    console.log(itens);
+
     var inputValor = inputDropdown.value.trim().toLowerCase();
 
+    // var estaNaLista = Array.from(itens).some(function (item) {
+
+    //     var textoItem = item.textContent.toLowerCase();
+    //     return textoItem === inputValor;
+    // });
+
     var estaNaLista = Array.from(itens).some(function (item) {
-        var textoItem = item.textContent.toLowerCase();
+        var textoItem = item.textContent.trim().toLowerCase();
+        var inputValor = inputDropdown.value.trim().toLowerCase();
         return textoItem === inputValor;
     });
 

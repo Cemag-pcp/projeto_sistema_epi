@@ -2,19 +2,27 @@
 
 {% block links %}
 
-    <link rel="stylesheet" href="/static/css/assinatura.css">
+<link rel="stylesheet" href="/static/css/assinatura.css">
 
 {% endblock %}
 
 {% block container %}
 
 <div class="row justify-content-center">
-    
+
     <div class="col-md-12 col-lm-12 col-lg-12 col-xl-6">
         <div class="card o-hidden border-0 shadow-sm my-5">
             <div class="card-header">
-                <div class="text-center">
-                    <h1 class="h4 text-gray-900 mb-2 mt-2">Solicitação de EPI</h1>
+                <div class="text-center"
+                    style="display: flex; justify-content: space-between;">
+                    <h1 class="h4 text-gray-900 mb-2 mt-2"
+                        style="order: 1;">Solicitação de EPI</h1>
+                    <div style="order: 2;">
+                        <!-- Conteúdo do botão na ponta direita -->
+                        <button class="btn btn-primary" data-toggle="modal"
+                            data-target="#opcoesSolicitacaoPadrao">Solicitação
+                            padrão</button>
+                    </div>
                 </div>
             </div>
             <div class="card-body" style="height:575px; overflow-y: auto;">
@@ -27,7 +35,11 @@
                             <div class="row form-group">
                                 <div class="col-sm-12">
                                     <label>Solicitante:</label>
-                                    <input type="text" class="form-control" id="inputSolicitante" name="nameSolicitante" value="{{solicitante}}" autocomplete="off" disabled>
+                                    <input type="text" class="form-control"
+                                        id="inputSolicitante"
+                                        name="nameSolicitante"
+                                        value="{{solicitante}}"
+                                        autocomplete="off" disabled>
                                 </div>
                             </div>
                             <hr>
@@ -35,31 +47,60 @@
                                 <!-- codigo,quantidade,operador -->
                                 <div class="row form-group">
                                     <div class="col-sm-10">
-                                        <label for="inputCodigo">Código do item:</label>
+                                        <label for="inputCodigo">Código do
+                                            item:</label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="inputCodigo" name="nameCodigo" aria-describedby="basic-addon2" autocomplete="off" onclick="getId_itens(this)" required>
+                                            <input type="text"
+                                                class="form-control"
+                                                id="inputCodigo"
+                                                name="nameCodigo"
+                                                aria-describedby="basic-addon2"
+                                                autocomplete="off"
+                                                onclick="getId_itens(this)"
+                                                required>
                                             <div class="input-group-append">
-                                                <button class="btn btn-outline-secondary" type="button" onclick="apagarConteudo(this)">x</button>
+                                                <button
+                                                    class="btn btn-outline-secondary"
+                                                    type="button"
+                                                    onclick="apagarConteudo(this)">x</button>
                                             </div>
                                         </div>
-                                        <ul class="dropdown-list" id="listCodigo">
+                                        <ul class="dropdown-list"
+                                            id="listCodigo">
                                         </ul>
                                     </div>
                                     <div class="col-sm-2">
-                                        <label for="inputQuantidade">Quantidade:</label>
-                                        <input type="number" class="form-control" id="inputQuantidade" name="nameQuantidade" autocomplete="off" required>
+                                        <label
+                                            for="inputQuantidade">Quantidade:</label>
+                                        <input type="number"
+                                            class="form-control"
+                                            id="inputQuantidade"
+                                            name="nameQuantidade"
+                                            autocomplete="off" required>
                                     </div>
                                 </div>
                                 <div class="row form-group">
                                     <div class="col-sm-10">
-                                        <label for="inputOperador">Operador <small>(Para quem?):</small></label>
+                                        <label for="inputOperador">Operador
+                                            <small>(Para quem?):</small></label>
                                         <div class="input-group">
-                                            <input type="text" class="form-control" id="inputOperador" name="nameOperador" autocomplete="off" aria-describedby="basic-addon2" onclick="getId_operadores(this)" required>
+                                            <input type="text"
+                                                class="form-control"
+                                                id="inputOperador"
+                                                name="nameOperador"
+                                                autocomplete="off"
+                                                aria-describedby="basic-addon2"
+                                                onclick="getId_operadores(this)"
+                                                required>
                                             <div class="input-group-append">
-                                                <button class="btn btn-outline-secondary" type="button" onclick="apagarConteudo(this)">x</button>
+                                                <button
+                                                    class="btn btn-outline-secondary"
+                                                    type="button"
+                                                    onclick="apagarConteudo(this)">x</button>
                                             </div>
                                         </div>
-                                        <ul class="dropdown-list" id="listOperador">
+                                        <ul class="dropdown-list"
+                                            id="listOperador">
                                         </ul>
                                     </div>
                                 </div>
@@ -69,27 +110,41 @@
                                     <div class="row form-group">
                                         <div class="col-sm-3 d-flex">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
-                                                    id="radioPerda" value="Perda">
-                                                <label class="form-check-label" for="radioPerda" id="labelRadioPerda">
+                                                <input class="form-check-input"
+                                                    type="radio"
+                                                    name="radioSolicitacao"
+                                                    id="radioPerda"
+                                                    value="Perda">
+                                                <label class="form-check-label"
+                                                    for="radioPerda"
+                                                    id="labelRadioPerda">
                                                     Perda
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 d-flex">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
+                                                <input class="form-check-input"
+                                                    type="radio"
+                                                    name="radioSolicitacao"
                                                     id="radioDano" value="Dano">
-                                                <label class="form-check-label" for="radioDano" id="labelRadioDano">
+                                                <label class="form-check-label"
+                                                    for="radioDano"
+                                                    id="labelRadioDano">
                                                     Dano
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 d-flex">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
-                                                    id="radioEntrega" value="Primeira Entrega">
-                                                <label class="form-check-label" for="radioEntrega" id="labelRadioEntrega">
+                                                <input class="form-check-input"
+                                                    type="radio"
+                                                    name="radioSolicitacao"
+                                                    id="radioEntrega"
+                                                    value="Primeira Entrega">
+                                                <label class="form-check-label"
+                                                    for="radioEntrega"
+                                                    id="labelRadioEntrega">
                                                     Primeira Entrega
                                                 </label>
                                             </div>
@@ -99,27 +154,42 @@
                                     <div class="row form-group mb-5">
                                         <div class="col-sm-3 d-flex">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
-                                                    id="radioSubstituicao" value="Substituição">
-                                                <label class="form-check-label" for="radioSubstituicao" id="labelRadioSubstituicao">
+                                                <input class="form-check-input"
+                                                    type="radio"
+                                                    name="radioSolicitacao"
+                                                    id="radioSubstituicao"
+                                                    value="Substituição">
+                                                <label class="form-check-label"
+                                                    for="radioSubstituicao"
+                                                    id="labelRadioSubstituicao">
                                                     Substituição
                                                 </label>
                                             </div>
                                         </div>
                                         <div class="col-sm-3 d-flex">
                                             <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="radioSolicitacao"
-                                                    id="radioOutro" value="Admissão">
-                                                <label class="form-check-label" for="radioOutro" id="labelRadioOutro">
+                                                <input class="form-check-input"
+                                                    type="radio"
+                                                    name="radioSolicitacao"
+                                                    id="radioOutro"
+                                                    value="Admissão">
+                                                <label class="form-check-label"
+                                                    for="radioOutro"
+                                                    id="labelRadioOutro">
                                                     Admissão
                                                 </label>
                                             </div>
                                         </div>
-                                        <div class="col-sm-6 d-flex align-items-center justify-content-end">
+                                        <div
+                                            class="col-sm-6 d-flex align-items-center justify-content-end">
                                             <!-- <a class="btn btn-danger btn-circle" onclick="excluirClone(this)">
                                                 <i class="fas fa-trash"></i>
                                             </a> -->
-                                            <button class="btn btn-outline-secondary" type="button" onclick="excluirClone(this)"><i class="fas fa-trash"></i></button>
+                                            <button
+                                                class="btn btn-outline-secondary"
+                                                type="button"
+                                                onclick="excluirClone(this)"><i
+                                                    class="fas fa-trash"></i></button>
                                         </div>
                                     </div>
                                 </fieldset>
@@ -132,10 +202,14 @@
             <div class="card-footer">
                 <div class="row justify-content-between">
                     <div class="col-4">
-                      <button class="form-control btn btn-primary" type="button" onclick="clonarCampos()">Adicionar</button>
+                        <button class="form-control btn btn-primary"
+                            type="button"
+                            onclick="clonarCampos()">Adicionar</button>
                     </div>
                     <div class="col-4">
-                        <button id="btnEnviarSolicitacao" type="submit" class="form-control btn btn-success" onclick="enviarSolicitacao()">Salvar</button>
+                        <button id="btnEnviarSolicitacao" type="submit"
+                            class="form-control btn btn-success"
+                            onclick="enviarSolicitacao()">Salvar</button>
                     </div>
                 </div>
             </div>
@@ -143,19 +217,30 @@
     </div>
 </div>
 
+{% include 'modals/modal-opcoes-sol-padrao.html' %}
+
 <div id="mensagem"></div>
 
 {% endblock %}
 
 {% block scripts %}
 
-<script type="text/javascript" src="{{ url_for('static', filename='js/mensagem.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/populando-listas.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/clonando-populando.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
-<script type="text/javascript" src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/mensagem.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/formulario-solicitacao/populando-listas.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/formulario-solicitacao/clonando-populando.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/formulario-solicitacao/enviar-solicitacao.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/formulario-solicitacao/excluir-campos.js') }}"></script>
+<script type="text/javascript"
+    src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
 
+
+
+    
 <script>
     $(document).ready(function() {
         nome_solicitante = $('#pegando_nome').val()
