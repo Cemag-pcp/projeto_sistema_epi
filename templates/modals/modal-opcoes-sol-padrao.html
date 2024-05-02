@@ -1,0 +1,59 @@
+<!-- Modal para abrir opções de padrão -->
+
+<div class="modal fade" id="opcoesSolicitacaoPadrao" tabindex="-1"
+    role="dialog"
+    aria-labelledby="modalCadastrarFuncionario"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="modalCadastrarFuncionario">Escolha 1 opção</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-toggle="modal"
+                    data-target="#opcaoCriarPadrao" data-dismiss="modal">Criar
+                    padrão</button>
+                <button class="btn btn-primary" data-toggle="modal"
+                    data-target="#opcaoSelecionarPadrao" data-dismiss="modal">Selecionar padrão
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal opção de SELECIONAR PADRÃO -->
+
+<div class="modal fade" id="opcaoSelecionarPadrao" tabindex="-1"
+    role="dialog"
+    aria-labelledby="opcaoSelecionarPadraoLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Selecionar padrão</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary">Salvar</button>
+                <button class="btn btn-primary" data-toggle="modal"
+                    data-target="#opcoesSolicitacaoPadrao"
+                    data-dismiss="modal">Retornar</button>
+            </div>
+        </div>
+    </div>
+</div>
