@@ -208,6 +208,8 @@ function verificarDuplicatas() {
 
 function verificarNomePadrao() {
 
+    $("#loading-overlay").show();
+
     var nome_padrao = document.getElementById('idNomePadrao').value;
     var nome_solicitante = document.getElementById('inputSolicitante').value;
 
@@ -262,6 +264,8 @@ var btnSalvarNovoPadrao = document.getElementById('novoPadrao');
 
 function popularBodyEscolhaPadrao() {
     
+    $("#loading-overlay").show();
+
     $.ajax({
         url: '/buscar-padroes',
         type: 'GET',
@@ -277,10 +281,17 @@ function popularBodyEscolhaPadrao() {
             var padroesDisponiveis = response.padroes;
 
             padroesDisponiveis.forEach(padrao => {
+                // Cria um contêiner flexível
+                var divFlex = document.createElement('div');
+                divFlex.style.display = 'flex';
+                divFlex.style.alignItems = 'center';
+                divFlex.style.marginBottom = '10px'; // Espaçamento entre os elementos
+            
                 // Cria um parágrafo para cada padrão
                 var p = document.createElement('p');
                 p.textContent = padrao[0];
-
+                p.style.flex = '1'; // Permite que o parágrafo ocupe o espaço disponível
+            
                 var btnEscolher = document.createElement('button');
                 btnEscolher.textContent = 'Escolher';
                 btnEscolher.className = 'btn btn-success';
@@ -288,19 +299,21 @@ function popularBodyEscolhaPadrao() {
                 btnEscolher.setAttribute('data-target', '#modalPadraoEscolhido');
                 btnEscolher.setAttribute('data-dismiss', 'modal');
                 btnEscolher.setAttribute('data-id', padrao[0]);
-
+            
                 btnEscolher.addEventListener('click', function() {
-                    
-                    //popular padrao escolhido
+                    // Popular padrão escolhido
                     popularPadraoEscolhido(padrao[0]);
-
                 });
-        
-                // Adiciona o parágrafo e os botões ao bodyEscolhaPadrao
-                bodyEscolhaPadrao.appendChild(p);
-                bodyEscolhaPadrao.appendChild(btnEscolher);
-
+            
+                // Adiciona o parágrafo e o botão ao contêiner flexível
+                divFlex.appendChild(p);
+                divFlex.appendChild(btnEscolher);
+            
+                // Adiciona o contêiner flexível ao bodyEscolhaPadrao
+                bodyEscolhaPadrao.appendChild(divFlex);
             });
+
+            $("#loading-overlay").hide();
 
         },
         error: function (error) {
@@ -314,22 +327,23 @@ function popularBodyEscolhaPadrao() {
 
 function popularPadraoEscolhido(padrao){
 
+    $("#loading-overlay").show();
+
+    var bodyPadraoEscolhido = document.getElementById('bodyPadraoEscolhido');
+            
+    bodyPadraoEscolhido.innerHTML='';
+
     $.ajax({
         url: '/popular-padroes',
         type: 'POST',
         data: JSON.stringify({ nome_padrao: padrao }), // Envolvendo nome_padrao em um objeto
         contentType: 'application/json',
         success: function (response) {
-            // Supondo que a resposta contenha uma propriedade `mensagem`
-            console.log(response.itens);
-
             var itens = response.itens;
-
-            var bodyPadraoEscolhido = document.getElementById('bodyPadraoEscolhido');
             
-            bodyPadraoEscolhido.innerHTML='';
-
             popularTabelaPadraoEscolhido(itens);
+
+            $("#loading-overlay").hide();
 
         },
         error: function (error) {
