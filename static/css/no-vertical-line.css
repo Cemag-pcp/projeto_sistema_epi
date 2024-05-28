@@ -1,0 +1,15 @@
+.horizontal-lines-only {
+    border-collapse: collapse;
+    width: 100%;
+}
+.horizontal-lines-only th,
+.horizontal-lines-only td {
+    border-left: none;
+    border-right: none;
+    border-bottom: 1px solid #ddd; /* Adiciona uma linha horizontal inferior */
+    padding: 8px;
+}
+.horizontal-lines-only th {
+    background-color: #f2f2f2;
+    text-align: left;
+}
