@@ -24,7 +24,7 @@
                     data-target="#opcaoCriarPadrao" data-dismiss="modal">Criar
                     padrão</button>
                 <button class="btn btn-primary" data-toggle="modal"
-                    data-target="#opcaoSelecionarPadrao" data-dismiss="modal">Selecionar padrão
+                    data-target="#opcaoSelecionarPadrao" data-dismiss="modal" onclick="popularBodyEscolhaPadrao()">Selecionar padrão
                 </button>
             </div>
         </div>
@@ -46,13 +46,69 @@
                     <span aria-hidden="true">×</span>
                 </button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" id="bodyEscolhaPadrao">
+
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary">Salvar</button>
                 <button class="btn btn-primary" data-toggle="modal"
                     data-target="#opcoesSolicitacaoPadrao"
                     data-dismiss="modal">Retornar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Digitar o nome do padrão -->
+
+<div class="modal fade" id="modalEscolherNomePadrao" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Criar padrão</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <label for="idNomePadrao">Escolha um nome:</label>
+                        <input type="text" class="form-control" id="idNomePadrao">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button onclick="verificarNomePadrao()" id="salvarNovoPadrao" class="btn btn-primary" data-toggle="modal">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal escolher padrão -->
+
+<div class="modal fade" id="modalPadraoEscolhido" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Padrão escolhido</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" id="bodyPadraoEscolhido">
+                <div id="no-more-tables">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#opcaoSelecionarPadrao" data-dismiss="modal" onclick="popularBodyEscolhaPadrao()">Retornar</button>
+                <button id="confirmarPadraoEscolhido" class="btn btn-primary" data-toggle="modal" data-dismiss="modal" onclick="confirmarEscolhaPadrao()">Confirmar</button>
             </div>
         </div>
     </div>

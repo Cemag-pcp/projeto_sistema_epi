@@ -264,7 +264,6 @@ def gerar_id_solicitacao():
 
     return str(uuid.uuid1())
 
-
 def query_filtro_historico():
 
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
@@ -1014,7 +1013,6 @@ def pegar_assinatur():
 
     return 'sucess'
 
-
 # Funcionários
 
 #Listar setores para funcionários
@@ -1071,6 +1069,92 @@ def cadastrar_funcionario():
         'tipo_mensagem':tipo_mensagem,
         'mensagem':mensagem,
     })
+
+# Padrão
+@app.route('/salvar-novo-padrao', methods=['POST'])
+def salvar_novo_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+
+    matricula = dados['dados'][0]['solicitante'].split()[0]
+    nome_padrao = dados['nome_padrao']
+
+    for item in dados['dados']:
+        codigo_item=item['inputCodigo']
+        quantidade=item['inputQuantidade']
+        funcionario_recebe=item['inputOperador']
+        motivo=item['radioSubstituicao']
+
+        query_add = """insert into sistema_epi.padrao_solicitacao (matricula_solicitante,nome,codigo_item,motivo,quantidade,funcionario_recebe) values (%s,%s,%s,%s,%s,%s)"""
+
+        cur.execute(query_add,(matricula,nome_padrao,codigo_item,motivo,quantidade,funcionario_recebe))
+    
+    conn.commit()
+
+    return 'sucess'
+
+@app.route('/verificar-nome-padrao', methods=['POST'])
+def verificar_nome_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+
+    matricula = dados['nome_solicitante'].split()[0]
+    nome_padrao = dados['nome_padrao']
+
+    query_verificar = """select * from sistema_epi.padrao_solicitacao where matricula_solicitante = %s and nome = %s"""
+    cur.execute(query_verificar,(matricula,nome_padrao))
+    data_verificar = cur.fetchall()
+
+    if len(data_verificar) > 0:
+        response = {'tipo':'aviso','mensagem': 'Nome já existe, escolha outro'}
+    else:
+        response = {'tipo':'success','mensagem': 'Nome disponível. Salvo!'}
+
+    cur.close()
+    conn.close()
+    
+    return jsonify(response)
+
+@app.route('/buscar-padroes', methods=['GET'])
+def buscar_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    user_login = session['user_id']
+
+    cur.execute("select distinct nome from sistema_epi.padrao_solicitacao where matricula_solicitante = %s",(user_login,))
+
+    padroes=cur.fetchall()
+
+    return jsonify({'padroes':padroes})
+
+@app.route('/popular-padroes', methods=['POST'])
+def popular_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+    print(data)
+    user_login = session['user_id']
+
+    cur.execute("select * from sistema_epi.padrao_solicitacao where matricula_solicitante = %s and nome = %s",(user_login,data['nome_padrao']))
+
+    itens=cur.fetchall()
+    itens_dict = [dict(item) for item in itens]
+
+    return jsonify({'itens':itens_dict})
 
 
 if __name__ == '__main__':

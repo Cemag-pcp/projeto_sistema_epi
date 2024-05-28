@@ -9,7 +9,6 @@
 {% block container %}
 
 <div class="row justify-content-center">
-
     <div class="col-md-12 col-lm-12 col-lg-12 col-xl-6">
         <div class="card o-hidden border-0 shadow-sm my-5">
             <div class="card-header">
@@ -19,6 +18,10 @@
                         style="order: 1;">Solicitação de EPI</h1>
                     <div style="order: 2;">
                         <!-- Conteúdo do botão na ponta direita -->
+                        Guardar como padrão<input id="criarPadrao" class="criar-padrao form-control" type="checkbox">
+                    </div>
+                    <div style="order: 3;">
+                        <!-- Conteúdo do botão na ponta direita -->
                         <button class="btn btn-primary" data-toggle="modal"
                             data-target="#opcoesSolicitacaoPadrao">Solicitação
                             padrão</button>
@@ -26,7 +29,6 @@
                 </div>
             </div>
             <div class="card-body" style="height:575px; overflow-y: auto;">
-                <!-- Nested Row within Card Body -->
                 <div class="row">
                     <div class="col-md-12">
                         <div class="p-5">
@@ -238,9 +240,6 @@
 <script type="text/javascript"
     src="{{ url_for('static', filename='js/formulario-solicitacao/apagar-input-solicitacao.js') }}"></script>
 
-
-
-    
 <script>
     $(document).ready(function() {
         nome_solicitante = $('#pegando_nome').val()
