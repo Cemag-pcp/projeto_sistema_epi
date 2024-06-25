@@ -64,7 +64,7 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                     </div
                     <hr>
                     <hr>
-                    <div class="row">
+                    <div class="row" id='Campo_Equipamento'>
                         <div class="col-sm-2 mb-2">
                             <label>Id</label>
                             <input type="text" class="form-control" id="idExecucao_`+ index +`" value="` + equipamento.id + `" autocomplete="off" disabled> 
@@ -121,8 +121,8 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                             modalExcluirEquipamento(funcionario_nome,equipamento.codigo,equipamento.id,id_solicitante)
                         });
                     } else {
-                        excluirEquip.style.display = 'none';
                         excluirEquip.disabled = true;
+                        excluirEquip.style.display = 'none';
                     }
             
                     var listCodigo = document.getElementById('listCodigo'+index);
@@ -174,6 +174,115 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
     })
 
 }
+
+function adicionarEquipamento() {
+    var containerEquipamentos = $('#containerEquipamentos');
+    var novoIndex = containerEquipamentos.children('.equipamento-container').length;
+    var indexEquipamento = containerEquipamentos.children('#Campo_Equipamento').length + containerEquipamentos.children('.equipamento-container').length;
+
+    var novoInput = `
+    <div class="equipamento-container" id="equipamento_${novoIndex}">
+        <hr>
+        <div class="d-flex justify-content-between mb-3">
+            <h6 class="m-0 font-weight-bold text-primary">Equipamento adicionado</h6>
+            <i class="fa-solid fa-trash fa-flip-horizontal" style="color: #ff7a7a; cursor:pointer;" onclick="removerEquipamento(${novoIndex})"></i>
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-sm-2 mb-2">
+                <label for="idClone_${novoIndex}">Id</label>
+                <input type="text" class="form-control" id="idClone_${novoIndex}" autocomplete="off" disabled>
+            </div>
+            <div class="col-sm-10 mb-2">
+                <label for="equipamentoClone_${novoIndex}">Equipamento</label>
+                <input type="text" class="form-control" id="equipamentoClone_${novoIndex}" autocomplete="off">
+                <ul class="dropdown-list" id="listCodigo_${novoIndex}">
+                </ul>
+            </div>
+        </div>
+        <div class="row" style="align-items:end">
+            <div class="col-sm-2">
+                <label for="quantidadeClone_${novoIndex}">Quantidade</label>
+                <input type="number" class="form-control" id="quantidadeClone_${novoIndex}" autocomplete="off">
+            </div>
+            <div class="col-sm-4">
+                <label for="motivoClone_${novoIndex}">Motivo:</label>
+                <select class="form-control form-control" id="motivoClone_${novoIndex}" style='padding: .375rem .25rem;'>
+                    <option value="" selected disabled hidden>Selecione o motivo</option>
+                    <option value="Perda">Perda</option>
+                    <option value="Dano">Dano</option>
+                    <option value="Admissão">Admissão</option>
+                    <option value="Substituição">Substituição</option>
+                    <option value="Primeira Entrega">Primeira Entrega</option>
+                </select>
+            </div>
+            <div class="col-sm-4">
+                <label for="previsao_entrega_clone_${novoIndex}">Previsão de troca</label>
+                <input type="datetime" class="form-control" id="previsao_entrega_clone_${novoIndex}" autocomplete="off" disabled>
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary" style="width:100%" type="button" onclick="acaoBotao(equipamentoClone_${novoIndex})">Salvar</button>
+            </div>
+        </div>
+    </div>`;
+
+    containerEquipamentos.append(novoInput);
+
+    configurarDropdown('equipamentoClone_'+novoIndex, 'listCodigo_'+novoIndex)
+
+    var equipamentoClone = document.getElementById('equipamentoClone_' + novoIndex);
+
+    var listCodigo = document.getElementById('listCodigo_'+novoIndex);
+
+    equipamentoClone.addEventListener('click', function() {
+        carregarItens(listCodigo);
+    });
+    equipamentoClone.addEventListener('focus', function() {
+        carregarItens(listCodigo);
+    });
+}
+
+// Função para remover um container de equipamento específico
+function removerEquipamento(index) {
+    $('#equipamento_' + index).remove();
+
+    // Reindexar os containers restantes
+    reindexarEquipamentos();
+}
+
+// Função para reindexar os containers de equipamentos após a remoção
+function reindexarEquipamentos() {
+    $('#containerEquipamentos').children('.equipamento-container').each(function(index) {
+        $(this).attr('id', 'equipamento_' + index);
+        $(this).find('i').attr('onclick', 'removerEquipamento(' + index + ')');
+
+        // Atualiza os IDs e os 'for' dos labels dos campos de input e select
+        $(this).find('input, select').each(function() {
+            var oldId = $(this).attr('id');
+            var newId = oldId.replace(/_\d+$/, '_' + index);
+            $(this).attr('id', newId);
+            $(this).prev('label').attr('for', newId);
+        });
+
+        $(this).find('button').each(function() {
+            var oldId = $(this).attr('id');
+            var newId = oldId.replace(/_\d+$/, '_' + index);
+            $(this).attr('id', newId);
+            $(this).attr('onclick', 'acaoBotao(' + index + ')');
+        });
+    });
+}
+
+function acaoBotao(index) {
+    // Coloque aqui a ação que você deseja realizar ao clicar no botão
+    alert('Botão clicado no contêiner de índice: ' + index);
+}
+
+// Evento para adicionar um novo container de equipamento
+$('#adicionarEquipamento').click(function() {
+    adicionarEquipamento();
+});
+
 
 $('#salvarExecucao').one('click',function() {
     var id_solicitante = $(this).data('id_solicitante');
