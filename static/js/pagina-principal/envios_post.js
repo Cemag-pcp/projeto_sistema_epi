@@ -17,9 +17,10 @@ function alterarDadosExecucao(id_solicitacao) {
         const equipamento = document.getElementById(`equipamentoSolicitado_${id}`).value;
         const quantidade = document.getElementById(`quantidadeExecucao_${id}`).value;
         const motivo = document.getElementById(`motivoExecucao_${id}`).value;
+        const observacao = document.getElementById(`observacaoExecucao_${id}`).value;
 
         // Adiciona os dados ao array
-        dados.push({id_solicitacao,idExecucao, equipamento, quantidade, motivo });
+        dados.push({id_solicitacao,idExecucao, equipamento, quantidade, motivo, observacao});
     });
 
     if (dados.some(obj => Object.values(obj).some(value => !value.trim()))) {

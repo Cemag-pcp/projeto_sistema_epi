@@ -155,6 +155,8 @@ function enviarSolicitacao() {
     
     }
 
+    console.log("DADOS ABAIXO")
+    console.log(dados)
     $.ajax({
         url: '/solicitacao',
         type: 'POST',
@@ -372,7 +374,7 @@ function popularTabelaPadraoEscolhido(itens) {
     var thead = document.createElement('thead');
     var headerRow = document.createElement('tr');
 
-    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade'];
+    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade','Observação'];
     headers.forEach(headerText => {
         var th = document.createElement('th');
         th.textContent = headerText;
@@ -404,6 +406,10 @@ function popularTabelaPadraoEscolhido(itens) {
         quantidadeCell.textContent = item.quantidade;
         row.appendChild(quantidadeCell);
 
+        var obsCell = document.createElement('td');
+        obsCell.textContent = item.observacao;
+        row.appendChild(obsCell);
+
         tbody.appendChild(row);
     });
 
@@ -433,12 +439,13 @@ function confirmarEscolhaPadrao() {
             solicitante: campoSolicitante,
             inputCodigo: colunas[0].textContent,
             inputQuantidade: colunas[3].textContent,
-            inputOperador: colunas[1].textContent,
+            inputObservacao: colunas[1].textContent,
+            inputOperador: colunas[4].textContent,
             radioSubstituicao: colunas[2].textContent,
         };
         dadosTabela.push(dadosLinha);
     }
-
+    console.log(dadosTabela)
     $.ajax({
         url: '/solicitacao',
         type: 'POST',

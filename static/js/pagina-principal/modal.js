@@ -2,6 +2,8 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 
     $('#salvarExecucao').data('id_solicitante', id_solicitante);
 
+    $('#id_solicitacao_exec').val(id_solicitante)
+    
     console.log(id_solicitante)
 
     $("#loading-overlay").show();
@@ -69,19 +71,19 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                             <label>Id</label>
                             <input type="text" class="form-control" id="idExecucao_`+ index +`" value="` + equipamento.id + `" autocomplete="off" disabled> 
                         </div>
-                        <div class="col-sm-10 mb-2">
+                        <div class="col-sm-8 mb-2">
                             <label>Equipamento</label>
                             <input type="text" class="form-control" id="equipamentoSolicitado_`+ index +`" value="` + equipamento.codigo + `" autocomplete="off"> 
                             <ul class="dropdown-list" id="listCodigo` + index + `">
                             </ul>
                         </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-4 mb-2">
+                        <div class="col-sm-2 mb-2">
                             <label>Quantidade</label>
                             <input type="number" class="form-control" id="quantidadeExecucao_`+ index +`" value="` + equipamento.quantidade + `" autocomplete="off"> 
                         </div>
-                        <div class="col-sm-4">
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-3">
                             <label>Motivo:</label>
                             <select class="form-control form-control" style='padding: .375rem .25rem;' id="motivoExecucao_`+ index +`">
                             <option value="` + equipamento.motivo + `" selected disabled hidden>` + equipamento.motivo + `</option>
@@ -92,14 +94,16 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                             <option value="Primeira Entrega">Primeira Entrega</option>
                         </select>
                         </div>
-                        
-                        <div class="col-sm-4 mb-2">
+                        <div class="col-sm-6 mb-2">
+                            <label>Observação</label>
+                            <input type="text" class="form-control" id="observacaoExecucao_`+ index +`" value="` + equipamento.observacao + `" autocomplete="off"> 
+                        </div>
+                        <div class="col-sm-3 mb-2">
                             <div class="info_previsao">
                                 <label>Previsão de troca</label>
                             </div>
                             <input type="datetime" class="form-control" id="previsao_entrega_execucao`+index+`" value="`+previsao+`" autocomplete="off" disabled> 
                         </div>
-                        
                     </div>`;
 
                     containerEquipamentos.append(novoInput);
@@ -115,6 +119,7 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                     var inputQuantidade = document.getElementById('quantidadeExecucao_' + index);
                     var selectMotivo = document.getElementById('motivoExecucao_' + index);
                     var excluirEquip = document.getElementById('excluirEquip_' + index);
+                    var inputObservacao = document.getElementById('observacaoExecucao_' + index);
 
                     if (response.equipamentos.length > 1) {
                         excluirEquip.addEventListener('click', function() {
@@ -159,6 +164,14 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
                         }
                     });
 
+                    inputObservacao.addEventListener('input', function() {
+                        if(inputObservacao.value == equipamento.observacao){
+                            $('#salvarExecucao').prop('disabled',true)
+                        } else {
+                            $('#salvarExecucao').prop('disabled',false);
+                        }
+                    });
+
                 });
                 
             });
@@ -178,7 +191,6 @@ function modalExecucao(id_solicitante,funcionario_nome,solicitante_nome) {
 function adicionarEquipamento() {
     var containerEquipamentos = $('#containerEquipamentos');
     var novoIndex = containerEquipamentos.children('.equipamento-container').length;
-    var indexEquipamento = containerEquipamentos.children('#Campo_Equipamento').length + containerEquipamentos.children('.equipamento-container').length;
 
     var novoInput = `
     <div class="equipamento-container" id="equipamento_${novoIndex}">
@@ -189,22 +201,18 @@ function adicionarEquipamento() {
         </div>
         <hr>
         <div class="row">
-            <div class="col-sm-2 mb-2">
-                <label for="idClone_${novoIndex}">Id</label>
-                <input type="text" class="form-control" id="idClone_${novoIndex}" autocomplete="off" disabled>
-            </div>
             <div class="col-sm-10 mb-2">
                 <label for="equipamentoClone_${novoIndex}">Equipamento</label>
                 <input type="text" class="form-control" id="equipamentoClone_${novoIndex}" autocomplete="off">
                 <ul class="dropdown-list" id="listCodigo_${novoIndex}">
                 </ul>
             </div>
-        </div>
-        <div class="row" style="align-items:end">
             <div class="col-sm-2">
                 <label for="quantidadeClone_${novoIndex}">Quantidade</label>
                 <input type="number" class="form-control" id="quantidadeClone_${novoIndex}" autocomplete="off">
             </div>
+        </div>
+        <div class="row" style="align-items:end">
             <div class="col-sm-4">
                 <label for="motivoClone_${novoIndex}">Motivo:</label>
                 <select class="form-control form-control" id="motivoClone_${novoIndex}" style='padding: .375rem .25rem;'>
@@ -216,12 +224,12 @@ function adicionarEquipamento() {
                     <option value="Primeira Entrega">Primeira Entrega</option>
                 </select>
             </div>
-            <div class="col-sm-4">
-                <label for="previsao_entrega_clone_${novoIndex}">Previsão de troca</label>
-                <input type="datetime" class="form-control" id="previsao_entrega_clone_${novoIndex}" autocomplete="off" disabled>
+            <div class="col-sm-6">
+                <label for="observacao_clone_${novoIndex}">Observação</label>
+                <input type="datetime" class="form-control" id="observacao_clone_${novoIndex}" autocomplete="off">
             </div>
             <div class="col-sm-2">
-                <button class="btn btn-primary" style="width:100%" type="button" onclick="acaoBotao(equipamentoClone_${novoIndex})">Salvar</button>
+                <button class="btn btn-primary" id="buttonClone_${novoIndex}" style="width:100%" type="button" onclick="acaoBotao(${novoIndex})">Salvar</button>
             </div>
         </div>
     </div>`;
@@ -252,6 +260,7 @@ function removerEquipamento(index) {
 
 // Função para reindexar os containers de equipamentos após a remoção
 function reindexarEquipamentos() {
+    
     $('#containerEquipamentos').children('.equipamento-container').each(function(index) {
         $(this).attr('id', 'equipamento_' + index);
         $(this).find('i').attr('onclick', 'removerEquipamento(' + index + ')');
@@ -274,8 +283,43 @@ function reindexarEquipamentos() {
 }
 
 function acaoBotao(index) {
+    $("#loading-overlay").show();
+    $("#buttonClone_"+index).prop('disabled',true)
     // Coloque aqui a ação que você deseja realizar ao clicar no botão
-    alert('Botão clicado no contêiner de índice: ' + index);
+    let id_solicitacao = $('#id_solicitacao_exec').val()
+    let equipamento = $("#equipamentoClone_" + index).val()
+    let quantidade = parseInt($("#quantidadeClone_" + index).val())
+    let motivo = $("#motivoClone_" + index).val()
+    let solicitante_execucao = $("#solicitante_execucao").val()
+    let funcionario_execucao = $("#funcionario_execucao").val()
+    let observacao = $("#observacao_clone_"+index).val()
+
+    if (equipamento === "" || quantidade === '' || quantidade < 0 || motivo === null) {
+        alert('Verifique se os campos adicionados estão corretos');
+        $("#loading-overlay").hide();
+        $("#buttonClone_"+index).prop('disabled',false)
+        return; // Interrompe a execução
+    }
+
+    $.ajax({
+        url: '/salvar-novos-dados',
+        type: 'POST',
+        dataType: 'json',
+        contentType: 'application/json',
+        data: JSON.stringify({ 'id_solicitacao':id_solicitacao,'equipamento': equipamento,'quantidade': quantidade,
+            'motivo': motivo ,'matricula_solicitante':solicitante_execucao,'matricula_recebedor':funcionario_execucao,
+            'observacao':observacao}),
+        success: function (response) {
+            exibirMensagem('sucess','Enviado com sucesso')
+            console.log(response)
+            $("#loading-overlay").hide();
+        },
+        error: function () {
+            console.error('Erro ao adicionar item');
+            $("#loading-overlay").hide();
+            $("#buttonClone_"+index).prop('disabled',false)
+        }
+    });
 }
 
 // Evento para adicionar um novo container de equipamento

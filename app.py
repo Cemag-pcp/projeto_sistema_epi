@@ -77,7 +77,16 @@ def pagina_inicial():
 
     # PRIMEIRA TABELA - Todos os itens solicitados
     s = """SELECT
-            solic.*,
+            solic.id,
+            solic.id_solicitacao,
+            solic.matricula_solicitante,
+            solic.codigo_item,
+            solic.quantidade,
+            solic.motivo,   
+            solic.setor_solicitante,   
+            solic.funcionario_recebe,   
+            solic.data_solicitada,   
+            solic.status_devolucao,   
             hist.status,
             ass.assinatura,
             ass.data_assinatura
@@ -194,7 +203,7 @@ def dados_execucao():
                 ORDER BY id asc;
             """
     
-    query_solicitacoes = f"""SELECT id,codigo_item,quantidade,motivo  
+    query_solicitacoes = f"""SELECT id,codigo_item,quantidade,motivo,observacao  
                          FROM sistema_epi.tb_solicitacoes
                          WHERE id_solicitacao = '{id_solicitante}'
                          ORDER BY id asc;"""
@@ -210,17 +219,20 @@ def dados_execucao():
         'matricula': info_gerais[-1][2],
         'funcionario': info_gerais[-1][7],
         'data_solicitacao': info_gerais[0][8],
-        'data_assinado': info_gerais[-1][10],
+        'data_assinado': info_gerais[-1][11],
     }
 
     equipamentos = []
     
     for row in equipamento:
+        observacao = row[4] if row[4] is not None else ""
+
         equipamentos.append({
             'id': row[0],
             'codigo': row[1],
             'quantidade': row[2],
-            'motivo': row[3]
+            'motivo': row[3],
+            'observacao':observacao
         })
 
     dados['equipamentos'] = equipamentos
@@ -377,12 +389,15 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
 
     # Iterar sobre os dados e inserir no banco de dados
     for item in campos_solicitacao:
-        id_solicitacao = list(item.values())[5]
+        id_solicitacao = list(item.values())[6]
         matricula_solicitante = list(item.values())[0].split()[0]
         codigo = list(item.values())[1]
         quantidade = list(item.values())[2]
-        motivo = list(item.values())[4]
+        motivo = list(item.values())[5]
+        observacao = list(item.values())[4]
         matricula_recebedor = list(item.values())[3].split()[0]
+
+        print(f"id_solicitacao:{id_solicitacao},matricula_solicitante:{matricula_solicitante},codigo:{codigo},quantidade:{quantidade},motivo:{motivo},observacao:{observacao},matricula_recebedor:{matricula_recebedor}")
 
         if verifica_existencia_solicitacao(cur, matricula_recebedor,codigo) == True:
 
@@ -398,11 +413,11 @@ def input_tb_solicitacoes(campos_solicitacao,id_solicitacao):
             cur.execute(query, (motivo,matricula_recebedor,codigo))
 
         sql = """INSERT INTO sistema_epi.tb_solicitacoes 
-            (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe)
+            (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe,observacao)
         VALUES
-            (%s, %s, %s, %s, %s, %s);"""
+            (%s, %s, %s, %s, %s, %s, %s);"""
 
-        cur.execute(sql,(id_solicitacao,matricula_solicitante,codigo,quantidade,motivo,matricula_recebedor))
+        cur.execute(sql,(id_solicitacao,matricula_solicitante,codigo,quantidade,motivo,matricula_recebedor,observacao))
 
     conn.commit()
 
@@ -567,9 +582,12 @@ def criar_solicitacao():
 
     lista_id_solicitacao = []
 
+    # print(listas.items())
+
     # Imprima as listas
     for input_operador, lista in listas.items():
         id_solicitacao = gerar_id_solicitacao()
+        print(id_solicitacao)
         lista_id_solicitacao.append(id_solicitacao)
         input_tb_solicitacoes(lista,id_solicitacao)
     
@@ -625,11 +643,12 @@ def alterar_dados():
             equipamento_nome = equipamento.get('equipamento')
             quantidade = equipamento.get('quantidade')
             motivo = equipamento.get('motivo')
+            observacao = equipamento.get('observacao')
 
             cur.execute(""" UPDATE sistema_epi.tb_solicitacoes
-                    SET codigo_item=%s, quantidade=%s, motivo=%s
+                    SET codigo_item=%s, quantidade=%s, motivo=%s, observacao=%s
                     WHERE id = %s
-                    """, (equipamento_nome, quantidade, motivo, idExecucao))
+                    """, (equipamento_nome, quantidade, motivo, observacao, idExecucao))
             
             print(idExecucao,equipamento_nome,quantidade,motivo)
 
@@ -642,6 +661,52 @@ def alterar_dados():
 
     except Exception as e:
         return jsonify({'erro': str(e)}), 500
+
+@app.route('/salvar-novos-dados',methods=['POST'])
+def salvar_dados():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+
+    id_solicitacao = dados['id_solicitacao']
+    equipamento = dados['equipamento']
+    quantidade = dados['quantidade']
+    motivo = dados['motivo']
+    matricula_nome_solicitante = dados['matricula_solicitante']
+    matricula_nome_recebedor = dados['matricula_recebedor']
+    observacao = dados['observacao']
+
+    matricula_solicitante,nome_solicitante = matricula_nome_solicitante.split(" - ")
+    matricula_recebedor,nome_recebedor = matricula_nome_recebedor.split(" - ")
+
+    sql = """INSERT INTO sistema_epi.tb_solicitacoes 
+            (id_solicitacao, matricula_solicitante, codigo_item, quantidade, motivo,funcionario_recebe,observacao)
+        VALUES
+            (%s, %s, %s, %s, %s, %s,%s);"""
+
+    cur.execute(sql,(id_solicitacao,matricula_solicitante,equipamento,quantidade,motivo,matricula_recebedor,observacao))
+
+    query_assinatura = f"""DELETE FROM sistema_epi.tb_assinatura
+                        WHERE id_solicitacao = '{id_solicitacao}'
+                        """
+    
+    cur.execute(query_assinatura)
+
+    codigo,nome_equipamento = equipamento.split(" - ")
+
+    motivo = "Adicionou o Item - " + codigo
+    status = "Aguardando Assinatura"
+
+    conn.commit()
+    conn.close()
+
+    base_tb_historico(id_solicitacao,status,motivo)
+
+    conn.close()
+
+    return jsonify("Sucesso")
 
 @app.route('/excluir-solicitacao', methods=['POST'])
 @login_required
@@ -1088,10 +1153,11 @@ def salvar_novo_padrao():
         quantidade=item['inputQuantidade']
         funcionario_recebe=item['inputOperador']
         motivo=item['radioSubstituicao']
+        observacao=item['observacaoSolicitacao']
 
-        query_add = """insert into sistema_epi.padrao_solicitacao (matricula_solicitante,nome,codigo_item,motivo,quantidade,funcionario_recebe) values (%s,%s,%s,%s,%s,%s)"""
+        query_add = """insert into sistema_epi.padrao_solicitacao (matricula_solicitante,nome,codigo_item,motivo,quantidade,funcionario_recebe,observacao) values (%s,%s,%s,%s,%s,%s,%s)"""
 
-        cur.execute(query_add,(matricula,nome_padrao,codigo_item,motivo,quantidade,funcionario_recebe))
+        cur.execute(query_add,(matricula,nome_padrao,codigo_item,motivo,quantidade,funcionario_recebe,observacao))
     
     conn.commit()
 
