@@ -69,9 +69,10 @@ function enviarSolicitacao() {
 
         // Itere sobre todos os inputs e armazene seus valores no objeto de dados do camposSolicitacao atual
         inputs.forEach(function(input) {
-            console.log(input.value);
             // Verifique se o valor não está vazio antes de adicionar ao objeto
-            if (input.value.trim() !== '') {
+            console.log(input.id)
+            console.log(input.value)
+            if (input.value.trim() !== '' || input.id === "observacaoSolicitacao") {
                 if (input.type === 'radio') {
                     // Verifique se o radio está marcado e adicione ao objeto apenas se for true
                     if (input.checked) {
@@ -155,8 +156,6 @@ function enviarSolicitacao() {
     
     }
 
-    console.log("DADOS ABAIXO")
-    console.log(dados)
     $.ajax({
         url: '/solicitacao',
         type: 'POST',

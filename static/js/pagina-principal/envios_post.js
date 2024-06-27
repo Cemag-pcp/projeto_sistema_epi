@@ -23,7 +23,11 @@ function alterarDadosExecucao(id_solicitacao) {
         dados.push({id_solicitacao,idExecucao, equipamento, quantidade, motivo, observacao});
     });
 
-    if (dados.some(obj => Object.values(obj).some(value => !value.trim()))) {
+    // Verifica se algum objeto tem campos inválidos, exceto 'observacao'
+    if (dados.some(obj => {
+        const { observacao, ...rest } = obj; // Exclui a propriedade 'observacao'
+        return Object.values(rest).some(value => !value.trim());
+    })) {
         exibirMensagem('aviso', 'Campo de equipamento, quantidade ou motivo inválido');
         $("#loading-overlay").hide();
         return;
