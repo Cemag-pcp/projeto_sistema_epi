@@ -106,9 +106,81 @@
 
                 </div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#opcaoSelecionarPadrao" data-dismiss="modal" onclick="popularBodyEscolhaPadrao()">Retornar</button>
-                <button id="confirmarPadraoEscolhido" class="btn btn-primary" data-toggle="modal" data-dismiss="modal" onclick="confirmarEscolhaPadrao()">Confirmar</button>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddNovoPadrao" data-dismiss="modal" id="add_padrao_existente">Adicionar novo campo <strong>+</strong></button>
+                <div>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#opcaoSelecionarPadrao" data-dismiss="modal" onclick="popularBodyEscolhaPadrao()">Retornar</button>
+                    <button id="confirmarPadraoEscolhido" class="btn btn-primary" data-toggle="modal" data-dismiss="modal" onclick="confirmarEscolhaPadrao()">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="modalAddNovoPadrao" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adicionar novo equipamento</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body" style="height: 370px; overflow-y: auto;">
+                <div class="row">
+                    <div class="col-sm-10 mb-2">
+                        <label>Equipamento</label>
+                        <input type="text" class="form-control" id="equipamento_adicionado" autocomplete="off" onclick="getId_itens_modal(this)">
+                        <ul class="dropdown-list" id="listEquipamentoNovo">
+                        </ul>
+                    </div>
+                    <div class="col-sm-2">
+                        <label>Quantidade</label>
+                        <input type="number" class="form-control" id="quantidade_adicionado">
+                    </div>
+                </div>
+                <div class="row" style="align-items:end">
+                    <div class="col-sm-4">
+                        <label>Motivo:</label>
+                        <select class="form-control form-control" id="motivo_adicionado" style='padding: .375rem .25rem;'>
+                            <option value="" selected disabled hidden>Selecione o motivo</option>
+                            <option value="Perda">Perda</option>
+                            <option value="Dano">Dano</option>
+                            <option value="Admissão">Admissão</option>
+                            <option value="Substituição">Substituição</option>
+                            <option value="Primeira Entrega">Primeira Entrega</option>
+                        </select>
+                    </div>
+                    <div class="col-sm-4">
+                        <label>Funcionário</label>
+                        <input type="text" class="form-control" id="funcionario_adicionado" autocomplete="off" onclick="getId_operadores_modal(this)">
+                        <ul class="dropdown-list"
+                            id="listFuncionarioAdd">
+                        </ul>
+                    </div>
+                    <div class="col-sm-4">
+                        <label>Observação</label>
+                        <input type="text" class="form-control" id="observacao_adicionado"  autocomplete="off">
+                    </div>
+                </div>
+                <div class="row" style="align-items:end">
+                    <div class="col-sm-6 d-none">
+                        <label>Nome Padrão</label>
+                        <input type="text" class="form-control" id="nome_padrao_adicionado"  autocomplete="off">
+                    </div>
+                    <div class="col-sm-6 d-none">
+                        <label>Solicitante</label>
+                        <input type="text" class="form-control" id="solicitante_adicionado"  autocomplete="off">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button class="btn btn-primary" data-toggle="modal" data-target="#modalPadraoEscolhido" data-dismiss="modal">Retornar</button>
+                <button class="btn btn-primary" id="add_item_padrao">Adicionar novo campo</button>
             </div>
         </div>
     </div>

@@ -68,6 +68,8 @@ function configurarDropdown(inputId, listId) {
 
 configurarDropdown('inputOperador', 'listOperador');
 configurarDropdown('inputCodigo', 'listCodigo');
+configurarDropdown('equipamento_adicionado', 'listEquipamentoNovo');
+configurarDropdown('funcionario_adicionado', 'listFuncionarioAdd');
 // Fim criar lista dentro de input
 
 // Carregando itens para inputs clonados
@@ -198,6 +200,12 @@ function getId_itens(element) {
 
     carregarItens2(id, listId);
 }
+
+function getId_itens_modal(element) {
+    var id = element.id;
+    
+    carregarItens2(id, 'listEquipamentoNovo');
+}
 // Fim Carregando itens com base no id clonado
 
 // Carregando operadores com base no id clonado
@@ -206,5 +214,11 @@ function getId_operadores(element) {
     var listId = id.replace('inputOperador-clone_', 'listOperador-clone_')
 
     carregarOperadores2(id, listId);
+}
+
+function getId_operadores_modal(element) {
+    var id = element.id;
+    
+    carregarOperadores2(id, 'listFuncionarioAdd');
 }
 // Fim Carregando operadores com base no id clonado

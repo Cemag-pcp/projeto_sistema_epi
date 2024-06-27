@@ -708,6 +708,26 @@ def salvar_dados():
 
     return jsonify("Sucesso")
 
+@app.route('/add-item-padrao',methods=['POST'])
+def add_item_padrao():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    dados = request.get_json()
+
+    equipamento_adicionado = dados['equipamento_adicionado']
+    quantidade_adicionado = dados['quantidade_adicionado']
+    motivo_adicionado = dados['motivo_adicionado']
+    funcionario_adicionado = dados['funcionario_adicionado']
+    observacao_adicionado = dados['observacao_adicionado']
+    nome_padrao_adicionado = dados['nome_padrao_adicionado']
+    solicitante_adicionado = dados['solicitante_adicionado']
+
+    print(equipamento_adicionado,quantidade_adicionado,motivo_adicionado,funcionario_adicionado,observacao_adicionado,nome_padrao_adicionado,solicitante_adicionado)
+
+    return jsonify("Sucesso")
+
 @app.route('/excluir-solicitacao', methods=['POST'])
 @login_required
 def excluir_solicitacao():

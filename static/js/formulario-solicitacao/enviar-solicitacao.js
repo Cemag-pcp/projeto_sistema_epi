@@ -341,6 +341,11 @@ function popularPadraoEscolhido(padrao){
         contentType: 'application/json',
         success: function (response) {
             var itens = response.itens;
+
+            console.log(itens)
+
+            $("#nome_padrao_adicionado").val(itens[0].nome)
+            $("#solicitante_adicionado").val(itens[0].matricula_solicitante)
             
             popularTabelaPadraoEscolhido(itens);
 
@@ -373,7 +378,7 @@ function popularTabelaPadraoEscolhido(itens) {
     var thead = document.createElement('thead');
     var headerRow = document.createElement('tr');
 
-    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade','Observação'];
+    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade', 'Observação', 'Ação'];
     headers.forEach(headerText => {
         var th = document.createElement('th');
         th.textContent = headerText;
@@ -386,7 +391,7 @@ function popularTabelaPadraoEscolhido(itens) {
     // Cria o corpo da tabela
     var tbody = document.createElement('tbody');
 
-    itens.forEach(item => {
+    itens.forEach((item, index) => {
         var row = document.createElement('tr');
 
         var codigoItemCell = document.createElement('td');
@@ -408,6 +413,39 @@ function popularTabelaPadraoEscolhido(itens) {
         var obsCell = document.createElement('td');
         obsCell.textContent = item.observacao;
         row.appendChild(obsCell);
+
+        // Cria a célula de ação com o botão de excluir
+        var actionCell = document.createElement('td');
+        var deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Excluir';
+        deleteButton.className = 'btn btn-danger';
+        deleteButton.onclick = function() {
+            var row = this.parentNode.parentNode;
+            var undoCell = document.createElement('td');
+            undoCell.setAttribute('colspan', headers.length);
+
+            var undoLink = document.createElement('a');
+            undoLink.textContent = 'Desfazer';
+            undoLink.href = '#';
+            undoLink.onclick = function() {
+                row.innerHTML = ''; // Limpa o conteúdo da linha
+
+                row.appendChild(codigoItemCell);
+                row.appendChild(funcionarioRecebeCell);
+                row.appendChild(motivoCell);
+                row.appendChild(quantidadeCell);
+                row.appendChild(obsCell);
+                row.appendChild(actionCell);
+
+                return false;
+            };
+
+            undoCell.appendChild(undoLink);
+            row.innerHTML = ''; // Limpa o conteúdo da linha
+            row.appendChild(undoCell);
+        };
+        actionCell.appendChild(deleteButton);
+        row.appendChild(actionCell);
 
         tbody.appendChild(row);
     });
@@ -434,36 +472,79 @@ function confirmarEscolhaPadrao() {
 
     for (var i = 0; i < linhas.length; i++) {
         var colunas = linhas[i].getElementsByTagName('td');
-        var dadosLinha = {
-            solicitante: campoSolicitante,
-            inputCodigo: colunas[0].textContent,
-            inputQuantidade: colunas[3].textContent,
-            inputObservacao: colunas[1].textContent,
-            inputOperador: colunas[4].textContent,
-            radioSubstituicao: colunas[2].textContent,
-        };
-        dadosTabela.push(dadosLinha);
+        
+        // Verifica se a linha possui colunas de desfazer
+        if (colunas.length > 1 && colunas[5].textContent.trim() !== 'Desfazer') {
+            var dadosLinha = {
+                solicitante: campoSolicitante,
+                inputCodigo: colunas[0].textContent,
+                inputQuantidade: colunas[3].textContent,
+                inputObservacao: colunas[1].textContent,
+                inputOperador: colunas[4].textContent,
+                radioSubstituicao: colunas[2].textContent,
+            };
+            dadosTabela.push(dadosLinha);
+        }
     }
-    console.log(dadosTabela)
+
+    if (dadosTabela.length === 0) {
+        $("#loading-overlay").hide();
+        exibirMensagem('aviso','Sem dados na tabela de padrões');
+        return; // Sai da função se dadosTabela estiver vazio
+    }
+    $("#loading-overlay").hide();
+    console.log(dadosTabela);
+    // $.ajax({
+    //     url: '/solicitacao',
+    //     type: 'POST',
+    //     data: JSON.stringify(dadosTabela), // Envolvendo nome_padrao em um objeto
+    //     contentType: 'application/json',
+    //     success: function (response) {
+
+    //         $("#loading-overlay").hide();
+    //         $('modalPadraoEscolhido').modal('hide');
+    //         exibirMensagem('success','Solicitação aberta com sucesso.');
+    //     },
+    //     error: function (error) {
+    //         console.error('Erro na requisição AJAX:', error);
+    //         $("#loading-overlay").hide();
+    //         exibirMensagem('erro', 'Erro ao enviar a solicitação');
+    //     }
+    // });
+
+}
+
+$("#add_item_padrao").on('click',function() {
+
+    $("#add_item_padrao").prop('disabled',true)
+
+    let equipamento_adicionado = $("#equipamento_adicionado").val()
+    let quantidade_adicionado = $("#quantidade_adicionado").val()
+    let motivo_adicionado = $("#motivo_adicionado").val()
+    let funcionario_adicionado = $("#funcionario_adicionado").val()
+    let observacao_adicionado = $("#observacao_adicionado").val()
+    let nome_padrao_adicionado = $("#nome_padrao_adicionado").val()
+    let solicitante_adicionado = $("#solicitante_adicionado").val()
+
     $.ajax({
-        url: '/solicitacao',
+        url: '/add-item-padrao',
         type: 'POST',
-        data: JSON.stringify(dadosTabela), // Envolvendo nome_padrao em um objeto
+        data: JSON.stringify({ 'equipamento_adicionado':equipamento_adicionado,'quantidade_adicionado': quantidade_adicionado,'motivo_adicionado': motivo_adicionado,
+            'funcionario_adicionado': funcionario_adicionado ,'observacao_adicionado':observacao_adicionado,'nome_padrao_adicionado':nome_padrao_adicionado,'solicitante_adicionado':solicitante_adicionado}), // Envolvendo nome_padrao em um objeto
         contentType: 'application/json',
         success: function (response) {
 
             $("#loading-overlay").hide();
-            $('modalPadraoEscolhido').modal('hide');
+            $('#modalAddNovoPadrao').modal('hide');
             exibirMensagem('success','Solicitação aberta com sucesso.');
         },
         error: function (error) {
             console.error('Erro na requisição AJAX:', error);
             $("#loading-overlay").hide();
-            exibirMensagem('erro', 'Erro ao enviar a solicitação');
+            exibirMensagem('erro', 'Erro ao adicionar novo item');
+            $("#add_item_padrao").prop('disabled',false)
         }
     });
 
-
-
-}
+})
 
