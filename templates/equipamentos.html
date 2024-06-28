@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+
+{% block links %}
+
+<!-- CSS datatable -->
+<link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+
+<!-- CSS dropdown inputs -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+{% endblock %}
+
+{% block container %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h1 class="h4 mb-0 text-gray-800">Equipamentos</h1>
+    <button class="btn btn-primary" onclick="modalCadastro()">Cadastro de Equipamentos </button>
+</div>
+
+<!-- DataTale Solicitações -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tabela de Equipamentos</h6>
+    </div>
+    <div class="card-body">
+        <div id="no-more-tables">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTableEquipamento" width="100%" style="font-size: 14px;">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Descrição</th>
+                            <th>Vida útil <small>(Em dias)</small></th>
+                            <th>CA</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipamento in equipamentos %}
+                        <tr>
+                            <td data-title="Código">{{equipamento[0]}}</td>
+                            <td data-title="Descrição">{{equipamento[1]}}</td>
+                            <td data-title="Vida útil">{{equipamento[2]}}</td>
+                            {% if equipamento[3] == None %}
+                                <td data-title="CA"></td>
+                            {% else %}
+                                <td data-title="CA">{{equipamento[3]}}</td>
+                            {% endif %}
+                            <td data-title="Ações" style="text-align: center;">
+                                <button class="btn btn-info" onclick="modalEdicao('{{equipamento[0]}}','{{equipamento[1]}}','{{equipamento[2]}}','{{equipamento[3]}}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="btn btn-danger" onclick="modalExcluirEquipamento('{{equipamento[0]}}','{{equipamento[1]}}')"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdicaoEquipamento" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Editar Equipamento</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label for="codigoEdicao">Código</label>
+                        <input type="number" class="form-control" id="codigoEdicao">
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="nomeEdicao">Nome do Equipamento</label>
+                        <input type="text" class="form-control" id="nomeEdicao">
+                    </div>
+                </div>
+                <div class="row" style="align-items: end;">
+                    <div class="col-sm-4">
+                        <label for="vida_util_edicao">Vida útil <small>(Em dias)</small></label>
+                        <input type="number" class="form-control" id="vida_util_edicao">
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="ca_edicao">Certificado de aprovação</label>
+                        <input type="text" class="form-control" id="ca_edicao">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="editarEquipamento" class="btn btn-primary">Editar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalCadastroEquipamento" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cadastrar Equipamento</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-4 mb-2">
+                        <label for="codigoCadastro">Código</label>
+                        <input type="number" class="form-control" id="codigoCadastro">
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="nomeCadastro">Nome do Equipamento</label>
+                        <input type="text" class="form-control" id="nomeCadastro">
+                    </div>
+                </div>
+                <div class="row" style="align-items: end;">
+                    <div class="col-sm-4">
+                        <label for="vida_util_cadastro">Vida útil <small>(Em dias)</small></label>
+                        <input type="number" class="form-control" id="vida_util_cadastro">
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="ca_cadastro">Certificado de aprovação</label>
+                        <input type="text" class="form-control" id="ca_cadastro">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cadastrarEquipamento" class="btn btn-primary">Cadastrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalExcluirEquipamento" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_excluir_equipamento"><i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i> Atenção</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="p_excluir_equipamento"></p>
+            </div>
+            <div class="modal-footer">
+                <button id="excluirEquipamento" class="btn btn-danger">Excluir</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="/static/vendor/datatables/jquery.dataTables.min.js"></script>
+<!-- Plugin icons -->
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+<script src="/static/js/demo/datatables-demo.js"></script>
+
+<script src="/static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<script src="/static/js/cadastrar-equipamento/cadastro_equipamento.js"></script>
+
+{% endblock %}

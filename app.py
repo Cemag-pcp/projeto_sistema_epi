@@ -1254,6 +1254,20 @@ def popular_padrao():
 
     return jsonify({'itens':itens_dict})
 
+@app.route('/equipamentos', methods=['GET'])
+def equipamentos():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_equipamentos = 'SELECT * FROM sistema_epi.tb_itens'
+
+    cur.execute(query_equipamentos)
+    equipamentos = cur.fetchall()
+
+    return render_template("equipamentos.html",equipamentos=equipamentos)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
