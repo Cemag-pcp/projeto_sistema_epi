@@ -709,7 +709,7 @@ def salvar_dados():
     return jsonify("Sucesso")
 
 @app.route('/add-item-padrao',methods=['POST'])
-def add_item_padrao():
+def add_item_padraoo():
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -725,6 +725,18 @@ def add_item_padrao():
     solicitante_adicionado = dados['solicitante_adicionado']
 
     print(equipamento_adicionado,quantidade_adicionado,motivo_adicionado,funcionario_adicionado,observacao_adicionado,nome_padrao_adicionado,solicitante_adicionado)
+
+    query = """ INSERT INTO sistema_epi.padrao_solicitacao (matricula_solicitante,nome,codigo_item,motivo,quantidade,funcionario_recebe,observacao)
+                VALUES (%s,%s,%s,%s,%s,%s,%s) """
+    
+    values = (solicitante_adicionado,nome_padrao_adicionado,equipamento_adicionado,motivo_adicionado,quantidade_adicionado,funcionario_adicionado,observacao_adicionado)
+
+    cur.execute(query,values)
+
+    conn.commit()
+
+    cur.close()
+    conn.close()
 
     return jsonify("Sucesso")
 

@@ -92,7 +92,7 @@
 <div class="modal fade" id="modalPadraoEscolhido" tabindex="-1"
     role="dialog"
     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-dialog modal-lg" style="max-width: 820px;" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Padrão escolhido</h5>
@@ -107,16 +107,17 @@
                 </div>
             </div>
             <div class="modal-footer" style="justify-content: space-between;">
-                <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddNovoPadrao" data-dismiss="modal" id="add_padrao_existente">Adicionar novo campo <strong>+</strong></button>
                 <div>
                     <button class="btn btn-primary" data-toggle="modal" data-target="#opcaoSelecionarPadrao" data-dismiss="modal" onclick="popularBodyEscolhaPadrao()">Retornar</button>
-                    <button id="confirmarPadraoEscolhido" class="btn btn-primary" data-toggle="modal" data-dismiss="modal" onclick="confirmarEscolhaPadrao()">Confirmar</button>
+                    <button class="btn btn-primary" data-toggle="modal" data-target="#modalAddNovoPadrao" data-dismiss="modal" id="add_padrao_existente">Adicionar novo campo <strong>+</strong></button>
                 </div>
+                    <button id="confirmarPadraoEscolhido" class="btn btn-primary" data-toggle="modal" data-dismiss="modal" onclick="confirmarEscolhaPadrao()">Confirmar</button>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Modal para adicionar um novo item como padrão -->
 
 <div class="modal fade" id="modalAddNovoPadrao" tabindex="-1"
     role="dialog"
