@@ -2,6 +2,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from flask import Flask, render_template, request, jsonify,redirect, send_file, url_for,flash,session
+from classes.equipamentos import EquipamentoCRUD
 import datetime
 import warnings
 import pandas as pd
@@ -22,6 +23,8 @@ DB_HOST = "database-2.cdcogkfzajf0.us-east-1.rds.amazonaws.com"
 DB_NAME = "postgres"
 DB_USER = "postgres"
 DB_PASS = "15512332"
+
+crud = EquipamentoCRUD(DB_NAME, DB_USER, DB_PASS, DB_HOST)
 
 warnings.filterwarnings("ignore")
 
@@ -167,12 +170,33 @@ def receber_assinatura():
         # Obtém o dataURL da assinatura
         id_solicitacao = data.get('id_solicitacao')
         dataURL = data.get('dataURL')
+        codigo_item = data.get('codigo_item')
+        codigo_nome_funcionario = data.get('nome_funcionario')
+        matricula,nome = codigo_nome_funcionario.split(" - ")
+
+        data_devolucao = datetime.now().date()
 
         cur.execute("INSERT INTO sistema_epi.tb_assinatura (id_solicitacao, assinatura) VALUES (%s, %s)", (id_solicitacao, dataURL))
 
         cur.execute("INSERT INTO sistema_epi.tb_historico_solicitacoes (id_solicitacao, status, motivo) VALUES (%s, %s, %s)", (id_solicitacao, 'Assinado', 'Assinado'))
 
+        if verifica_existencia_data_devolucao(cur, matricula, codigo_item) == True:
+
+            query = """UPDATE sistema_epi.tb_solicitacoes
+                SET data_devolucao = %s
+                WHERE id = (
+                    SELECT id
+                        FROM sistema_epi.tb_solicitacoes
+                    WHERE funcionario_recebe = %s AND codigo_item = %s AND data_devolucao IS NULL 
+                    ORDER BY id ASC
+                    LIMIT 1);"""
+        
+            cur.execute(query, (data_devolucao,matricula,codigo_item))
+
         conn.commit()
+
+        cur.close()
+        conn.close()
 
         # Exemplo de resposta de volta para o cliente
         return jsonify({'status': 'success', 'message': 'Assinatura recebida com sucesso!'})
@@ -320,36 +344,26 @@ def query_filtro_historico():
 
 def cardsPaginaInicial(cur):
 
-    query_quantidade_assinatura = """SELECT *
-                    FROM sistema_epi.tb_assinatura
-                     """
-
+    query_quantidade_assinatura = """SELECT COUNT(*) AS quantidade_assinados
+                                FROM sistema_epi.tb_assinatura;"""
     cur.execute(query_quantidade_assinatura)
-    lista_quantidade_assinados = cur.fetchall()
+    quantidade_assinados = cur.fetchone()[0]
 
-    quantidade_assinados = len(lista_quantidade_assinados)
-
-    query_quantidade_devolucao = """SELECT *
-                                FROM sistema_epi.tb_solicitacoes
-                                WHERE status_devolucao IS NOT NULL"""
-    
+    query_quantidade_devolucao = """SELECT COUNT(*) AS quantidade_devolucao
+                                    FROM sistema_epi.tb_solicitacoes
+                                    WHERE status_devolucao IS NOT NULL;"""
     cur.execute(query_quantidade_devolucao)
-    lista_quantidade_devolucao = cur.fetchall()
+    quantidade_devolucao = cur.fetchone()[0]
 
-    quantidade_devolucao = len(lista_quantidade_devolucao)
-
-    query_quantidade_trabalhadores = """SELECT DISTINCT funcionario_recebe
-                                    FROM sistema_epi.tb_solicitacoes"""
-    
+    query_quantidade_trabalhadores = """SELECT COUNT(DISTINCT funcionario_recebe) AS quantidade_trabalhadores
+                                        FROM sistema_epi.tb_solicitacoes;"""
     cur.execute(query_quantidade_trabalhadores)
-    lista_quantidade_trabalhadores = cur.fetchall()
-    quantidade_trabalhadores = len(lista_quantidade_trabalhadores)
+    quantidade_trabalhadores = cur.fetchone()[0]
 
-    query_quantidade_solicitacoes = """SELECT DISTINCT id_solicitacao
-                                    FROM sistema_epi.tb_solicitacoes"""
+    query_quantidade_solicitacoes = """SELECT COUNT(id_solicitacao) AS quantidade_solicitacoes
+                                    FROM sistema_epi.tb_solicitacoes;"""
     cur.execute(query_quantidade_solicitacoes)
-    lista_quantidade_solicitacoes = cur.fetchall()
-    quantidade_solicitacoes = len(lista_quantidade_solicitacoes)
+    quantidade_solicitacoes = cur.fetchone()[0]
 
     return quantidade_assinados,quantidade_devolucao,quantidade_trabalhadores,quantidade_solicitacoes
 
@@ -363,6 +377,23 @@ def verifica_existencia_solicitacao(cur, matricula_recebedor, codigo):
         WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao IS NULL
         ORDER BY id_solicitacao DESC
         LIMIT 1;"""
+
+    cur.execute(sql,(matricula_recebedor,codigo))
+
+    return cur.fetchone() is not None
+
+def verifica_existencia_data_devolucao(cur, matricula_recebedor, codigo):
+    """
+    Verifica se já existe uma solicitação com o mesmo matricula_recebedor e código na tabela sistema_epi.tb_solicitacoes.
+    Retorna True se existir, False caso contrário.
+    """
+    sql ="""SELECT *
+            FROM sistema_epi.tb_solicitacoes
+        WHERE funcionario_recebe = %s AND codigo_item = %s AND status_devolucao NOTNULL
+        ORDER BY id_solicitacao DESC
+        LIMIT 1;"""
+    
+    print(sql)
 
     cur.execute(sql,(matricula_recebedor,codigo))
 
@@ -891,6 +922,8 @@ def historico():
         equipamento_historico = data['equipamento_historico']
 
         query_historico = condicao_historico(matricula,data_solicit,solicitante_historico,equipamento_historico)
+
+        print(query_historico)
         
         cur.execute(query_historico)
         
@@ -946,15 +979,18 @@ def ficha():
                         a.data_assinatura,
                         s.quantidade,
                         s.codigo_item,
-                        s.motivo,
+                        itens.ca,
+                        s.status_devolucao,
                         s.funcionario_recebe,
+                        s.data_devolucao,
                         a.assinatura
                     FROM 
-                        sistema_epi.tb_solicitacoes s
+                    sistema_epi.tb_solicitacoes s
                     JOIN 
-                        sistema_epi.tb_assinatura a
+                    sistema_epi.tb_assinatura a
                     ON 
-                        s.id_solicitacao = a.id_solicitacao
+                    s.id_solicitacao = a.id_solicitacao
+                    LEFT JOIN sistema_epi.tb_itens itens ON s.codigo_item = CONCAT(itens.codigo || ' - ' || itens.descricao)
                     WHERE 1=1 AND s.funcionario_recebe = '{matricula}'
                 """
 
@@ -976,8 +1012,8 @@ def ficha():
             return jsonify('Vazio')
 
         for i in range(num_solicitacoes):
-            assinatura = lista_solicitacoes[i][5]
-            del(lista_solicitacoes[i][5])
+            assinatura = lista_solicitacoes[i][7]
+            del(lista_solicitacoes[i][7])
             assinatura_bytes = bytes(assinatura)
             lista_solicitacoes[i].append(assinatura_bytes)
 
@@ -1021,9 +1057,11 @@ def ficha():
             ws.cell(row=linha_destino, column=1).value = data_formatada
             ws.cell(row=linha_destino, column=2).value = lista_solicitacoes[i][1]  # Quantidade
             ws.cell(row=linha_destino, column=3).value = lista_solicitacoes[i][2]  # Código do item
-            ws.cell(row=linha_destino, column=6).value = lista_solicitacoes[i][3]  # Motivo
+            ws.cell(row=linha_destino, column=4).value = lista_solicitacoes[i][3]  # CA do item
+            ws.cell(row=linha_destino, column=5).value = lista_solicitacoes[i][6]  # Devolução do item
+            ws.cell(row=linha_destino, column=6).value = lista_solicitacoes[i][4]  # Motivo
             # assinatura = lista_solicitacoes[i][5]
-            base64_string = lista_solicitacoes[i][5]
+            base64_string = lista_solicitacoes[i][7]
 
             # Remove o prefixo 'data:image/png;base64,' para obter apenas a parte codificada em base64
             image_data = base64_string.split(b';base64,')[1]
@@ -1254,6 +1292,36 @@ def popular_padrao():
 
     return jsonify({'itens':itens_dict})
 
+@app.route('/crud-equipamento', methods=['POST'])
+def crud_equipamento():
+
+    data = request.get_json()
+
+    print(data)
+
+    codigo = data.get('codigo')
+    nome_equipamento = data.get('nome')
+    vida_util = data.get('vida_util')
+    ca = data.get('ca')
+    acao = data.get('acao')  # Ex: 'create', 'update', 'delete'
+
+    if ca == '':
+        ca = None
+
+    print(codigo,nome_equipamento,vida_util,ca,acao)
+
+    if acao == 'create':
+        crud.create_equipamento(codigo, nome_equipamento, vida_util, ca)
+        return jsonify({'message': 'Equipamento criado com sucesso'}), 201
+    elif acao == 'update':
+        crud.update_equipamento(codigo, vida_util, ca)
+        return jsonify({'message': 'Equipamento atualizado com sucesso'}), 200
+    elif acao == 'delete':
+        crud.delete_equipamento(codigo)
+        return jsonify({'message': 'Equipamento deletado com sucesso'}), 200
+    else:
+        return jsonify({'message': 'Ação inválida'}), 400
+
 @app.route('/equipamentos', methods=['GET'])
 def equipamentos():
 
@@ -1267,7 +1335,6 @@ def equipamentos():
     equipamentos = cur.fetchall()
 
     return render_template("equipamentos.html",equipamentos=equipamentos)
-
 
 if __name__ == '__main__':
     app.run(debug=True)

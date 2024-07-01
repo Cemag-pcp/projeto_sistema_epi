@@ -364,7 +364,7 @@ $('#btnExcluirAssinatura').one('click',function() {
     });
 })
 
-function modalAssinatura(nome_funcionario,id_solicitacao,id,data) {
+function modalAssinatura(nome_funcionario,id_solicitacao,id,codigo_item) {
 
     $('#modalAssinatura .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
 
@@ -374,7 +374,7 @@ function modalAssinatura(nome_funcionario,id_solicitacao,id,data) {
 
     // TRATAMENTO PARA NÃO ENVIAR MAIS DE UMA REQUISIÇÃO
     if (!signaturePad.calledOnce) {
-        signaturePad(id_solicitacao,id);
+        signaturePad(id_solicitacao,id,codigo_item,nome_funcionario);
 
         // Definir a variável de controle para indicar que a função foi chamada
         signaturePad.calledOnce = true;

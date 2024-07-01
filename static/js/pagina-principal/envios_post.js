@@ -57,7 +57,7 @@ function alterarDadosExecucao(id_solicitacao) {
 
  // CAMPO DE ENVIO DA ASSINATURA
 
- function signaturePad(id_solicitacao,id) {
+ function signaturePad(id_solicitacao,id,codigo_item,nome_funcionario) {
 
     var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
             backgroundColor: 'rgba(255, 255, 255, 0)',
@@ -90,7 +90,9 @@ function alterarDadosExecucao(id_solicitacao) {
                 body: JSON.stringify({
                     id_solicitacao: id_solicitacao,
                     dataURL: dataURL,
-                    motivo: motivo
+                    motivo: motivo,
+                    codigo_item: codigo_item,
+                    nome_funcionario: nome_funcionario
                 }),
             })
             .then(response => response.json())

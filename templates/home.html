@@ -49,8 +49,7 @@
                         <div class="card-body">
                             <div class="row no-gutters align-items-center">
                                 <div class="col mr-2">
-                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Qnt. de
-                                        Solicitações</div>
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Qnt. de itens solicitados</div>
                                 </div>
                                 <div class="col-auto">
                                     <div class="h4 mb-0 font-weight-bold text-gray-800">{{quantidade_solicitacoes}}
@@ -216,7 +215,7 @@
                                     style="max-width: 200px; cursor: default;">{{row[3]}}
                                 </td>
                                 {% if row[11] == None %}
-                                <td data-title="Assinatura" ><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}')"
+                                <td data-title="Assinatura" ><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}','{{row[3]}}')"
                                         class="btn btn-warning btn-block">Assinatura Pendente</button></td>
                                 {% else %}
                                 <td data-title="Assinatura" ><button class="btn btn-success btn-block"

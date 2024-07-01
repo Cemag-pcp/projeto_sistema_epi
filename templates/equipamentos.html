@@ -5,6 +5,8 @@
 <!-- CSS datatable -->
 <link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
 
+<link rel="stylesheet" href="/static/css/assinatura.css">
+
 <!-- CSS dropdown inputs -->
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
 
@@ -78,11 +80,11 @@
                 <div class="row">
                     <div class="col-sm-4 mb-2">
                         <label for="codigoEdicao">Código</label>
-                        <input type="number" class="form-control" id="codigoEdicao">
+                        <input type="number" class="form-control" id="codigoEdicao" disabled>
                     </div>
                     <div class="col-sm-8">
                         <label for="nomeEdicao">Nome do Equipamento</label>
-                        <input type="text" class="form-control" id="nomeEdicao">
+                        <input type="text" class="form-control" id="nomeEdicao" disabled>
                     </div>
                 </div>
                 <div class="row" style="align-items: end;">
@@ -158,6 +160,7 @@
             </div>
             <div class="modal-body">
                 <p id="p_excluir_equipamento"></p>
+                <input type="text" class="form-control d-none" id="codigo_excluir" disabled>
             </div>
             <div class="modal-footer">
                 <button id="excluirEquipamento" class="btn btn-danger">Excluir</button>
@@ -165,6 +168,8 @@
         </div>
     </div>
 </div>
+
+<div id="mensagem"></div>
 
 {% endblock %}
 
@@ -178,6 +183,8 @@
 
 <script src="/static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
 
-<script src="/static/js/cadastrar-equipamento/cadastro_equipamento.js"></script>
+<script src="/static/js/mensagem.js"></script>
+
+<script src="/static/js/crud-equipamento/crud-equipamento.js"></script>
 
 {% endblock %}
