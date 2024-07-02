@@ -880,6 +880,8 @@ def condicao_historico(matricula, data_solicit,solicitante_historico,equipamento
                         requisicao.funcionarios f_solicitante ON s.matricula_solicitante = f_solicitante.matricula
                     JOIN 
                         requisicao.funcionarios f ON s.funcionario_recebe = f.matricula
+                    JOIN 
+                        sistema_epi.tb_assinatura a ON s.id_solicitacao = a.id_solicitacao
                     WHERE 1=1"""
     
     if matricula:
