@@ -72,7 +72,7 @@ function enviarSolicitacao() {
             // Verifique se o valor não está vazio antes de adicionar ao objeto
             console.log(input.id)
             console.log(input.value)
-            if (input.value.trim() !== '' || input.id === "observacaoSolicitacao") {
+            if (input.value.trim() !== '' || input.id.includes("observacaoSolicitacao")) {
                 if (input.type === 'radio') {
                     // Verifique se o radio está marcado e adicione ao objeto apenas se for true
                     if (input.checked) {
