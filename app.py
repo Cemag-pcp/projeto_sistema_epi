@@ -1294,6 +1294,33 @@ def popular_padrao():
 
     return jsonify({'itens':itens_dict})
 
+@app.route('/excluir-item-padrao', methods=['POST'])
+def excluir_item_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()  # Recebe os dados da requisição
+    nome_padrao = data.get('nome_padrao')
+    codigo_item = data.get('codigo_item')
+    matricula_solicitante = data.get('matricula_solicitante')
+    funcionario_recebe = data.get('funcionario_recebe')
+
+    print(nome_padrao,codigo_item,matricula_solicitante,funcionario_recebe)
+
+    delete_query = F"""DELETE
+                    FROM sistema_epi.padrao_solicitacao
+                    WHERE matricula_solicitante = '{matricula_solicitante}' AND nome = '{nome_padrao}' 
+                    AND codigo_item = '{codigo_item}' AND funcionario_recebe = '{funcionario_recebe}'"""
+    
+    cur.execute(delete_query)
+
+    conn.commit()
+    conn.close()
+
+    return jsonify('success')
+
 @app.route('/crud-equipamento', methods=['POST'])
 def crud_equipamento():
 

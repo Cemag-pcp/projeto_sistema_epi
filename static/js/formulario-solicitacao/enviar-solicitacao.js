@@ -363,6 +363,7 @@ function popularPadraoEscolhido(padrao){
 
 function popularTabelaPadraoEscolhido(itens) {
     // Cria a div com o ID no-more-tables
+    console.log(itens)
     var divTableResponsive = document.createElement('div');
     divTableResponsive.setAttribute('class', 'table-responsive');
 
@@ -417,7 +418,7 @@ function popularTabelaPadraoEscolhido(itens) {
         // Cria a célula de ação com o botão de excluir
         var actionCell = document.createElement('td');
         var deleteButton = document.createElement('button');
-        deleteButton.textContent = 'Excluir';
+        deleteButton.textContent = 'Exclusão Temporária';
         deleteButton.className = 'btn btn-danger';
         deleteButton.onclick = function() {
             var row = this.parentNode.parentNode;
@@ -440,7 +441,41 @@ function popularTabelaPadraoEscolhido(itens) {
                 return false;
             };
 
+            var deletePermanentlyLink = document.createElement('a');
+            deletePermanentlyLink.textContent = 'Excluir item do padrão';
+            deletePermanentlyLink.style.color = 'red'
+            deletePermanentlyLink.href = '#';
+            deletePermanentlyLink.onclick = function() {
+                $("#loading-overlay").show();
+                fetch('/excluir-item-padrao', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ nome_padrao: item.nome, codigo_item: item.codigo_item, 
+                        matricula_solicitante: item.matricula_solicitante,funcionario_recebe:item.funcionario_recebe}) // Supondo que o item tenha um ID
+                })
+                .then(response => {
+                    if (response.ok) {
+                        row.remove(); // Remove a linha permanentemente se a exclusão for bem-sucedida
+                        exibirMensagem("sucesso","Item excluído do Padrão")
+                    } else {
+                        alert('Falha ao excluir o item');
+                    }
+                    $("#loading-overlay").hide();
+                })
+                .catch(error => {
+                    console.error('Erro ao excluir o item:', error);
+                    alert('Erro ao excluir o item');
+                    $("#loading-overlay").hide();
+                });
+                return false;
+            };
+
             undoCell.appendChild(undoLink);
+            undoCell.appendChild(document.createTextNode(' | ')); // Adiciona um separador
+            undoCell.appendChild(deletePermanentlyLink);
+            
             row.innerHTML = ''; // Limpa o conteúdo da linha
             row.appendChild(undoCell);
         };
