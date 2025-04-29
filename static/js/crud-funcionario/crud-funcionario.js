@@ -31,6 +31,27 @@ function modalDesativarFuncionario(matricula,nome){
     $("#modalDesativarFuncionario").modal('show')
 }
 
+// Função para filtrar a tabela
+function filtrarTabela() {
+    const filtroMatricula = document.getElementById('filtroMatricula').value.toLowerCase();
+    const filtroNome = document.getElementById('filtroNome').value.toLowerCase();
+    const linhas = document.querySelectorAll('tbody tr');
+
+    linhas.forEach(linha => {
+        const matricula = linha.querySelector('td:nth-child(1)').textContent.toLowerCase();
+        const nome = linha.querySelector('td:nth-child(2)').textContent.toLowerCase();
+
+        // Condição para mostrar ou esconder a linha
+        const mostraLinha = matricula.includes(filtroMatricula) && nome.includes(filtroNome);
+
+        linha.style.display = mostraLinha ? '' : 'none';
+    });
+}
+
+// Adiciona eventos de digitação nos filtros
+document.getElementById('filtroMatricula').addEventListener('input', filtrarTabela);
+document.getElementById('filtroNome').addEventListener('input', filtrarTabela);
+
 
 $("#editarFuncionarioSalvar").on('click',function(){
 
