@@ -31,6 +31,8 @@
         <link rel="stylesheet" type="text/css"
             href="{{ url_for('static', filename='css/dropdown.css') }}">
 
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+
     </head>
 
     <body id="page-top">
@@ -122,11 +124,18 @@
                 </div>
 
                 <!-- Nav Item - Dashboard -->
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="#" data-toggle="modal"
                         data-target="#cadastroFuncionarioModal">
                         <i class="fa-solid fa-user"></i>
                         <span>Funcionário</span>
+                    </a>
+                </li> -->
+
+                <li class="nav-item">
+                    <a class="nav-link" href="/funcionarios">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Funcionários</span>
                     </a>
                 </li>
 
@@ -274,7 +283,7 @@
         </a>
 
         <!-- Modal cadastro de funcionario -->
-        <div class="modal fade" id="cadastroFuncionarioModal" tabindex="-1"
+        <!-- <div class="modal fade" id="cadastroFuncionarioModal" tabindex="-1"
             role="dialog"
             aria-labelledby="modalCadastrarFuncionario"
             aria-hidden="true">
@@ -318,7 +327,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
 
         <!-- Logout Modal-->
         <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog"

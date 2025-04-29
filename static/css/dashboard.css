@@ -1,0 +1,61 @@
+/* Container principal da página */
+.p-5 {
+    padding: 3rem;
+}
+  
+  /* Título centralizado e em negrito */
+.titulo-centralizado {
+    text-align: center;
+    font-weight: bold;
+    color:rgb(26, 26, 26);
+}
+  
+/* Card customizado */
+.card-personalizado {
+    max-width: 30rem;
+    font-size: 1.2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+  
+/* Cabeçalho azul com cantos arredondados */
+.card-header-azul {
+    background-color: rgb(78, 115, 223);
+    color: white;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+  
+/* Rodapé com bordas arredondadas */
+.card-footer-arredondado {
+    background-color: #f8f9fc;
+    color: #6c757d;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+}
+  
+/* Destaque com fundo amarelo */
+.destaque-contador {
+    font-size: 1.5rem;
+    border-radius: 5px;
+    padding: 5px;
+    background-color: #ffc107; /* Bootstrap warning */
+    display: inline-block;
+    font-weight: bold;
+}
+  
+/* Esconde elementos */
+.oculto {
+    display: none;
+}
+
+/* Preto e negrito */
+.black-bold {
+    font-weight: bold;
+    color: black;
+}
+
+
+
+
+  

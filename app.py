@@ -3,6 +3,7 @@ from PIL import Image
 from io import BytesIO
 from flask import Flask, render_template, request, jsonify,redirect, send_file, url_for,flash,session
 from classes.equipamentos import EquipamentoCRUD
+from classes.funcionario import FuncionarioCRUD
 import datetime
 import warnings
 import pandas as pd
@@ -25,6 +26,7 @@ DB_USER = "postgres"
 DB_PASS = "15512332"
 
 crud = EquipamentoCRUD(DB_NAME, DB_USER, DB_PASS, DB_HOST)
+crudFuncionario = FuncionarioCRUD(DB_NAME, DB_USER, DB_PASS, DB_HOST)
 
 warnings.filterwarnings("ignore")
 
@@ -129,6 +131,8 @@ def pagina_inicial():
     tb_solicitacoes = tb_solicitacoes.sort_values(by='id', ascending=False)
 
     tb_solicitacoes_list = tb_solicitacoes.values.tolist()
+
+    
 
     # SEGUNDA TABELA - Identificar troca de equipamentos
     query_troca = """SELECT 
@@ -499,7 +503,7 @@ def listar_operadores():
                         password=DB_PASS, host=DB_HOST)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-    sql = "select concat(matricula, ' - ', nome) from requisicao.funcionarios"
+    sql = "select concat(matricula, ' - ', nome) from requisicao.funcionarios where ativo = TRUE"
     cur.execute(sql)
 
     data = cur.fetchall()
@@ -573,9 +577,118 @@ def rota_solicitacao_material():
 # Dashboard
 @app.route('/dashboard', methods=['GET','POST'])
 def dashboard():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
+    # sql = "select * from sistema_epi.tb_solicitacoes ts left join sistema_epi.tb_assinatura ta on ts.id_solicitacao = ta.id_solicitacao where data_assinatura is null"
+    sql = """SELECT
+            solic.id,
+            solic.id_solicitacao,
+            solic.matricula_solicitante,
+            solic.codigo_item,
+            solic.quantidade,
+            solic.motivo,   
+            solic.setor_solicitante,   
+            solic.funcionario_recebe,   
+            solic.data_solicitada,   
+            solic.status_devolucao,   
+            hist.status,
+            ass.assinatura,
+            ass.data_assinatura
+        FROM sistema_epi.tb_solicitacoes AS solic
+        LEFT JOIN (
+            SELECT
+                id_solicitacao,
+                status,
+                ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
+            FROM sistema_epi.tb_historico_solicitacoes
+        ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
+        LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
+        WHERE solic.status_devolucao IS null and data_assinatura is null ORDER BY solic.data_solicitada DESC"""
+
+    tb_solicitacoes = pd.read_sql_query(sql, conn)
+
+    tb_solicitacoes['data_solicitada'] = pd.to_datetime(tb_solicitacoes['data_solicitada'])
+    tb_solicitacoes['data_solicitada_iso'] = tb_solicitacoes['data_solicitada'].dt.strftime("%Y-%m-%dT%H:%M:%S")
+    tb_solicitacoes['data_solicitada'] = tb_solicitacoes['data_solicitada'].dt.strftime('%d/%m/%Y')
+
+    sql = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios"
+    
+    tb_sql = pd.read_sql_query(sql, conn)
+
+    mapeamento = dict(zip(tb_sql['concat'].str.extract('(\d+)', expand=False), tb_sql['concat']))
+
+    # Substituir na coluna matricula_solicitante
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].astype(str)
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].replace(mapeamento)
+
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].astype(str)
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].replace(mapeamento)
+
+
+    tb_solicitacoes_list = tb_solicitacoes.values.tolist()
+
+    # print(data)
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
-    return render_template('dashboard.html')
+    return render_template('dashboard.html',data=tb_solicitacoes_list)
+
+@app.route('/atualizar-dashboard')
+def atualizar_dashboard():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+
+    sql = """SELECT
+            solic.id,
+            solic.id_solicitacao,
+            solic.matricula_solicitante,
+            solic.codigo_item,
+            solic.quantidade,
+            solic.motivo,   
+            solic.setor_solicitante,   
+            solic.funcionario_recebe,   
+            solic.data_solicitada,   
+            solic.status_devolucao,   
+            hist.status,
+            ass.assinatura,
+            ass.data_assinatura
+        FROM sistema_epi.tb_solicitacoes AS solic
+        LEFT JOIN (
+            SELECT
+                id_solicitacao,
+                status,
+                ROW_NUMBER() OVER (PARTITION BY id_solicitacao ORDER BY data_modificacao DESC) AS row_num
+            FROM sistema_epi.tb_historico_solicitacoes
+        ) AS hist ON hist.id_solicitacao = solic.id_solicitacao AND hist.row_num = 1
+        LEFT JOIN sistema_epi.tb_assinatura AS ass ON ass.id_solicitacao = solic.id_solicitacao
+        WHERE solic.status_devolucao IS null and data_assinatura is null ORDER BY solic.data_solicitada DESC"""
+
+    tb_solicitacoes = pd.read_sql_query(sql, conn)
+
+    tb_solicitacoes['data_solicitada'] = pd.to_datetime(tb_solicitacoes['data_solicitada'])
+    tb_solicitacoes['data_solicitada_iso'] = tb_solicitacoes['data_solicitada'].dt.strftime("%Y-%m-%dT%H:%M:%S")
+    tb_solicitacoes['data_solicitada'] = tb_solicitacoes['data_solicitada'].dt.strftime('%d/%m/%Y')
+
+    sql = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios"
+    
+    tb_sql = pd.read_sql_query(sql, conn)
+
+    mapeamento = dict(zip(tb_sql['concat'].str.extract('(\d+)', expand=False), tb_sql['concat']))
+
+    # Substituir na coluna matricula_solicitante
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].astype(str)
+    tb_solicitacoes['matricula_solicitante'] = tb_solicitacoes['matricula_solicitante'].replace(mapeamento)
+
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].astype(str)
+    tb_solicitacoes['funcionario_recebe'] = tb_solicitacoes['funcionario_recebe'].replace(mapeamento)
+
+
+    tb_solicitacoes_list = tb_solicitacoes.values.tolist()
+
+    return jsonify({
+        "solicitacoes": tb_solicitacoes_list
+    })
 
 @app.route('/solicitacao', methods=['POST'])
 def criar_solicitacao():
@@ -1364,6 +1477,125 @@ def equipamentos():
     equipamentos = cur.fetchall()
 
     return render_template("equipamentos.html",equipamentos=equipamentos)
+
+@app.route('/funcionarios', methods=['GET'])
+def funcionarios():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    query_funcionarios = 'SELECT * FROM requisicao.funcionarios'
+
+    cur.execute(query_funcionarios)
+    funcionarios = cur.fetchall()
+
+    return render_template("funcionarios.html",funcionarios=funcionarios)
+
+@app.route('/crud-funcionario', methods=['POST'])
+def crud_funcionario():
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    data = request.get_json()
+
+    print(data)
+
+    matricula = data.get('matricula')
+    nome = data.get('nome')
+    setor = data.get('setor')
+    data_admissao = data.get('dataAdmissao')
+    acao = data.get('acao')  # Ex: 'create', 'update', 'delete'
+    matricula_anterior = data.get('matriculaAnterior')
+    ativo_funcionario = data.get('habilitarFuncionario') == 'true'
+    # nome_anterior = data.get('nome_anterior')
+    
+    if acao == 'update':
+        if matricula_anterior != matricula:
+            print("Matrículas diferentes")
+            query_consulta = """select * from requisicao.funcionarios where matricula = %s"""
+            cur.execute(query_consulta,(matricula,))
+            data = cur.fetchall()
+            if len(data) > 0:
+                message = 'Matrícula ja existe'
+                return jsonify({'message': message}), 400
+            # update nas outras tabelas que puxam a matrícula
+            sql_concat = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios where matricula = '{matricula_anterior}'"
+            cur.execute(sql_concat)
+            data = cur.fetchall()
+            solicitante_anterior = data[0][0]
+            solicitante = f'{matricula} - {nome.strip()}'
+            atualizar_dados_pos_troca_matricula(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario, solicitante, solicitante_anterior)
+            return jsonify({'message': 'Funcionário atualizado com sucesso'}), 200
+        # if nome != nome_anterior:
+        #     #trocar o padrao solicitacoes, pois ele concatena o funcionario recebe com (matricula - nome)
+        #     print('Apenas nomes diferentes')
+        #     sql_concat = f"select concat(matricula, ' - ', nome) from requisicao.funcionarios where matricula = '{matricula_anterior}'"
+        #     cur.execute(sql_concat)
+        #     data = cur.fetchall()
+        #     solicitante_anterior = data[0][0]
+        #     solicitante = f'{matricula} - {nome.strip()}'
+        #     atualizar_dados_pos_troca_nome(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario, solicitante, solicitante_anterior)
+        #     return jsonify({'message': 'Funcionário atualizado com sucesso'}), 200 
+    
+        crudFuncionario.update_funcionario(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario)
+        return jsonify({'message': 'Funcionário atualizado com sucesso'}), 200
+    elif acao == 'delete':
+        crudFuncionario.desabilitar_funcionario(matricula)
+        return jsonify({'message': 'Funcionário desabilitado com sucesso'}), 200
+    else:
+        return jsonify({'message': 'Ação inválida'}), 400
+    
+def atualizar_dados_pos_troca_matricula(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario, solicitante, solicitante_anterior):
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                            password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    try:
+        # Início da transação
+        #Atualiza a matricula de funcionario
+        cur.execute("UPDATE requisicao.funcionarios SET matricula = %s, nome = %s, setor = %s, data_admissao = %s, ativo = %s WHERE matricula = %s",
+                        (matricula, nome, setor, data_admissao, ativo_funcionario, matricula_anterior))
+        #Atualiza a matricula nas solicitacoes
+        cur.execute("UPDATE sistema_epi.tb_solicitacoes SET funcionario_recebe = %s WHERE funcionario_recebe = %s",(matricula, matricula_anterior))
+        #Atualiza a tabela de padrao_solicitacao
+        cur.execute("UPDATE sistema_epi.padrao_solicitacao SET funcionario_recebe = %s WHERE funcionario_recebe = %s", (solicitante, solicitante_anterior))
+
+        conn.commit()  # ✅ Tudo certo, confirma as mudanças
+
+    except Exception as e:
+        conn.rollback()  # ❌ Algo deu errado, desfaz tudo
+        print("Erro na transação:", e)
+
+    finally:
+        cur.close()
+        conn.close()
+
+# def atualizar_dados_pos_troca_nome(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario, solicitante, solicitante_anterior):
+#     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+#                             password=DB_PASS, host=DB_HOST)
+#     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+#     try:
+#         # Início da transação
+#         #Atualiza a matricula de funcionario
+#         cur.execute("UPDATE requisicao.funcionarios SET matricula = %s, nome = %s, setor = %s, data_admissao = %s, ativo = %s WHERE matricula = %s",
+#                         (matricula, nome, setor, data_admissao, ativo_funcionario, matricula_anterior))
+#         #Atualiza a tabela de padrao_solicitacao
+#         cur.execute("UPDATE sistema_epi.padrao_solicitacao SET funcionario_recebe = %s WHERE funcionario_recebe = %s", (solicitante, solicitante_anterior))
+
+#         conn.commit()  # ✅ Tudo certo, confirma as mudanças
+
+#     except Exception as e:
+#         conn.rollback()  # ❌ Algo deu errado, desfaz tudo
+#         print("Erro na transação:", e)
+
+#     finally:
+#         cur.close()
+#         conn.close()
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

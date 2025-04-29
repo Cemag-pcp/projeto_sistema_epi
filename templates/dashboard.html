@@ -5,27 +5,54 @@
     <!-- Dropdown input list -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
     <link rel="stylesheet" href="/static/css/assinatura.css">
+    
 {% endblock %}
 
 {% block container %}
-    <div id="wrapper">
-        <div id="content-wrapper" class="d-flex flex-column">
-            <div id="content">
-                <div class="container-fluid">
-                    <div class="text-center">
-                        <div class="error mx-auto" id="dashboard"  data-text="Dashboard">Dashboard</div>
-                        <p class="lead text-gray-800 mx-auto">Dashboard ainda está indisponível para visualização...</p>
-                        <p class="text-gray-500 mx-auto" style="font-size: 150px;"><i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i></p>
-                        <a href="/">&larr; Voltar para página inicial</a>
-                    </div>
-                </div>
+
+<div class="p-5">
+    <h1 class="titulo-centralizado">Solicitações Pendentes</h1>
+    <div class="row" id='dados-container'>
+    {% for row in data %}
+        <div class="col-lg-3">
+            <div class="card text-dark bg-light mb-4 mt-5 card-personalizado">
+                 
+              <!-- HEADER AZUL -->
+              <div class="card-header card-header-azul">
+                <h4 class="fw-bold mb-0">Solicitação - {{ row[0] }}</h4>
+              </div>
+          
+              <!-- CORPO DO CARD -->
+              <div class="card-body">
+                <h5 class="card-title"><span class="black-bold">Funcionário: </span>{{ row[7] }}</h5>
+                <h5 class="card-title"><span class="black-bold">Solicitante: </span>{{ row[2] }}</h5>
+                <p class="card-text"><span class="black-bold">Item: </span>{{ row[3] }}</p>
+                <p class="card-text"><span class="black-bold">Data Solicitação: </span>{{ row[8] }}</p>
+                <span class="card-text oculto" id="data-solicitacao-iso-{{row[0]}}">{{ row[-1] }}</span>
+          
+                <!-- Destaque -->
+                <span class="card-text destaque-contador" id="contador-{{row[0]}}">
+                  00:00:00
+                </span>
+              </div>
+          
+              <!-- RODAPÉ -->
+              <div class="card-footer card-footer-arredondado">
+                <small class="text-muted">Quantidade - {{ row[4] }}</small>
+              </div>
             </div>
-        </div>
+          </div>
+    {% endfor %}
     </div>
+</div>
+
+
 
 {% endblock %}
 
 {% block scripts %}
+
+<script src="/static/js/dashboard/dashboard.js"></script>
 
 <script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
 

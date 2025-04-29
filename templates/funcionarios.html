@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block links %}
+
+<!-- CSS datatable -->
+<link href="{{ url_for('static', filename='vendor/datatables/dataTables.bootstrap4.min.css') }}" rel="stylesheet">
+
+<link rel="stylesheet" href="/static/css/assinatura.css">
+
+<!-- CSS dropdown inputs -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/dropdown.css') }}">
+
+<!-- CSS tables responsive -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/no-more-table.css') }}">
+
+<style>
+    .form-check-input-lg {
+      transform: scale(1.5);
+      margin-right: 10px;
+      cursor: not-allowed;
+    }
+
+    .custom-checkbox {
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+
+  .custom-checkbox::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background-color: white;
+    transition: transform 0.3s;
+  }
+
+  /* Quando está marcado (simulando a cor verde) */
+  .custom-checkbox.checked {
+    background-color: #28a745;
+  }
+
+  .custom-checkbox.checked::before {
+    transform: translateX(20px);
+  }
+
+  /* Efeito de cursor proibido se estiver desabilitado */
+  .custom-checkbox.disabled {
+    cursor: not-allowed;
+    background-color: #e9ecef;
+  }
+
+  </style>
+  
+
+
+{% endblock %}
+
+{% block container %}
+
+<div class="d-flex align-items-center justify-content-between mb-4">
+    <h1 class="h4 mb-0 text-gray-800">Funcionários</h1>
+    <button class="btn btn-primary" data-toggle="modal"
+    data-target="#cadastroFuncionarioModal">Cadastro de Funcionários </button>
+</div>
+
+<!-- DataTale Solicitações -->
+<div class="card shadow mb-4">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Tabela de Funcionários</h6>
+    </div>
+    <div class="card-body">
+        <div id="no-more-tables">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTableFuncionario" width="100%" style="font-size: 14px;">
+                    <thead>
+                        <tr>
+                            <th>Matrícula</th>
+                            <th>Nome</th>
+                            <th>Função</th>
+                            <th>Data de Admissão</th>
+                            <th>Setor</th>
+                            <th>Ativo</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for funcionario in funcionarios %}
+                        <tr>
+                            <td data-title="Matrícula">{{funcionario[0]}}</td>
+                            <td data-title="Nome">{{funcionario[1]}}</td>
+                            <td data-title="Função">{{funcionario[2]}}</td>
+                            <td data-title="Data de Admissão">{{funcionario[3]}}</td>
+                            <td data-title="Setor">{{funcionario[4]}}</td>
+                              <td data-title="Ativo">
+                                {% if funcionario[5] == True %}
+                                  <span style="color: #28a745; font-weight: bold; font-size: 1.1rem;">✔ Ativo</span>
+                                {% else %}
+                                  <span style="color: #dc3545; font-weight: bold; font-size: 1.1rem;">✖ Inativo</span>
+                                {% endif %}
+                              </td>
+  
+                            
+
+                            <td data-title="Ações" style="text-align: center;">
+                                <button class="btn btn-info" onclick="modalEdicaoFuncionario('{{funcionario[0]}}','{{funcionario[1]}}','{{funcionario[4]}}','{{funcionario[3]}}','{{funcionario[5]}}')"><i class="fa-solid fa-pen-to-square"></i></button>
+                                <button class="btn btn-danger" onclick="modalDesativarFuncionario('{{funcionario[0]}}','{{funcionario[1]}}')"><i class="fa-solid fa-trash"></i></button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalEdicaoFuncionario" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"
+                    id="modalEdicaoFuncionario">Editar funcionário</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-sm-4">
+                        <label for="matriculaFuncionarioEdit">Matrícula</label>
+                        <input class="form-control" type="text" id="matriculaFuncionarioEdit" maxlength="10" placeholder="Máx. 10 caracteres">
+                    </div>
+                    <div class="col-sm-8">
+                        <label for="nomeFuncionarioEdit">Nome</label>
+                        <input class="form-control" type="text" id="nomeFuncionarioEdit">
+                    </div>
+                    <div class="col-sm-4" style="display: none;">
+                        <input class="form-control" type="text" id="matriculaFuncionarioAnteriorEdit">
+                    </div>
+                    <div class="col-sm-4" style="display: none;">
+                        <input class="form-control" type="text" id="nomeFuncionarioAnteriorEdit">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-sm-6">
+                        <label for="setor">Setor</label>
+                        <select class="form-control" name="setor" id="idSetorEdit">
+                            <option value=""></option>
+                        </select>
+                    </div>
+                    <div class="col-sm-6">
+                        <label for="dataAdmissaoEdit">Data de admissão</label>
+                        <input class="form-control" type="date" id="dataAdmissaoEdit">
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6" style="margin-left: 5px;">
+                        <div class="form-check">
+                            <input class="form-check-input form-check-input-lg" type="checkbox" id="habilitarFuncionarioEdit">
+                            <label class="form-check-label" for="habilitarFuncionarioEdit">Ativo</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="editarFuncionarioSalvar">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalDesativarFuncionario" tabindex="-1"
+    role="dialog"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="title_desativar_funcionario"><i class="fa-solid fa-triangle-exclamation" style="color: #FFD43B;"></i> Atenção</h5>
+                <button class="close" type="button" data-dismiss="modal"
+                    aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="p_desativar_funcionario"></p>
+                <input type="text" class="form-control d-none" id="matricula_excluir" disabled>
+            </div>
+            <div class="modal-footer">
+                <button id="desativarFuncionario" class="btn btn-danger">Desabilitar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal cadastro de funcionario -->
+<div class="modal fade" id="cadastroFuncionarioModal" tabindex="-1"
+role="dialog"
+aria-labelledby="modalCadastrarFuncionario"
+aria-hidden="true">
+<div class="modal-dialog" role="document">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h5 class="modal-title"
+                id="modalCadastrarFuncionario">Cadastro de
+                funcionários</h5>
+            <button class="close" type="button" data-dismiss="modal"
+                aria-label="Close">
+                <span aria-hidden="true">×</span>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="row mb-3">
+                <div class="col-sm-4">
+                    <label for="matriculaFuncionario">Matrícula</label>
+                    <input class="form-control" type="text" id="matriculaFuncionario" maxlength="10" placeholder="Máx. 10 caracteres">
+                </div>
+                <div class="col-sm-8">
+                    <label for="nomeFuncionario">Nome</label>
+                    <input class="form-control" type="text" id="nomeFuncionario">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <label for="setor">Setor</label>
+                    <select class="form-control" name="setor" id="idSetor">
+                        <option value=""></option>
+                    </select>
+                </div>
+                <div class="col-sm-6">
+                    <label for="dataAdmissao">Data de admissão</label>
+                    <input class="form-control" type="date" id="dataAdmissao">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-success" id="salvarCadastroFuncionario">Salvar</button>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="mensagem"></div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="/static/vendor/datatables/jquery.dataTables.min.js"></script>
+<!-- Plugin icons -->
+<script src="https://kit.fontawesome.com/d1807a784c.js" crossorigin="anonymous"></script>
+
+<script src="/static/js/demo/datatables-demo.js"></script>
+
+<script src="/static/vendor/datatables/dataTables.bootstrap4.min.js"></script>
+
+<script src="/static/js/mensagem.js"></script>
+
+<script src="/static/js/crud-equipamento/crud-equipamento.js"></script>
+
+<!-- <script src="/static/js/cadastrar-funcionario/cadastrar-funcionario.js"></script> -->
+<!-- <script src="/static/js/cadastrar-funcionario/listar-setores.js"></script> -->
+<script src="/static/js/crud-funcionario/crud-funcionario.js"></script>
+
+
+
+
+{% endblock %}

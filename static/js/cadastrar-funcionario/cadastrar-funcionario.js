@@ -22,6 +22,12 @@ document.getElementById('salvarCadastroFuncionario').addEventListener('click', f
         return;
     }
 
+    if (isNaN(new Date(dataAdmissao).getTime())){
+        alert('Data Inválida!');
+        button.disabled = false;
+        return;
+    }
+
     $.ajax({
         type: 'POST',
         url: '/cadastrar-funcionario',

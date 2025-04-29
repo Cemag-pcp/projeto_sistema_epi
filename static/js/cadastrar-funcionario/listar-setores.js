@@ -2,7 +2,7 @@
 function handleResponse(response) {
     // Referência ao select no DOM
     const selectSetor = document.getElementById('idSetor');
-    
+
     // Limpar as opções existentes, exceto a opção vazia
     selectSetor.innerHTML = '<option value=""></option>';
 
@@ -20,7 +20,7 @@ function handleResponse(response) {
                 option.textContent = setorNome; // Define o texto visível da opção como o nome do setor
 
                 // Adiciona a nova opção ao select
-                selectSetor.appendChild(option);
+                selectSetor.appendChild(option);                 
             }
         });
     }
