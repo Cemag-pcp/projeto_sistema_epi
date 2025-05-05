@@ -1547,6 +1547,42 @@ def crud_funcionario():
     else:
         return jsonify({'message': 'Ação inválida'}), 400
     
+@app.route('/edit-item-padrao',methods=['POST'])
+def edit_item_padrao():
+
+    conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    try:
+        dados = request.get_json()
+
+        equipamento_edit = dados['equipamento_edit']
+        solicitante_edit = dados['solicitante_edit']
+        nome_padrao = dados['nome_padrao_edit']
+        nome_padrao_anterior = dados['nome_padrao_anterior']
+        funcionario = dados['funcionario_edit']
+
+        print(equipamento_edit,solicitante_edit,nome_padrao, nome_padrao_anterior, funcionario)
+
+        query = """ UPDATE sistema_epi.padrao_solicitacao SET codigo_item = %s WHERE matricula_solicitante = %s AND nome = %s AND codigo_item = %s AND funcionario_recebe = %s """
+        
+        values = (equipamento_edit,solicitante_edit,nome_padrao,nome_padrao_anterior,funcionario)
+
+        cur.execute(query,values)
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()  # ❌ Algo deu errado, desfaz tudo
+        print("Erro na transação:", e)
+
+    finally:
+        cur.close()
+        conn.close()
+
+    return jsonify("Sucesso")
+    
 def atualizar_dados_pos_troca_matricula(matricula, nome, setor, data_admissao, matricula_anterior, ativo_funcionario, solicitante, solicitante_anterior):
     conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
                             password=DB_PASS, host=DB_HOST)

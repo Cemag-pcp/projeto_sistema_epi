@@ -379,7 +379,7 @@ function popularTabelaPadraoEscolhido(itens) {
     var thead = document.createElement('thead');
     var headerRow = document.createElement('tr');
 
-    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade', 'Observação', 'Exclusão Temporária'];
+    var headers = ['Código do Item', 'Funcionário', 'Motivo', 'Quantidade', 'Observação', 'Ações'];
     headers.forEach(headerText => {
         var th = document.createElement('th');
         th.textContent = headerText;
@@ -417,9 +417,22 @@ function popularTabelaPadraoEscolhido(itens) {
 
         // Cria a célula de ação com o botão de excluir
         var actionCell = document.createElement('td');
-        var deleteButton = document.createElement('button');
+        actionCell.style.display = "flex";
+        actionCell.style.flexDirection = "column";
+        var deleteButton = document.createElement('button')
+        deleteButton.style.flex = '1'
         deleteButton.textContent = 'Exclusão Temporária';
-        deleteButton.className = 'btn btn-danger';
+        deleteButton.className = 'btn btn-danger mb-2';
+
+        
+        var editButton = document.createElement('button');
+        editButton.style.flex = '1'
+        editButton.textContent = 'Editar Item';
+        editButton.className = 'btn btn-success';
+        editButton.setAttribute('data-target','#modalEditPadrao');
+        editButton.setAttribute('data-toggle','modal');
+        editButton.setAttribute('data-dismiss','modal');
+
         deleteButton.onclick = function() {
             var row = this.parentNode.parentNode;
             var undoCell = document.createElement('td');
@@ -472,6 +485,7 @@ function popularTabelaPadraoEscolhido(itens) {
                 return false;
             };
 
+
             undoCell.appendChild(undoLink);
             undoCell.appendChild(document.createTextNode(' | ')); // Adiciona um separador
             undoCell.appendChild(deletePermanentlyLink);
@@ -479,7 +493,19 @@ function popularTabelaPadraoEscolhido(itens) {
             row.innerHTML = ''; // Limpa o conteúdo da linha
             row.appendChild(undoCell);
         };
+        editButton.onclick = function(){
+            // $('#modalEditPadrao').show();
+            document.getElementById('equipamento_edit').value = item.codigo_item
+            document.getElementById('motivo_edit').value = item.motivo
+            document.getElementById('funcionario_edit').value = item.funcionario_recebe
+            document.getElementById('observacao_edit').value = item.observacao           
+            document.getElementById('quantidade_edit').value = item.quantidade
+            document.getElementById('solicitante_edit').value = item.matricula_solicitante
+            document.getElementById('nome_padrao_edit').value = item.nome
+            document.getElementById('equipamento_anterior_edit').value = item.codigo_item
+        }
         actionCell.appendChild(deleteButton);
+        actionCell.appendChild(editButton);
         row.appendChild(actionCell);
 
         tbody.appendChild(row);
@@ -604,5 +630,53 @@ $("#add_item_padrao").on('click', function() {
         }
     });
 });
+
+$("#edit_item_padrao").on('click', function(){
+    $("#loading-overlay").show();
+
+    $("#edit_item_padrao").prop('disabled',true);
+
+    let equipamento_edit = $('#equipamento_edit').val();
+    let solicitante_edit = $('#solicitante_edit').val();
+    let nome_padrao_edit = $('#nome_padrao_edit').val();
+    let nome_padrao_anterior = $('#equipamento_anterior_edit').val();
+    let funcionario_edit = $('#funcionario_edit').val();
+
+    console.log('solicitante_edit: '+ $('#solicitante_edit').val());
+
+    if (equipamento_edit === ''){
+        exibirMensagem('aviso','O campo de equipamento não pode ser vazio!');
+        $("#edit_item_padrao").prop('disabled',false);
+        $("#loading-overlay").hide();
+        return;
+    }
+
+    $.ajax({
+        url: '/edit-item-padrao',
+        type: 'POST',
+        data: JSON.stringify({
+            'equipamento_edit': equipamento_edit,
+            'solicitante_edit': solicitante_edit,
+            'nome_padrao_edit': nome_padrao_edit,
+            'nome_padrao_anterior': nome_padrao_anterior,
+            'funcionario_edit': funcionario_edit,
+        }),
+        contentType: 'application/json',
+        success: function (response){
+            $("#loading-overlay").hide();
+            $('#modalEditPadrao').modal('hide');
+            exibirMensagem('success', 'Equipamento editado com sucesso!');
+            $("#edit_item_padrao").prop('disabled',false);
+        },
+        error: function(error){
+            console.error('Erro na requisição AJAX: ',error);
+            $("#loading-overlay").hide();
+            exibirMensagem('aviso', 'Erro ao atualizar item');
+            $("#edit_item_padrao").prop('disabled', false);
+
+        }
+    });
+
+})
 
 

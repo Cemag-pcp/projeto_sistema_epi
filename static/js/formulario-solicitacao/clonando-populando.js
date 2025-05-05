@@ -6,6 +6,7 @@ function configurarDropdown(inputId, listId) {
     var valorAnterior = "";
 
     inputDropdown.addEventListener('focus', function () {
+        valorAnterior = inputDropdown.value;
         if (inputDropdown.readOnly) {
             listaDropdown.style.display = 'none';
         } else {
@@ -70,12 +71,14 @@ configurarDropdown('inputOperador', 'listOperador');
 configurarDropdown('inputCodigo', 'listCodigo');
 configurarDropdown('equipamento_adicionado', 'listEquipamentoNovo');
 configurarDropdown('funcionario_adicionado', 'listFuncionarioAdd');
+configurarDropdown('equipamento_edit', 'listEquipamentoEdit');
 // Fim criar lista dentro de input
 
 // Carregando itens para inputs clonados
 function carregarItens2(inputId, listId) {
     var inputCodigo = document.getElementById(inputId);
     var listCodigo = document.getElementById(listId);
+    console.log('teste carregarItens2()');
     $("#loading-overlay").show();
 
     // Caso contrário, faz a solicitação AJAX
@@ -83,6 +86,7 @@ function carregarItens2(inputId, listId) {
         url: '/itens',
         type: 'GET',
         success: function (data) {
+            console.log('teste itens');
             atualizarLista(data);
             $("#loading-overlay").hide();
         }
@@ -220,5 +224,11 @@ function getId_operadores_modal(element) {
     var id = element.id;
     
     carregarOperadores2(id, 'listFuncionarioAdd');
+}
+
+function getId_itens_modalEdit(element) {
+    var id = element.id;
+    
+    carregarItens2(id, 'listEquipamentoEdit');
 }
 // Fim Carregando operadores com base no id clonado
