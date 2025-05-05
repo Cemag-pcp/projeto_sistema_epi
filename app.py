@@ -1560,14 +1560,16 @@ def edit_item_padrao():
         equipamento_edit = dados['equipamento_edit']
         solicitante_edit = dados['solicitante_edit']
         nome_padrao = dados['nome_padrao_edit']
-        nome_padrao_anterior = dados['nome_padrao_anterior']
+        equipamento_anterior_edit = dados['equipamento_anterior_edit']
         funcionario = dados['funcionario_edit']
+        quantidade = dados['quantidade_edit']
+        observacao = dados['observacao_edit']
 
-        print(equipamento_edit,solicitante_edit,nome_padrao, nome_padrao_anterior, funcionario)
+        print(equipamento_edit,solicitante_edit,nome_padrao, equipamento_anterior_edit, funcionario)
 
-        query = """ UPDATE sistema_epi.padrao_solicitacao SET codigo_item = %s WHERE matricula_solicitante = %s AND nome = %s AND codigo_item = %s AND funcionario_recebe = %s """
+        query = """ UPDATE sistema_epi.padrao_solicitacao SET codigo_item = %s, quantidade = %s, observacao = %s WHERE matricula_solicitante = %s AND nome = %s AND codigo_item = %s AND funcionario_recebe = %s """
         
-        values = (equipamento_edit,solicitante_edit,nome_padrao,nome_padrao_anterior,funcionario)
+        values = (equipamento_edit, quantidade, observacao, solicitante_edit, nome_padrao, equipamento_anterior_edit, funcionario)
 
         cur.execute(query,values)
 

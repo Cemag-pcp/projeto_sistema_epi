@@ -70,8 +70,6 @@ function enviarSolicitacao() {
         // Itere sobre todos os inputs e armazene seus valores no objeto de dados do camposSolicitacao atual
         inputs.forEach(function(input) {
             // Verifique se o valor não está vazio antes de adicionar ao objeto
-            console.log(input.id)
-            console.log(input.value)
             if (input.value.trim() !== '' || input.id.includes("observacaoSolicitacao")) {
                 if (input.type === 'radio') {
                     // Verifique se o radio está marcado e adicione ao objeto apenas se for true
@@ -229,7 +227,6 @@ function verificarNomePadrao() {
             if (response.mensagem) {
                 exibirMensagem(response.tipo, response.mensagem);
                 if (response.tipo !== 'aviso') {
-                    console.log(response.tipo);
                     $('#modalEscolherNomePadrao').modal('hide');
                 }
             } else {
@@ -363,7 +360,6 @@ function popularPadraoEscolhido(padrao){
 
 function popularTabelaPadraoEscolhido(itens) {
     // Cria a div com o ID no-more-tables
-    console.log(itens)
     var divTableResponsive = document.createElement('div');
     divTableResponsive.setAttribute('class', 'table-responsive');
 
@@ -639,10 +635,10 @@ $("#edit_item_padrao").on('click', function(){
     let equipamento_edit = $('#equipamento_edit').val();
     let solicitante_edit = $('#solicitante_edit').val();
     let nome_padrao_edit = $('#nome_padrao_edit').val();
-    let nome_padrao_anterior = $('#equipamento_anterior_edit').val();
+    let equipamento_anterior_edit = $('#equipamento_anterior_edit').val();
     let funcionario_edit = $('#funcionario_edit').val();
-
-    console.log('solicitante_edit: '+ $('#solicitante_edit').val());
+    let quantidade_edit = $('#quantidade_edit').val();
+    let observacao_edit = $('#observacao_edit').val();
 
     if (equipamento_edit === ''){
         exibirMensagem('aviso','O campo de equipamento não pode ser vazio!');
@@ -658,8 +654,10 @@ $("#edit_item_padrao").on('click', function(){
             'equipamento_edit': equipamento_edit,
             'solicitante_edit': solicitante_edit,
             'nome_padrao_edit': nome_padrao_edit,
-            'nome_padrao_anterior': nome_padrao_anterior,
+            'equipamento_anterior_edit': equipamento_anterior_edit,
             'funcionario_edit': funcionario_edit,
+            'quantidade_edit': quantidade_edit,
+            'observacao_edit': observacao_edit,
         }),
         contentType: 'application/json',
         success: function (response){
