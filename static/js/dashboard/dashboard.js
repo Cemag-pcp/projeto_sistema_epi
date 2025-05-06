@@ -103,6 +103,7 @@ function atualizarContador(idSolicitacao,dataSolicitacao) {
     // Função que calcula e atualiza o tempo
     function atualizarTempo() {
         var agora = new Date(); // Data e hora atuais
+        agora.setHours(agora.getHours() + 3)
         var tempoDecorrido = Math.floor((agora - dataSolicitacaoDate) / 1000); // Tempo em segundos
         // console.log(tempoDecorrido);
 
