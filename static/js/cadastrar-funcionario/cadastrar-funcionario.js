@@ -7,7 +7,7 @@ document.getElementById('salvarCadastroFuncionario').addEventListener('click', f
     var selectSetor = document.querySelector('#idSetor');
     var setor = selectSetor.value;
 
-    var dataAdmissao = formatarDataAdmissao(document.getElementById('dataAdmissao').value);
+    var dataAdmissao = document.getElementById('dataAdmissao').value;
 
     console.log(matriculaFuncionario,nomeFuncionario,setor,dataAdmissao)
 
@@ -35,7 +35,7 @@ document.getElementById('salvarCadastroFuncionario').addEventListener('click', f
             nome: nomeFuncionario,
             matricula: matriculaFuncionario,
             setor:setor,
-            data_admissao:dataAdmissao,
+            data_admissao: formatarDataAdmissao(dataAdmissao),
         },
         success: function (response) {
             // Lidar com a resposta do backend, se necessário
