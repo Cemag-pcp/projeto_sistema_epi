@@ -215,8 +215,11 @@
                                     style="max-width: 200px; cursor: default;">{{row[3]}}
                                 </td>
                                 {% if row[11] == None %}
-                                <td data-title="Assinatura" ><button onclick="modalAssinatura('{{ row[7] }}','{{ row[0] }}','{{ row[1] }}','{{row[3]}}')"
-                                        class="btn btn-warning btn-block">Assinatura Pendente</button></td>
+                                <td data-title="Assinatura" ><button class="btn btn-warning btn-block open-signature"
+                                        data-nome-funcionario="{{ row[7] }}"
+                                        data-id-solicitacao="{{ row[0] }}"
+                                        data-id="{{ row[1] }}"
+                                        data-codigo-item="{{ row[3] }}">Assinatura Pendente</button></td>
                                 {% else %}
                                 <td data-title="Assinatura" ><button class="btn btn-success btn-block"
                                         title="Agora está habilitado salvar as informações no campo de execução"
@@ -341,7 +344,12 @@
                             <button class="btn btn-secondary btn-block" id="clear">Clear</button>
                         </div>
                         <div class="col-sm-6 mt-4">
-                            <button class="btn btn-primary btn-block" id="save">Save</button>
+                            <button class="btn btn-primary btn-block" id="save" 
+                                    data-id-solicitacao="" 
+                                    data-codigo-item="" 
+                                    data-nome-funcionario="">
+                                Salvar Assinatura
+                            </button>
                         </div>
                     </div>
                 </div>

@@ -364,23 +364,40 @@ $('#btnExcluirAssinatura').one('click',function() {
     });
 })
 
-function modalAssinatura(nome_funcionario,id_solicitacao,id,codigo_item) {
+let signaturePad;
 
-    $('#modalAssinatura .modal-title').text('Assinatura do Funcionario: ' + nome_funcionario );
+document.addEventListener('click', function(event) {
+    if(event.target.classList.contains('open-signature')){
+        // Capturar os atributos do botão clicado
+        const nomeFuncionario = event.target.getAttribute('data-nome-funcionario');
+        const idSolicitacao = event.target.getAttribute('data-id-solicitacao');
+        const codigoItem = event.target.getAttribute('data-codigo-item');
+        
+        // Definir os atributos no botão de save
+        const saveButton = document.getElementById('save');
+        saveButton.setAttribute('data-id-solicitacao', idSolicitacao);
+        saveButton.setAttribute('data-codigo-item', codigoItem);
+        saveButton.setAttribute('data-nome-funcionario', nomeFuncionario);
+        
+        // Atualizar o título do modal
+        $('#modalAssinatura .modal-title').text('Assinatura do Funcionário: ' + nomeFuncionario);
+        
+        console.log(signaturePad)
 
-    $('#modalAssinatura').modal('show');
+        // Mostrar o modal
+        if (!signaturePad) {
+            signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
+                backgroundColor: 'rgba(255, 255, 255, 0)',
+                penColor: 'rgb(0, 0, 0)'
+            });
+        } else {
+            // Limpa a assinatura anterior se necessário
+            signaturePad.clear();
+        }
 
-    console.log(id_solicitacao)
-
-    // TRATAMENTO PARA NÃO ENVIAR MAIS DE UMA REQUISIÇÃO
-    if (!signaturePad.calledOnce) {
-        signaturePad(id_solicitacao,id,codigo_item,nome_funcionario);
-
-        // Definir a variável de controle para indicar que a função foi chamada
-        signaturePad.calledOnce = true;
+        $('#modalAssinatura').modal('show');
     }
-
-}
+});
 
 function modalTimeline(id_solicitacao,codigo_item,funcionario) {
 

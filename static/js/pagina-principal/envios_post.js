@@ -57,65 +57,79 @@ function alterarDadosExecucao(id_solicitacao) {
 
  // CAMPO DE ENVIO DA ASSINATURA
 
- function signaturePad(id_solicitacao,id,codigo_item,nome_funcionario) {
+$('#modalAssinatura').on('hidden.bs.modal', function () {
+    // Limpar o SignaturePad quando o modal é fechado
+    signaturePad.clear();
+});
 
-    var signaturePad = new SignaturePad(document.getElementById('signature-pad'), {
-            backgroundColor: 'rgba(255, 255, 255, 0)',
-            penColor: 'rgb(0, 0, 0)'
-    });
+document.getElementById('save').addEventListener("click", function(event) {
+    event.preventDefault(); // Previne comportamento padrão se necessário
+    const saveButton = event.currentTarget; // Usar currentTarget é mais seguro que target
+    
+    // Verificar se os atributos necessários estão presentes
+    const id_solicitacao = saveButton.getAttribute('data-id-solicitacao');
+    const codigo_item = saveButton.getAttribute('data-codigo-item');
+    const nome_funcionario = saveButton.getAttribute('data-nome-funcionario');
+    
+    if (!id_solicitacao || !codigo_item || !nome_funcionario) {
+        alert("Dados incompletos. Recarregue a página e tente novamente.");
+        return;
+    }
 
-    var saveButton = document.getElementById('save');
-    var cancelButton = document.getElementById('clear');
+    console.log(id_solicitacao)
+    console.log(codigo_item)
+    console.log(nome_funcionario)
 
-        
-    saveButton.addEventListener("click", function(event) {
-        let motivo = "Primeira Assinatura";
-        $("#loading-overlay").show();
-        if (signaturePad.isEmpty()) {
-            alert("Faça sua assinatura.");
-            $("#loading-overlay").hide();
-        } else {
-            // Desabilitar o botão para evitar múltiplos cliques
-            saveButton.disabled = true;
+    if (signaturePad.isEmpty()) {
+        alert("Por favor, faça sua assinatura antes de salvar.");
+        return;
+    }
 
-            // Obter a data de hoje
-            var dataURL = signaturePad.toDataURL();
+    // Se chegou aqui, todos os checks passaram
+    const motivo = "Primeira Assinatura";
+    const dataURL = signaturePad.toDataURL();
+    
+    // Restante do código para enviar ao servidor
+    $("#loading-overlay").show();
+    saveButton.disabled = true;
 
-            // Enviar o dataURL e a data para a rota /receber-assinatura usando a API Fetch
-            fetch('/receber-assinatura', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    id_solicitacao: id_solicitacao,
-                    dataURL: dataURL,
-                    motivo: motivo,
-                    codigo_item: codigo_item,
-                    nome_funcionario: nome_funcionario
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Lidar com a resposta do servidor, se necessário
-                exibirMensagem('sucesso', 'Salvo.')
-                $('#modalAssinatura').modal('hide');
-                console.log(data);
-                window.location.reload();
-                $("#loading-overlay").hide();
-            });
+    fetch('/receber-assinatura', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            id_solicitacao: id_solicitacao,
+            dataURL: dataURL,
+            motivo: motivo,
+            codigo_item: codigo_item,
+            nome_funcionario: nome_funcionario
+        }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Erro na resposta do servidor');
         }
+        return response.json();
+    })
+    .then(data => {
+        exibirMensagem('sucesso', 'Assinatura salva com sucesso!');
+        $('#modalAssinatura').modal('hide');
+        window.location.reload();
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert("Ocorreu um erro ao salvar a assinatura. Tente novamente.");
+    })
+    .finally(() => {
+        $("#loading-overlay").hide();
+        saveButton.disabled = false;
     });
+});
 
-    cancelButton.addEventListener('click', function(event) {
-        signaturePad.clear();
-    });
-
-    $('#modalAssinatura').on('hidden.bs.modal', function () {
-        // Limpar o SignaturePad quando o modal é fechado
-        signaturePad.clear();
-    });
-}
+document.getElementById('clear').addEventListener('click', function(event) {
+    signaturePad.clear();
+});
 
 function download(dataURL, filename) {
     if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
