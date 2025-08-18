@@ -572,7 +572,7 @@ def rota_solicitacao_material():
     nome = solicitante.split(' - ')[1]
 
     # Renderize o template e passe o parâmetro de sucesso, se aplicável
-    return render_template('solicitacao-material.html', solicitante=solicitante,nome=nome)
+    return render_template('solicitacao-material-new.html', solicitante=solicitante,nome=nome)
 
 # Dashboard
 @app.route('/dashboard', methods=['GET','POST'])
