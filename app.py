@@ -1116,7 +1116,10 @@ def ficha():
 
             mes_inicial_formatado = mes_inicial.strftime('%Y-%m-%d')
             mes_final_formatado = mes_final.strftime('%Y-%m-%d')
-            query += f" AND a.data_assinatura >= '{mes_inicial_formatado}' AND a.data_assinatura <= '{mes_final_formatado}'"
+            query += f" AND a.data_assinatura >= '{mes_inicial_formatado}' AND a.data_assinatura < '{mes_final_formatado}'"
+
+        # Ordena da entrega mais antiga para a mais recente
+        query += " ORDER BY a.data_assinatura ASC"
 
         cur.execute(query)
         lista_solicitacoes = cur.fetchall()
